@@ -32,3 +32,9 @@ Route::get('/gallery', function () {
 Route::get('/form-pengaduan', function () {
     return view('pengaduan');
 });
+
+
+// ADMIN
+Route::get('/dashboard', function () {
+    return view('admin-page.dashboard');
+});
