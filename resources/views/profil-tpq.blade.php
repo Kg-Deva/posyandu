@@ -33,7 +33,7 @@
 
     <!-- Start feature Area -->
     <section class="feature-area pb-120">
-        <div class="container">
+        {{-- <div class="container">
             <div class="row">
 
 
@@ -58,7 +58,7 @@
                 </div>
 
             </div>
-        </div>
+        </div> --}}
     </section>
     <!-- End feature Area -->
 

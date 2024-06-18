@@ -42,10 +42,8 @@
                             <img class="img-fluid" src="{{ asset('landing-page/img/e1.jpg') }}" alt="">
                         </div>
                         <div class="detials col-12 col-md-6">
-                            <p>25th February, 2018</p>
-                            <a href="event-details.html">
-                                <h4>Danieal Spd</h4>
-                            </a>
+
+                            <h4>Danieal Spd</h4>
                             <p>
                                 Guru Bhasa Jawa
                             </p>

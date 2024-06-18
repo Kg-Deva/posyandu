@@ -33,8 +33,23 @@ Route::get('/form-pengaduan', function () {
     return view('pengaduan');
 });
 
+Route::get('/berita', function () {
+    return view('berita');
+});
+
+Route::get('/agenda', function () {
+    return view('agenda');
+});
 
 // ADMIN
+
+Route::get('/login-tpq', function () {
+    return view('login');
+});
+
+
+
 Route::get('/dashboard', function () {
     return view('admin-page.dashboard');
 });
+

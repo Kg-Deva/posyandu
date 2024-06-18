@@ -35,14 +35,21 @@
                         </ul>
                     </li>
                     <li><a href="/gallery">Gallery</a></li>
-                    <li class="menu-has-children"><a href="">Kalender</a>
+                    <li class="menu-has-children"><a href="">Akademik</a>
                         <ul>
-                            <li><a href="blog-home.html">Kalender Pendidikan</a></li>
-                            <li><a href="blog-single.html">Kalender Kegiatan</a></li>
+                            <li><a href="blog-home.html">Kalender Akademik</a></li>
+                            <li><a href="blog-single.html">Peraturan Akademik</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="menu-has-children"><a href="">Informasi</a>
+                        <ul>
+                            <li><a href="/berita">Berita</a></li>
+                            <li><a href="/agenda">Agenda</a></li>
                         </ul>
                     </li>
                     <li><a href="/form-pengaduan">Form Pengaduan</a></li>
-                    <li><a href="contact.html">Login</a></li>
+                    <li><a href="/login-tpq">Login</a></li>
                 </ul>
             </nav><!-- #nav-menu-container -->
         </div>
