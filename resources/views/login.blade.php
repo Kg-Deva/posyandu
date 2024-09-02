@@ -51,26 +51,32 @@
                             <img src="{{ asset('login/assets/images/big/icon.png') }}" alt="wrapkit">
                         </div>
                         <h2 class="mt-3 text-center">Login</h2>
-                        <p class="text-center">Maukan Username dan Password</p>
-                        <form class="mt-4">
+                        <p class="text-center">Masukan Email dan Password</p>
+                        <form id="formAuthentication" method="GET" action="{{ route('postlogin') }}">
                             <div class="row">
                                 <div class="col-lg-12">
                                     <div class="form-group">
-                                        <label class="text-dark" for="uname">Username</label>
-                                        <input class="form-control" id="uname" type="text"
-                                            placeholder="enter your username">
+                                        <label class="text-dark" for="email">Email</label>
+                                        <input class="form-control" id="email" type="email" name="email"
+                                            required placeholder="Masukan Email">
                                     </div>
                                 </div>
                                 <div class="col-lg-12">
                                     <div class="form-group">
-                                        <label class="text-dark" for="pwd">Password</label>
-                                        <input class="form-control" id="pwd" type="password"
-                                            placeholder="enter your password">
+                                        <label class="text-dark" for="password">Password</label>
+                                        <input class="form-control" id="password" type="password" name="password"
+                                            required placeholder="Masukan Password">
                                     </div>
                                 </div>
                                 <div class="col-lg-12 text-center">
                                     <button type="submit" class="btn btn-block btn-dark">Login</button>
                                 </div>
+
+                                <div class="col-lg-12 text-center mt-3">
+                                    <button type="button" class="btn btn-outline-dark btn-block"
+                                        onclick="window.location.href='/'">Kembali</button>
+                                </div>
+
                                 {{-- <div class="col-lg-12 text-center mt-5">
                                     Don't have an account? <a href="#" class="text-danger">Sign Up</a>
                                 </div> --}}

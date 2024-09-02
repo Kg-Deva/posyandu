@@ -2,16 +2,20 @@
     <ul class="menu">
         <li class="sidebar-title">Menu</li>
 
-        <li class="sidebar-item active ">
-            <a href="index.html" class='sidebar-link'>
+        {{-- <li class="sidebar-item active "> --}}
+        <li class="sidebar-item ">
+            <a href="/dashboard" class='sidebar-link'>
                 <i class="bi bi-grid-fill"></i>
                 <span>Dashboard</span>
             </a>
         </li>
 
         <li class="sidebar-item  ">
-            <a href="table.html" class='sidebar-link'>
-                <i class="bi bi-grid-1x2-fill"></i>
+            <a href="/beranda" class='sidebar-link'>
+                {{-- <i class="bi bi-grid-1x2-fill"></i> --}}
+                <i class="bi bi-house"></i>
+
+
                 <span>Beranda</span>
             </a>
         </li>
@@ -36,14 +40,14 @@
 
         <li class="sidebar-item ">
             <a href="#" class='sidebar-link'>
-                <i class="bi bi-collection-fill"></i>
+                <i class="bi bi-images"></i>
                 <span>Gallery</span>
             </a>
         </li>
 
         <li class="sidebar-item  has-sub">
             <a href="#" class='sidebar-link'>
-                <i class="bi bi-grid-1x2-fill"></i>
+                <i class="bi bi-book-half"></i>
                 <span>Akademik</span>
             </a>
             <ul class="submenu ">
@@ -56,23 +60,10 @@
             </ul>
         </li>
 
-        <li class="sidebar-item">
-            <a href="#" class='sidebar-link'>
-                <i class="bi bi-bar-chart-fill"></i>
-                <span>kontak</span>
-            </a>
-        </li>
-
-        <li class="sidebar-item">
-            <a href="#" class='sidebar-link'>
-                <i class="bi bi-map-fill"></i>
-                <span>Maps</span>
-            </a>
-        </li>
 
         <li class="sidebar-item has-sub ">
             <a href="" class='sidebar-link'>
-                <i class="bi bi-puzzle"></i>
+                <i class="bi bi-info-circle"></i>
                 <span>Informasi</span>
             </a>
 
@@ -86,6 +77,17 @@
             </ul>
         </li>
 
+        <li class="sidebar-item">
+            <a href="#" class='sidebar-link'>
+                <i class="bi bi-person-rolodex"></i>
+                <span>kontak</span>
+            </a>
+        </li>
+
+
+
+
+
         <li class="sidebar-title">Logout</li>
 
         <li class="sidebar-item  ">
@@ -95,7 +97,6 @@
             </a>
 
         </li>
-
 
 
     </ul>

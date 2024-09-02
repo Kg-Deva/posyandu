@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\MenuController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,13 +45,21 @@ Route::get('/agenda', function () {
 
 // ADMIN
 
-Route::get('/login-tpq', function () {
-    return view('login');
-});
+// Route::get('/login-tpq', function () {
+//     return view('login');
+// });
+
+Route::get('/login-lpq', [LoginController::class, 'index'])->name('login-lpq');
+Route::get('/postlogin', [LoginController::class, 'postlogin'])->name('postlogin');
+Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::get('/dashboard', [MenuController::class, 'dashboard'])->name('dashboard');
+Route::get('/beranda', [MenuController::class, 'beranda'])->name('beranda');
+
+Route::get('/tambah-beranda', [MenuController::class, 'tambahberanda'])->name('tambah-beranda');
 
 
-
-Route::get('/dashboard', function () {
-    return view('admin-page.dashboard');
-});
+// Route::get('/dashboard', function () {
+//     return view('admin-page.dashboard');
+// });
 

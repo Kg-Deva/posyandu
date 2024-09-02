@@ -42,6 +42,51 @@
     }
 </style>
 
+{{-- maps style --}}
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    .popular-course-area {
+        display: flex;
+        justify-content: center;
+        /* Center horizontally */
+        align-items: center;
+        /* Center vertically */
+        min-height: 100vh;
+        /* Ensure it takes up at least the viewport height */
+        padding: 20px;
+        /* Add padding around the section */
+    }
+
+    .map-container {
+        position: relative;
+        width: 80%;
+        /* Adjust the width percentage as needed */
+        max-width: 900px;
+        /* Set a maximum width for larger screens */
+        aspect-ratio: 16 / 9;
+        /* Maintain a 16:9 aspect ratio */
+        background: #f3f3f3;
+        /* Optional, for background color */
+        border-radius: 8px;
+        /* Optional, for rounded corners */
+        overflow: hidden;
+        /* Ensure content doesn’t overflow */
+    }
+
+    .map-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+    }
+</style>
+
 <body>
     {{-- navbar --}}
 
@@ -57,14 +102,18 @@
             <div class="row fullscreen d-flex align-items-center justify-content-between">
                 <div class="banner-content col-lg-9 col-md-12">
                     <h1 class="text-uppercase">
-                        We Ensure better education
-                        for a better world
+                        {{-- We Ensure better education
+                        for a better world --}}
+                        Menjadi Sumber Inspirasi Pendidikan Al-Quran Anda
                     </h1>
                     <p class="pt-10 pb-10">
-                        In the history of modern astronomy, there is probably no one greater leap forward than the
-                        building and launch of the space telescope known as the Hubble.
+                        {{-- In the history of modern astronomy, there is probably no one greater leap forward than the
+                        building and launch of the space telescope known as the Hubble. --}}
+
+                        Platform kami menyediakan informasi lengkap tentang lembaga pendidikan Al-Quran Baiturrahmah,
+                        termasuk visi dan misi untuk membentuk generasi Qurani yang cerdas dan berakhlak.
                     </p>
-                    <a href="#" class="primary-btn text-uppercase">Get Started</a>
+                    {{-- <a href="#" class="primary-btn text-uppercase">Get Started</a> --}}
                 </div>
             </div>
         </div>
@@ -82,16 +131,15 @@
                             <div class="single-feature">
                                 <div class="title">
                                     {{-- <h4>No.1 of universities</h4> --}}
-                                    <h4>TPQ Baiturrahmah</h4>
+                                    <h4>LPQ Baiturrahmah</h4>
 
                                 </div>
                                 <div class="desc-wrap">
                                     <p>
-                                        For many of us, our very first experience of learning about the celestial bodies
-                                        begins
-                                        when we saw our first.
+                                        "Daftar sekarang untuk bimbingan dari pengajar ahli
+                                        dan mulai memahami Quran dengan lebih mendalam!"
                                     </p>
-                                    <a href="#">Join Now</a>
+                                    <a href="#">Daftar Sekarang</a>
                                 </div>
                             </div>
                         </div>
@@ -431,7 +479,7 @@
 
     <!-- End blog Area -->
     {{-- mapss --}}
-    <section class="popular-course-area section-gap">
+    {{-- <section class="popular-course-area section-gap">
         <div class="container">
             <div class="row d-flex justify-content-center">
                 <div class="menu-content pb-70 col-lg-8">
@@ -444,9 +492,19 @@
 
             </div>
         </div>
+    </section> --}}
+
+    <section class="popular-course-area section-gap">
+        <div class="map-container">
+
+
+            <iframe
+                src="https://www.google.com/maps/embed?pb=!4v1725270898001!6m8!1m7!1szE6IxDY19UXGT2CcoeoncA!2m2!1d-6.986612916975554!2d110.379446798736!3f14.609894560675123!4f8.547371538380375!5f0.7820865974627469"
+                width="600" height="450" style="border:0;" allowfullscreen=""
+                referrerpolicy="no-referrer-when-downgrade"></iframe>
+
+        </div>
     </section>
-
-
 
     <!-- start footer Area -->
     {{-- footer --}}
