@@ -1,91 +1,112 @@
 <footer class="footer-area section-gap">
     <div class="container">
         <div class="row">
+            
             <div class="col-lg-2 col-md-6 col-sm-6">
                 <div class="single-footer-widget">
-                    <h4>Top Products</h4>
+                    <h4>Informasi LPQ <br>Baiturrahmah</h4>
                     <ul>
-                        <li><a href="#">Managed Website</a></li>
-                        <li><a href="#">Manage Reputation</a></li>
-                        <li><a href="#">Power Tools</a></li>
-                        <li><a href="#">Marketing Service</a></li>
+                        <li><a href="/profil-lpq">Tentang LPQ</a></li>
+                        {{-- <li><a href="/profil-pengajar">Profil Pengajar</a></li> --}}
+                        <li><a href="/struktur-organisasi">Struktur Organisasi</a></li>
+                        <li><a href="/gallery">Galeri LPQ</a></li>
+                        
                     </ul>
                 </div>
             </div>
+           
             <div class="col-lg-2 col-md-6 col-sm-6">
                 <div class="single-footer-widget">
-                    <h4>Quick links</h4>
+                    <h4>Program<br>Pendidikan</h4>
                     <ul>
-                        <li><a href="#">Jobs</a></li>
-                        <li><a href="#">Brand Assets</a></li>
-                        <li><a href="#">Investor Relations</a></li>
-                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Daftar Program Pendidikan</a></li>
                     </ul>
                 </div>
             </div>
-            <div class="col-lg-2 col-md-6 col-sm-6">
+          
+            <div class="col-lg-3 col-md-6 col-sm-6">
                 <div class="single-footer-widget">
-                    <h4>Features</h4>
+                    <h4>Kontak <br> Kami</h4>
                     <ul>
-                        <li><a href="#">Jobs</a></li>
-                        <li><a href="#">Brand Assets</a></li>
-                        <li><a href="#">Investor Relations</a></li>
-                        <li><a href="#">Terms of Service</a></li>
+
+                         {{-- <li><i class="fa fa-map-marker"></i> {{ $kontaks->alamat }}</li>
+                        <li><i class="fa fa-phone"></i> <a href="tel:{{ $kontaks->no_telp }}">{{ $kontaks->no_telp }}</a></li>
+                        <li><i class="fa fa-envelope"></i> <a href="mailto:{{ $kontaks->email }}">{{ $kontaks->email }}</a></li> --}}
+                        <li>
+                            <i class="fa fa-map-marker"></i> 
+                            {{ optional($kontaks)->alamat ?? 'Alamat belum tersedia' }}
+                        </li>
+                        
+                        <li>
+                            <i class="fa fa-phone"></i> 
+                            @if(optional($kontaks)->no_telp)
+                                <a href="tel:{{ $kontaks->no_telp }}">{{ $kontaks->no_telp }}</a>
+                            @else
+                                Nomor telepon belum tersedia
+                            @endif
+                        </li>
+                        
+                        <li>
+                            <i class="fa fa-envelope"></i> 
+                            @if(optional($kontaks)->email)
+                                <a href="mailto:{{ $kontaks->email }}">{{ $kontaks->email }}</a>
+                            @else
+                                Email belum tersedia
+                            @endif
+                        </li>
+                        
+                        
                     </ul>
                 </div>
             </div>
-            <div class="col-lg-2 col-md-6 col-sm-6">
+            
+            {{-- <div class="col-lg-4 col-md-6 col-sm-6">
                 <div class="single-footer-widget">
-                    <h4>Resources</h4>
-                    <ul>
-                        <li><a href="#">Guides</a></li>
-                        <li><a href="#">Research</a></li>
-                        <li><a href="#">Experts</a></li>
-                        <li><a href="#">Agencies</a></li>
-                    </ul>
+                    <h4>Dukung Pendidikan Al-Qur'an</h4>
+                    <p>Bantu LPQ Baiturrahmah dalam mencetak generasi Qur'ani dengan berdonasi.</p>
+                    @if($kontaks)
+                    <a href="https://wa.me/{{ str_replace('+', '', $kontaks->whatsapp) }}?text=Halo,%20saya%20ingin%20berdonasi%20untuk%20LPQ%20Baiturrahmah." 
+                       class="btn btn-primary btn-sm" target="_blank">
+                        <i class="fa fa-whatsapp"></i> Donasi Sekarang
+                    </a>
+                @endif
+                </div>
+            </div> --}}
+
+            <div class="col-lg-4 col-md-6 col-sm-6">
+                <div class="single-footer-widget">
+                    <h4>Dukung Pendidikan Al-Qur'an</h4>
+                    <p>Bantu LPQ Baiturrahmah dalam mencetak generasi Qur'ani dengan berdonasi.</p>
+            
+                    @if($kontaks && $kontaks->whatsapp)
+                        {{-- <a href="https://wa.me/62{{ ltrim($kontaks->whatsapp, '0') }}?text=Halo,%20saya%20ingin%20berdonasi%20untuk%20LPQ%20Baiturrahmah." 
+                            class="btn btn-primary btn-sm" target="_blank">
+                             <i class="fa fa-whatsapp"></i> Donasi Sekarang
+                         </a> --}}
+
+                         <a href="https://wa.me/62{{ ltrim($kontaks->whatsapp, '0') }}?text=Halo,%20saya%20ingin%20berdonasi%20untuk%20LPQ%20Baiturrahmah." 
+                            class="genric-btn primary" target="_blank" style="float: left;">
+                            <i class="fa fa-whatsapp"></i> Donasi Sekarang
+                        </a>
+                         
+                    @else
+                        <p class="text-muted">Kontak WhatsApp belum tersedia.</p>
+                    @endif
                 </div>
             </div>
-            <div class="col-lg-4  col-md-6 col-sm-6">
-                <div class="single-footer-widget">
-                    <h4>Newsletter</h4>
-                    <p>Stay update with our latest</p>
-                    <div class="" id="mc_embed_signup">
-                        <form target="_blank"
-                            action="https://spondonit.us12.list-manage.com/subscribe/post?u=1462626880ade1ac87bd9c93a&amp;id=92a4423d01"
-                            method="get">
-                            <div class="input-group">
-                                <input type="text" class="form-control" name="EMAIL"
-                                    placeholder="Enter Email Address" onfocus="this.placeholder = ''"
-                                    onblur="this.placeholder = 'Enter Email Address '" required="" type="email">
-                                <div class="input-group-btn">
-                                    <button class="btn btn-default" type="submit">
-                                        <span class="lnr lnr-arrow-right"></span>
-                                    </button>
-                                </div>
-                                <div class="info"></div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+            
+          
+            
+            
+            
         </div>
         <div class="footer-bottom row align-items-center justify-content-between">
+
             <p class="footer-text m-0 col-lg-6 col-md-12">
-                <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                Copyright &copy;
-                <script>
-                    document.write(new Date().getFullYear());
-                </script> All rights reserved | Made with <i class="fa fa-heart-o"
-                    aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a> &amp;
-                distributed by <a href="https://themewagon.com" target="_blank">ThemeWagon</a>
-                <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                Copyright &copy; <script>document.write(new Date().getFullYear());</script> 
+                LPQ Baiturrahmah. All Rights Reserved.
             </p>
-            <div class="col-lg-6 col-sm-12 footer-social">
-                <a href="#"><i class="fa fa-facebook"></i></a>
-                <a href="#"><i class="fa fa-twitter"></i></a>
-                <a href="#"><i class="fa fa-dribbble"></i></a>
-                <a href="#"><i class="fa fa-behance"></i></a>
-            </div>
+            
         </div>
     </div>
 </footer>

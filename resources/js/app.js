@@ -1,4 +1,4 @@
 import './bootstrap';
 
 
-import './quill-editor';
+import './quill.snow';

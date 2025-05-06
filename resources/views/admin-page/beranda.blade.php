@@ -10,39 +10,8 @@
             <div class="sidebar-wrapper active">
                 <div class="sidebar-header position-relative">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div class="logo">
-                            <a href="index.html"><img src="{{ asset('admin/assets/images/logo/logo.svg') }}"
-                                    alt="Logo" srcset=""></a>
-                        </div>
-                        <div class="theme-toggle d-flex gap-2  align-items-center mt-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                aria-hidden="true" role="img" class="iconify iconify--system-uicons" width="20"
-                                height="20" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21">
-                                <g fill="none" fill-rule="evenodd" stroke="currentColor" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path
-                                        d="M10.5 14.5c2.219 0 4-1.763 4-3.982a4.003 4.003 0 0 0-4-4.018c-2.219 0-4 1.781-4 4c0 2.219 1.781 4 4 4zM4.136 4.136L5.55 5.55m9.9 9.9l1.414 1.414M1.5 10.5h2m14 0h2M4.135 16.863L5.55 15.45m9.899-9.9l1.414-1.415M10.5 19.5v-2m0-14v-2"
-                                        opacity=".3"></path>
-                                    <g transform="translate(-210 -1)">
-                                        <path d="M220.5 2.5v2m6.5.5l-1.5 1.5"></path>
-                                        <circle cx="220.5" cy="11.5" r="4"></circle>
-                                        <path d="m214 5l1.5 1.5m5 14v-2m6.5-.5l-1.5-1.5M214 18l1.5-1.5m-4-5h2m14 0h2">
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                            <div class="form-check form-switch fs-6">
-                                <input class="form-check-input  me-0" type="checkbox" id="toggle-dark">
-                                <label class="form-check-label"></label>
-                            </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                aria-hidden="true" role="img" class="iconify iconify--mdi" width="20"
-                                height="20" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24">
-                                <path fill="currentColor"
-                                    d="m17.75 4.09l-2.53 1.94l.91 3.06l-2.63-1.81l-2.63 1.81l.91-3.06l-2.53-1.94L12.44 4l1.06-3l1.06 3l3.19.09m3.5 6.91l-1.64 1.25l.59 1.98l-1.7-1.17l-1.7 1.17l.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95l2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85c-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14c.4-.4.82-.76 1.27-1.08c.75-.53 1.93.36 1.85 1.19c-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82c-2.81 3.14-2.7 7.96.31 10.98c3.02 3.01 7.84 3.12 10.98.31Z">
-                                </path>
-                            </svg>
-                        </div>
+                        @include('admin-layouts.icon')
+
                         <div class="sidebar-toggler  x">
                             <a href="#" class="sidebar-hide d-xl-none d-block"><i
                                     class="bi bi-x bi-middle"></i></a>
@@ -58,7 +27,9 @@
                     <i class="bi bi-justify fs-3"></i>
                 </a>
             </header>
-
+            @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
             <div class="page-heading">
                 <h3>Beranda</h3>
             </div>
@@ -72,13 +43,12 @@
                             <div class="row" id="table-hover-row">
                                 <div class="col-12">
                                     <div class="card">
-                                        {{-- <div class="card-header">
-                                            <h4 class="card-title">Daftar Anggota</h4>
-                                        </div> --}}
                                         <div class="card-body">
-                                            <p> <a class="dropdown-item text-success" href="/tambah-beranda"><i
+                                            {{-- @if (auth()->user()->level == 'adminpengelola')     --}}
+                                            <p> <a class="dropdown-item text-success" href="{{ 'tambah-beranda' }}"><i
                                                         data-feather="plus"></i>
                                                     Tambah</a></p>
+                                                    {{-- @endif --}}
                                             <!-- table hover -->
                                             <div class="table-responsive">
                                                 <table class="table table-hover mb-0">
@@ -88,85 +58,45 @@
                                                             <th>Deskripsi</th>
                                                             <th>Gambar</th>
                                                             <th>Maps</th>
-                                                            <th>ACTION</th>
+                                                            <th>Aksi</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
+                                                        @foreach($data as $key => $item)
                                                         <tr>
-                                                            <td class="text-bold-500">Michael Right</td>
-                                                            <td>$15/hr</td>
-                                                            <td class="text-bold-500">UI/UX</td>
-                                                            <td>Remote</td>
-                                                            <td>
-                                                                <!-- Dropdown button -->
-                                                                <div class="dropdown">
-                                                                    <button class="btn dropdown-toggle" type="button"
-                                                                        id="dropdownMenuButton"
-                                                                        data-bs-toggle="dropdown" aria-expanded="false">
-                                                                        <i class="badge-circle badge-circle-light-secondary font-medium-1"
-                                                                            data-feather="more-horizontal"></i>
-                                                                    </button>
-                                                                    <!-- Dropdown menu -->
-                                                                    <ul class="dropdown-menu"
-                                                                        aria-labelledby="dropdownMenuButton">
-
-                                                                        <a class="dropdown-item text-primary"
-                                                                            href="#"><i data-feather="edit"></i>
-                                                                            Update</a>
-                                                                        <a class="dropdown-item text-danger"
-                                                                            href="#"><i data-feather="trash"></i>
-                                                                            Delete</a>
-                                                                        {{-- 
-                                                                                <a class="dropdown-item text-success"
-                                                                                href="#">Tambah</a>
-                                                                            <a class="dropdown-item text-primary"
-                                                                                href="#">Update</a>
-                                                                            <a class="dropdown-item text-danger"
-                                                                                href="#">Delete</a> --}}
-                                                                    </ul>
+                                                            <td class="text-bold-500">
+                                                                <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">
+                                                                    {{ $item->tagline }}
                                                                 </div>
                                                             </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="text-bold-500">Morgan Vanblum</td>
-                                                            <td>$13/hr</td>
-                                                            <td class="text-bold-500">Graphic concepts</td>
-                                                            <td>Remote</td>
+                                                            <td class="text-bold-500">
+                                                                <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">
+                                                                    {{ $item->deskripsi }}
+                                                                </div>
+                                                            </td>
+                                                            <td class="text-bold-500">
+                                                                <img src="{{ asset('storage/' . $item->gambar) }}" alt="Gambar Beranda" class="img-fluid" style="max-width: 150px; height: auto;">
+                                                            </td>
 
-                                                            <td><a href="#"><i
-                                                                        class="badge-circle badge-circle-light-secondary font-medium-1"
-                                                                        data-feather="mail"></i></a></td>
+                                                            <td class="text-bold-500">
+                                                                <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">
+                                                                    {{ $item->maps }}
+                                                                </div>
+                                                            </td>
+                                                            
+                                                            <td>
+                                                                <div class="d-flex gap-2">
+                                                                    <a class="btn btn-sm btn-primary" href="{{ url('edit-beranda', $item->id) }}">
+                                                                        <i data-feather="edit"></i> Edit
+                                                                    </a>
+                                                                    <a class="btn btn-sm btn-danger" href="{{ url('delete-beranda', $item->id) }}" onclick="confirmation(event)">
+                                                                        <i data-feather="trash"></i> Delete
+                                                                    </a>
+                                                                </div>
+                                                            </td>
+                                                            
                                                         </tr>
-                                                        <tr>
-                                                            <td class="text-bold-500">Tiffani Blogz</td>
-                                                            <td>$15/hr</td>
-                                                            <td class="text-bold-500">Animation</td>
-                                                            <td>Remote</td>
-
-                                                            <td><a href="#"><i
-                                                                        class="badge-circle badge-circle-light-secondary font-medium-1"
-                                                                        data-feather="mail"></i></a></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="text-bold-500">Ashley Boul</td>
-                                                            <td>$15/hr</td>
-                                                            <td class="text-bold-500">Animation</td>
-                                                            <td>Remote</td>
-
-                                                            <td><a href="#"><i
-                                                                        class="badge-circle badge-circle-light-secondary font-medium-1"
-                                                                        data-feather="mail"></i></a></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="text-bold-500">Mikkey Mice</td>
-                                                            <td>$15/hr</td>
-                                                            <td class="text-bold-500">Animation</td>
-                                                            <td>Remote</td>
-
-                                                            <td><a href="#"><i
-                                                                        class="badge-circle badge-circle-light-secondary font-medium-1"
-                                                                        data-feather="mail"></i></a></td>
-                                                        </tr>
+                                                        @endforeach
                                                     </tbody>
                                                 </table>
                                             </div>

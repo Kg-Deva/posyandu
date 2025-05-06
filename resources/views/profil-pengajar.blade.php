@@ -2,7 +2,7 @@
 <html lang="zxx" class="no-js">
 
 {{-- header --}}
-
+<title>Profil Pengajar</title>
 @include('layouts.header')
 
 @include('layouts.css-banner')
@@ -22,10 +22,10 @@
             <div class="row d-flex align-items-center justify-content-center">
                 <div class="about-content col-lg-12">
                     <h1 class="text-white">
-                        Profil Guru
+                        Profil Pengajar
                     </h1>
                     <p class="text-white link-nav"><a href="/">Beranda </a> <span
-                            class="lnr lnr-arrow-right"></span> <a href="/profil-guru"> Profil Guru</a></p>
+                            class="lnr lnr-arrow-right"></span> <a href="/profil-pengajar"> Profil Pengajar</a></p>
                 </div>
             </div>
         </div>
@@ -33,7 +33,7 @@
     <!-- End banner Area -->
 
     <!-- Start events-list Area -->
-    <section class="events-list-area section-gap event-page-lists">
+    {{-- <section class="events-list-area section-gap event-page-lists">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6 pb-30">
@@ -177,6 +177,34 @@
                     </div>
                 </div>
                 <a href="#" class="text-uppercase primary-btn mx-auto mt-40">Load more courses</a>
+            </div>
+        </div>
+    </section> --}}
+
+
+    <section class="events-list-area section-gap event-page-lists">
+        <div class="container">
+            <div class="row align-items-center">
+                @foreach($pengajar as $guru)
+                <div class="col-lg-6 pb-30">
+                    <div class="single-carusel row align-items-center">
+                        <div class="col-12 col-md-6 thumb">
+                            <img class="img-fluid" src="{{ asset('storage/' . $guru->gambar) }}" alt="{{ $guru->nama }}">
+                        </div>
+                        <div class="detials col-12 col-md-6">
+                            <h4>{{ $guru->pengajar }}</h4>
+                            <p>
+                                {{ $guru->jabatan }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+    
+            <!-- Pagination -->
+            <div class="row justify-content-center mt-4">
+                {{ $pengajar->links('pagination::bootstrap-4') }}
             </div>
         </div>
     </section>

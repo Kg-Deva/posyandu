@@ -4,7 +4,7 @@
 {{-- header --}}
 
 @include('layouts.header')
-
+<title>Agenda</title>
 {{-- header --}}
 @include('layouts.css-banner')
 <style>
@@ -73,219 +73,103 @@
 
     {{-- start feature --}}
 
+    {{-- <section class="popular-course-area section-gap">
+        <div class="container">
+            <div class="row d-flex justify-content-center">
+                <div class="menu-content pb-70 col-lg-8">
+                    <div class="title text-center">
+                        <h1 class="mb-10">Agenda</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                @foreach($agendas as $agenda)
+                <div class="active-popular-carusel">
+                    <div class="single-popular-carusel">
+
+                        <div class="thumb-wrap relative">
+                            <div class="thumb relative">
+                                <div class="overlay overlay-bg"></div>
+                                <img class="img-fluid" src="{{ asset('images/' . $agenda->gambar) }}" alt="{{ $agenda->judul }}"
+                                    alt="">
+                            </div>
+                        </div>
+
+                        <div class="details">
+                            <p class="text-muted pt-2 mb-1" style="font-size: 14px;">{{ \Carbon\Carbon::parse($agenda->tanggal)->format('d F, Y') }} | By <a>{{ $agenda->penulis }}</p>
+                                <a href="{{ route('agendashow', $agenda->id) }}">
+                                <h4>
+                                    {{ \Illuminate\Support\Str::limit($agenda->judul, 10, '...') }}
+                                </h4>
+                            </a>
+                            <p>
+                                {{ Str::limit($agenda->deskripsi, 20, '...') }}
+                            </p>
+                        </div>
+                    </div>
+
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </section> --}}
+
     <section class="popular-course-area section-gap">
         <div class="container">
             <div class="row d-flex justify-content-center">
                 <div class="menu-content pb-70 col-lg-8">
                     <div class="title text-center">
                         <h1 class="mb-10">Agenda</h1>
-                        {{-- <p>There is a moment in the life of any aspiring.</p> --}}
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="active-popular-carusel">
-                    <div class="single-popular-carusel">
-                        {{-- <div class="thumb-wrap relative">
-                            <div class="thumb relative">
-                                <div class="overlay overlay-bg"></div>
-                                <img class="img-fluid" src="{{ asset('landing-page/img/p1.jpg') }}" alt="">
-                            </div>
-                            <div class="meta d-flex justify-content-between">
-                                <p><span class="lnr lnr-users"></span> 355 <span class="lnr lnr-bubble"></span>35</p>
-                                <h4>$150</h4>
-                            </div>
-                        </div> --}}
-
-                        <div class="thumb-wrap relative">
-                            <div class="thumb relative">
-                                <div class="overlay overlay-bg"></div>
-                                <img class="img-fluid" src="{{ asset('landing-page/img/gallery/g1.jpg') }}"
-                                    alt="">
-                            </div>
-                            <div class="meta d-flex justify-content-between">
-                                <p><span class="lnr lnr-users"></span> 355 <span class="lnr lnr-bubble"></span>35</p>
-                                <h4>$150</h4>
-                            </div>
-                        </div>
-
-                        <div class="details">
-                            <a href="#">
-                                <h4>
-                                    Learn Designing
-                                </h4>
-                            </a>
-                            <p>
-                                When television was young, there was a hugely popular show based on the still popular
-                                fictional characte
-                            </p>
-                        </div>
-                    </div>
+    
+            <!-- Slick Carousel -->
+            <div class="active-popular-carusel">
+                @foreach($agendas as $agenda)
                     <div class="single-popular-carusel">
                         <div class="thumb-wrap relative">
                             <div class="thumb relative">
                                 <div class="overlay overlay-bg"></div>
-                                <img class="img-fluid" src="{{ asset('landing-page/img/p2.jpg') }}" alt="">
-                            </div>
-                            <div class="meta d-flex justify-content-between">
-                                <p><span class="lnr lnr-users"></span> 355 <span class="lnr lnr-bubble"></span>35</p>
-                                <h4>$150</h4>
+                                <img class="img-fluid" src="{{ asset('images/' . $agenda->gambar) }}" alt="{{ $agenda->judul }}">
                             </div>
                         </div>
+    
                         <div class="details">
-                            <a href="#">
-                                <h4>
-                                    Learn React js beginners
-                                </h4>
-                            </a>
-                            <p>
-                                When television was young, there was a hugely popular show based on the still popular
-                                fictional characte
+                            <p class="text-muted pt-2 mb-1" style="font-size: 14px;">
+                                {{ \Carbon\Carbon::parse($agenda->tanggal)->format('d F, Y') }} | By <a>{{ $agenda->penulis }}</a>
                             </p>
+                            <a href="{{ route('agendashow', $agenda->id) }}">
+                                <h4>{{ \Illuminate\Support\Str::limit($agenda->judul, 10, '...') }}</h4>
+                            </a>
+                            <p>{{ Str::limit($agenda->deskripsi, 20, '...') }}</p>
                         </div>
                     </div>
-                    <div class="single-popular-carusel">
-                        <div class="thumb-wrap relative">
-                            <div class="thumb relative">
-                                <div class="overlay overlay-bg"></div>
-                                <img class="img-fluid" src="{{ asset('landing-page/img/p3.jpg') }}" alt="">
-                            </div>
-                            <div class="meta d-flex justify-content-between">
-                                <p><span class="lnr lnr-users"></span> 355 <span class="lnr lnr-bubble"></span>35</p>
-                                <h4>$150</h4>
-                            </div>
-                        </div>
-                        <div class="details">
-                            <a href="#">
-                                <h4>
-                                    Learn Photography
-                                </h4>
-                            </a>
-                            <p>
-                                When television was young, there was a hugely popular show based on the still popular
-                                fictional characte
-                            </p>
-                        </div>
-                    </div>
-                    <div class="single-popular-carusel">
-                        <div class="thumb-wrap relative">
-                            <div class="thumb relative">
-                                <div class="overlay overlay-bg"></div>
-                                <img class="img-fluid" src="{{ asset('landing-page/img/p4.jpg') }}" alt="">
-                            </div>
-                            <div class="meta d-flex justify-content-between">
-                                <p><span class="lnr lnr-users"></span> 355 <span class="lnr lnr-bubble"></span>35</p>
-                                <h4>$150</h4>
-                            </div>
-                        </div>
-                        <div class="details">
-                            <a href="#">
-                                <h4>
-                                    Learn Surveying
-                                </h4>
-                            </a>
-                            <p>
-                                When television was young, there was a hugely popular show based on the still popular
-                                fictional characte
-                            </p>
-                        </div>
-                    </div>
-                    <div class="single-popular-carusel">
-                        <div class="thumb-wrap relative">
-                            <div class="thumb relative">
-                                <div class="overlay overlay-bg"></div>
-                                <img class="img-fluid" src="{{ asset('landing-page/img/p1.jpg') }}" alt="">
-                            </div>
-                            <div class="meta d-flex justify-content-between">
-                                <p><span class="lnr lnr-users"></span> 355 <span class="lnr lnr-bubble"></span>35</p>
-                                <h4>$150</h4>
-                            </div>
-                        </div>
-                        <div class="details">
-                            <a href="#">
-                                <h4>
-                                    Learn Designing
-                                </h4>
-                            </a>
-                            <p>
-                                When television was young, there was a hugely popular show based on the still popular
-                                fictional characte
-                            </p>
-                        </div>
-                    </div>
-                    <div class="single-popular-carusel">
-                        <div class="thumb-wrap relative">
-                            <div class="thumb relative">
-                                <div class="overlay overlay-bg"></div>
-                                <img class="img-fluid" src="{{ asset('landing-page/img/p2.jpg') }}" alt="">
-                            </div>
-                            <div class="meta d-flex justify-content-between">
-                                <p><span class="lnr lnr-users"></span> 355 <span class="lnr lnr-bubble"></span>35</p>
-                                <h4>$150</h4>
-                            </div>
-                        </div>
-                        <div class="details">
-                            <a href="#">
-                                <h4>
-                                    Learn React js beginners
-                                </h4>
-                            </a>
-                            <p>
-                                When television was young, there was a hugely popular show based on the still popular
-                                fictional characte
-                            </p>
-                        </div>
-                    </div>
-                    <div class="single-popular-carusel">
-                        <div class="thumb-wrap relative">
-                            <div class="thumb relative">
-                                <div class="overlay overlay-bg"></div>
-                                <img class="img-fluid" src="{{ asset('landing-page/img/p3.jpg') }}" alt="">
-                            </div>
-                            <div class="meta d-flex justify-content-between">
-                                <p><span class="lnr lnr-users"></span> 355 <span class="lnr lnr-bubble"></span>35</p>
-                                <h4>$150</h4>
-                            </div>
-                        </div>
-                        <div class="details">
-                            <a href="#">
-                                <h4>
-                                    Learn Photography
-                                </h4>
-                            </a>
-                            <p>
-                                When television was young, there was a hugely popular show based on the still popular
-                                fictional characte
-                            </p>
-                        </div>
-                    </div>
-                    <div class="single-popular-carusel">
-                        <div class="thumb-wrap relative">
-                            <div class="thumb relative">
-                                <div class="overlay overlay-bg"></div>
-                                <img class="img-fluid" src="{{ asset('landing-page/img/p4.jpg') }}" alt="">
-                            </div>
-                            <div class="meta d-flex justify-content-between">
-                                <p><span class="lnr lnr-users"></span> 355 <span class="lnr lnr-bubble"></span>35</p>
-                                <h4>$150</h4>
-                            </div>
-                        </div>
-                        <div class="details">
-                            <a href="#">
-                                <h4>
-                                    Learn Surveying
-                                </h4>
-                            </a>
-                            <p>
-                                When television was young, there was a hugely popular show based on the still popular
-                                fictional characte
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
+    
+    <!-- Tambahkan Slick.js untuk Auto Slider -->
+    @section('scripts')
+    <script>
+        $(document).ready(function(){
+            $('.active-popular-carusel').slick({
+                slidesToShow: 3,  // Jumlah item per slide
+                slidesToScroll: 1,
+                autoplay: true,
+                autoplaySpeed: 3000, // 3 detik per geser
+                arrows: false, // Hilangkan tombol navigasi
+                dots: false, // Hilangkan indikator titik
+                responsive: [
+                    { breakpoint: 992, settings: { slidesToShow: 2 } }, // Tablet
+                    { breakpoint: 768, settings: { slidesToShow: 1 } }  // Mobile
+                ]
+            });
+        });
+    </script>
+    @endsection
+    
     {{-- end feature --}}
     <!-- Start popular-course Area -->
 

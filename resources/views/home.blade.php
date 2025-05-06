@@ -2,7 +2,7 @@
 <html lang="zxx" class="no-js">
 
 {{-- header --}}
-
+<title>LPQ Baiturrahmah</title>
 @include('layouts.header')
 
 {{-- header --}}
@@ -102,16 +102,13 @@
             <div class="row fullscreen d-flex align-items-center justify-content-between">
                 <div class="banner-content col-lg-9 col-md-12">
                     <h1 class="text-uppercase">
-                        {{-- We Ensure better education
-                        for a better world --}}
-                        Menjadi Sumber Inspirasi Pendidikan Al-Quran Anda
+                   
+                        {{-- {{ $berandas->tagline}} --}}
+                        {{ $berandas?->tagline ?? 'Tagline belum tersedia' }}
                     </h1>
                     <p class="pt-10 pb-10">
-                        {{-- In the history of modern astronomy, there is probably no one greater leap forward than the
-                        building and launch of the space telescope known as the Hubble. --}}
-
-                        Platform kami menyediakan informasi lengkap tentang lembaga pendidikan Al-Quran Baiturrahmah,
-                        termasuk visi dan misi untuk membentuk generasi Qurani yang cerdas dan berakhlak.
+                        {{-- {{ $berandas->deskripsi }} --}}
+                        {{ $berandas?->deskripsi ?? 'Deskripsi belum tersedia' }}
                     </p>
                     {{-- <a href="#" class="primary-btn text-uppercase">Get Started</a> --}}
                 </div>
@@ -121,7 +118,7 @@
     <!-- End banner Area -->
 
     <!-- Start feature Area -->
-    <section class="feature-area">
+    {{-- <section class="feature-area">
         <div class="container">
             <div class="row">
 
@@ -130,7 +127,6 @@
                         <div class="col-lg-4 col-md-6 mx-auto">
                             <div class="single-feature">
                                 <div class="title">
-                                    {{-- <h4>No.1 of universities</h4> --}}
                                     <h4>LPQ Baiturrahmah</h4>
 
                                 </div>
@@ -151,10 +147,12 @@
 
             </div>
         </div>
-    </section>
+    </section> --}}
     <!-- End feature Area -->
 
     {{-- start feature --}}
+
+    
 
     <section class="blog-area section-gap" id="blog">
         <div class="container">
@@ -166,96 +164,41 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-lg-3 col-md-6 single-blog">
-                    <div class="thumb">
-                        <img class="img-fluid" src="{{ asset('landing-page/img/b1.jpg') }}" alt="">
+                @foreach($beritas as $berita)
+                    <div class="col-lg-3 col-md-6 single-blog">
+                        <div class="thumb">
+                            <img class="img-fluid" src="{{ asset('images/' . $berita->gambar) }}" alt="{{ $berita->judul }}">
+                        </div>
+                        <p class="meta">{{ \Carbon\Carbon::parse($berita->tanggal)->format('d F, Y') }} | By <a href="#">{{ $berita->penulis }}</a></p>
+                        <a href="{{ route('beritashow', $berita->id) }}">
+                            <h5>{{ \Illuminate\Support\Str::limit($berita->judul, 10, '...') }}</h5>
+                        </a>
+                        <p>
+                            {{ Str::limit($berita->deskripsi, 20, '...') }}
+                        </p>
+                        <a href="{{ route('beritashow', $berita->id) }}" class="details-btn d-flex justify-content-center align-items-center">
+                            <span class="details">Details</span><span class="lnr lnr-arrow-right"></span>
+                        </a>
                     </div>
-                    <p class="meta">25 April, 2018 | By <a href="#">Mark Wiens</a></p>
-                    <a href="blog-single.html">
-                        <h5>Addiction When Gambling Becomes A Problem</h5>
-                    </a>
-                    <p>
-                        Computers have become ubiquitous in almost every facet of our lives. At work, desk jockeys spend
-                        hours in front of their.
-                    </p>
-                    <a href="#" class="details-btn d-flex justify-content-center align-items-center"><span
-                            class="details">Details</span><span class="lnr lnr-arrow-right"></span></a>
-                </div>
-
-                <div class="col-lg-3 col-md-6 single-blog">
-                    <div class="thumb">
-                        <img class="img-fluid" src="{{ asset('landing-page/img/b2.jpg') }}" alt="">
-                    </div>
-                    <p class="meta">25 April, 2018 | By <a href="#">Mark Wiens</a></p>
-                    <a href="blog-single.html">
-                        <h5>Computer Hardware Desktops And Notebooks</h5>
-                    </a>
-                    <p>
-                        Ah, the technical interview. Nothing like it. Not only does it cause anxiety, but it causes
-                        anxiety for several different reasons.
-                    </p>
-                    <a href="#" class="details-btn d-flex justify-content-center align-items-center"><span
-                            class="details">Details</span><span class="lnr lnr-arrow-right"></span></a>
-                </div>
-                <div class="col-lg-3 col-md-6 single-blog">
-                    <div class="thumb">
-                        <img class="img-fluid" src="{{ asset('landing-page/img/b3.jpg') }}" alt="">
-                    </div>
-                    <p class="meta">25 April, 2018 | By <a href="#">Mark Wiens</a></p>
-                    <a href="blog-single.html">
-                        <h5>Make Myspace Your Best Designed Space</h5>
-                    </a>
-                    <p>
-                        Plantronics with its GN Netcom wireless headset creates the next generation of wireless headset
-                        and other products such as wireless.
-                    </p>
-                    <a href="#" class="details-btn d-flex justify-content-center align-items-center"><span
-                            class="details">Details</span><span class="lnr lnr-arrow-right"></span></a>
-                </div>
-                <div class="col-lg-3 col-md-6 single-blog">
-                    <div class="thumb">
-                        <img class="img-fluid" src="{{ asset('landing-page/img/b4.jpg') }}" alt="">
-                    </div>
-                    <p class="meta">25 April, 2018 | By <a href="#">Mark Wiens</a></p>
-                    <a href="blog-single.html">
-                        <h5>Video Games Playing With Imagination</h5>
-                    </a>
-                    <p>
-                        About 64% of all on-line teens say that do things online that they wouldn’t want their parents
-                        to know about. 11% of all adult internet
-                    </p>
-                    <a href="#" class="details-btn d-flex justify-content-center align-items-center"><span
-                            class="details">Details</span><span class="lnr lnr-arrow-right"></span></a>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
+    
     {{-- end feature --}}
     <!-- Start popular-course Area -->
-    <section class="popular-course-area section-gap">
+    {{-- <section class="popular-course-area section-gap">
         <div class="container">
             <div class="row d-flex justify-content-center">
                 <div class="menu-content pb-70 col-lg-8">
                     <div class="title text-center">
                         <h1 class="mb-10">Agenda</h1>
-                        {{-- <p>There is a moment in the life of any aspiring.</p> --}}
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="active-popular-carusel">
                     <div class="single-popular-carusel">
-                        {{-- <div class="thumb-wrap relative">
-                            <div class="thumb relative">
-                                <div class="overlay overlay-bg"></div>
-                                <img class="img-fluid" src="{{ asset('landing-page/img/p1.jpg') }}" alt="">
-                            </div>
-                            <div class="meta d-flex justify-content-between">
-                                <p><span class="lnr lnr-users"></span> 355 <span class="lnr lnr-bubble"></span>35</p>
-                                <h4>$150</h4>
-                            </div>
-                        </div> --}}
-
                         <div class="thumb-wrap relative">
                             <div class="thumb relative">
                                 <div class="overlay overlay-bg"></div>
@@ -444,42 +387,46 @@
                 </div>
             </div>
         </div>
-    </section>
-    <!-- End popular-course Area -->
+    </section> --}}
 
-
-
-
-
-
-
-
-    <!-- End review Area -->
-
-    <!-- Start cta-one Area -->
-    {{-- <section class="cta-one-area relative section-gap">
+    <section class="popular-course-area section-gap">
         <div class="container">
-            <div class="overlay overlay-bg"></div>
-            <div class="row justify-content-center">
-                <div class="wrap">
-                    <h1 class="text-white">Become an instructor</h1>
-                    <p>
-                        There is a moment in the life of any aspiring astronomer that it is time to buy that first
-                        telescope. It’s exciting to think about setting up your own viewing station whether that is on
-                        the deck.
-                    </p>
-                    <a class="primary-btn wh" href="#">Apply for the post</a>
+            <div class="row d-flex justify-content-center">
+                <div class="menu-content pb-70 col-lg-8">
+                    <div class="title text-center">
+                        <h1 class="mb-10">Agenda</h1>
+                    </div>
                 </div>
             </div>
+    
+            <!-- Slick Carousel -->
+            <div class="active-popular-carusel">
+                @foreach($agendas as $agenda)
+                    <div class="single-popular-carusel">
+                        <div class="thumb-wrap relative">
+                            <div class="thumb relative">
+                                <div class="overlay overlay-bg"></div>
+                                <img class="img-fluid" src="{{ asset('images/' . $agenda->gambar) }}" alt="{{ $agenda->judul }}">
+                            </div>
+                        </div>
+    
+                        <div class="details">
+                            <p class="text-muted pt-2 mb-1" style="font-size: 14px;">
+                                {{ \Carbon\Carbon::parse($agenda->tanggal)->format('d F, Y') }} | By <a>{{ $agenda->penulis }}</a>
+                            </p>
+                            <a href="{{ route('agendashow', $agenda->id) }}">
+                                <h4>{{ \Illuminate\Support\Str::limit($agenda->judul, 10, '...') }}</h4>
+                            </a>
+                            <p>{{ Str::limit($agenda->deskripsi, 20, '...') }}</p>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
         </div>
-    </section> --}}
-    <!-- End cta-one Area -->
+    </section>
 
-    <!-- Start blog Area -->
 
-    <!-- End blog Area -->
-    {{-- mapss --}}
-    {{-- <section class="popular-course-area section-gap">
+    <section class="popular-course-area section-gap">
         <div class="container">
             <div class="row d-flex justify-content-center">
                 <div class="menu-content pb-70 col-lg-8">
@@ -487,24 +434,60 @@
                         <h1 class="mb-10">Lokasi</h1>
                     </div>
                 </div>
-                <div id="map" style="width: 100%; height: 400px;">
-                </div>
-
             </div>
-        </div>
-    </section> --}}
 
-    <section class="popular-course-area section-gap">
-        <div class="map-container">
+            <!-- Kontainer responsif untuk peta -->
+            {{-- <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="embed-responsive embed-responsive-16by9">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!4v1725270898001!6m8!1m7!1szE6IxDY19UXGT2CcoeoncA!2m2!1d-6.986612916975554!2d110.379446798736!3f14.609894560675123!4f8.547371538380375!5f0.7820865974627469"
+                            width="600" height="450" style="border:0;" allowfullscreen=""
+                            referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                </div>
+            </div> --}}
 
-
-            <iframe
-                src="https://www.google.com/maps/embed?pb=!4v1725270898001!6m8!1m7!1szE6IxDY19UXGT2CcoeoncA!2m2!1d-6.986612916975554!2d110.379446798736!3f14.609894560675123!4f8.547371538380375!5f0.7820865974627469"
-                width="600" height="450" style="border:0;" allowfullscreen=""
-                referrerpolicy="no-referrer-when-downgrade"></iframe>
-
+            {{-- <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="embed-responsive embed-responsive-16by9">
+                        <iframe 
+                            src="{{ $berandas->maps }}" 
+                            width="100%" 
+                            height="450" 
+                            style="border:0; border-radius: 10px;" 
+                            allowfullscreen 
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
+                </div>
+            </div> --}}
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="embed-responsive embed-responsive-16by9" style="position: relative;">
+                        @if($berandas && $berandas->maps)
+                            <iframe 
+                                src="{{ $berandas->maps }}" 
+                                width="100%" 
+                                height="450" 
+                                style="border:0; border-radius: 10px;" 
+                                allowfullscreen 
+                                referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        @else
+                            <div style="width: 100%; height: 450px; display: flex; align-items: center; justify-content: center; border: 2px dashed #ccc; border-radius: 10px; background-color: #f9f9f9;">
+                                <p class="text-muted m-0" style="font-size: 1.2rem;">📍 Peta belum tersedia</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            
+            
+            
         </div>
     </section>
+
 
     <!-- start footer Area -->
     {{-- footer --}}
@@ -542,6 +525,23 @@
             });
         }
     </script>
+
+<script>
+    $(document).ready(function(){
+        $('.active-popular-carusel').slick({
+            slidesToShow: 3,  // Jumlah item per slide
+            slidesToScroll: 1,
+            autoplay: true,
+            autoplaySpeed: 3000, // 3 detik per geser
+            arrows: false, // Hilangkan tombol navigasi
+            dots: false, // Hilangkan indikator titik
+            responsive: [
+                { breakpoint: 992, settings: { slidesToShow: 2 } }, // Tablet
+                { breakpoint: 768, settings: { slidesToShow: 1 } }  // Mobile
+            ]
+        });
+    });
+</script>
     {{-- js --}}
 </body>
 

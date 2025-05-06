@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zxx" class="no-js">
 {{-- header --}}
-
+<title>Gallery</title>
 @include('layouts.header')
 <style>
     .img-container {
@@ -40,7 +40,7 @@
             <div class="row d-flex align-items-center justify-content-center">
                 <div class="about-content col-lg-12">
                     <h1 class="text-white">
-                        Gallery
+                        Galeri
                     </h1>
                     <p class="text-white link-nav"><a href="/">Beranda </a> <span
                             class="lnr lnr-arrow-right"></span> <a href="/gallery"> Gallery</a></p>
@@ -54,73 +54,23 @@
     <section class="gallery-area section-gap">
         <div class="container">
             <div class="row">
+                @foreach($data as $gallery)
                 <div class="col-lg-6">
-                    <a href="{{ asset('landing-page/img/gallery/g1.jpg') }}" class="img-gal">
+                    <a href="{{ asset('storage/' . $gallery->gallery_item) }}" class="img-gal">
                         <div class="single-imgs relative">
                             <div class="overlay overlay-bg"></div>
                             <div class="img-container relative">
-                                <img class="img-fluid" src="{{ asset('landing-page/img/gallery/g1.jpg') }}"
+                                <img class="img-fluid" src="{{ asset('storage/' . $gallery->gallery_item) }}"
                                     alt="">
                             </div>
                         </div>
                     </a>
                 </div>
-                <div class="col-lg-6">
-                    <a href="{{ asset('landing-page/img/gallery/g2.jpg') }}" class="img-gal">
-                        <div class="single-imgs relative">
-                            <div class="overlay overlay-bg"></div>
-                            <div class="img-container relative">
-                                <img class="img-fluid" src="{{ asset('landing-page/img/gallery/g2.jpg') }}"
-                                    alt="">
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="col-lg-6">
-                    <a href="{{ asset('landing-page/img/gallery/g2.jpg') }}" class="img-gal">
-                        <div class="single-imgs relative">
-                            <div class="overlay overlay-bg"></div>
-                            <div class="img-container relative">
-                                <img class="img-fluid" src="{{ asset('landing-page/img/gallery/g1.jpg') }}"
-                                    alt="">
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-lg-6">
-                    <a href="{{ asset('landing-page/img/gallery/g2.jpg') }}" class="img-gal">
-                        <div class="single-imgs relative">
-                            <div class="overlay overlay-bg"></div>
-                            <div class="img-container relative">
-                                <img class="img-fluid" src="{{ asset('landing-page/img/gallery/g1.jpg') }}"
-                                    alt="">
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-lg-6">
-                    <a href="{{ asset('landing-page/img/gallery/g2.jpg') }}" class="img-gal">
-                        <div class="single-imgs relative">
-                            <div class="overlay overlay-bg"></div>
-                            <div class="img-container relative">
-                                <img class="img-fluid" src="{{ asset('landing-page/img/gallery/g1.jpg') }}"
-                                    alt="">
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-lg-6">
-                    <a href="{{ asset('landing-page/img/gallery/g2.jpg') }}" class="img-gal">
-                        <div class="single-imgs relative">
-                            <div class="overlay overlay-bg"></div>
-                            <div class="img-container relative">
-                                <img class="img-fluid" src="{{ asset('landing-page/img/gallery/g1.jpg') }}"
-                                    alt="">
-                            </div>
-                        </div>
-                    </a>
-                </div>
+                @endforeach
+            </div>
+            <!-- Pagination -->
+            <div class="row justify-content-center mt-4">
+                {{ $data->links('pagination::bootstrap-4') }}
             </div>
         </div>
     </section>
@@ -128,7 +78,7 @@
 
 
     <!-- Start cta-two Area -->
-    <section class="cta-two-area">
+    {{-- <section class="cta-two-area">
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 cta-left">
@@ -139,7 +89,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> --}}
     <!-- End cta-two Area -->
 
     {{-- footer --}}

@@ -45,6 +45,10 @@ class Kernel extends HttpKernel
         ],
     ];
 
+    protected $routeMiddleware = [
+        'ceklevel' => \App\Http\Middleware\CekLevel::class,
+    ];
+    
     /**
      * The application's middleware aliases.
      *

@@ -2,7 +2,7 @@
 <html lang="zxx" class="no-js">
 
 {{-- header --}}
-
+<title>Profil LPQ Baiturrahmah</title>
 @include('layouts.header')
 @include('layouts.css-banner')
 {{-- header --}}
@@ -21,10 +21,10 @@
             <div class="row d-flex align-items-center justify-content-center">
                 <div class="about-content col-lg-12">
                     <h1 class="text-white">
-                        Profil TPQ Baiturrahmah
+                        Profil LPQ Baiturrahmah
                     </h1>
                     <p class="text-white link-nav"><a href="/">Beranda </a> <span
-                            class="lnr lnr-arrow-right"></span> <a href="/profil-tpq"> Profil TPQ Baiturrahmah</a></p>
+                            class="lnr lnr-arrow-right"></span> <a href="/profil-lpq"> Profil LPQ Baiturrahmah</a></p>
                 </div>
             </div>
         </div>
@@ -95,51 +95,28 @@
             <div class="row">
                 <div class="col-lg-8 left-contents">
                     <div class="main-image">
-                        <img class="img-fluid" src="{{ asset('landing-page/img/m-img.jpg') }}" alt="">
+                        <img class="img-fluid" src="{{ asset('storage/' . $lpq->gambar) }}" alt="">
                     </div>
                     <div class="jq-tab-wrapper" id="horizontalTab">
                         <div class="jq-tab-menu">
-                            <div class="jq-tab-title active" data-tab="1">Sejarah</div>
-                            <div class="jq-tab-title" data-tab="2">Visi & Misi</div>
+                            <div class="jq-tab-title active" data-tab="1">Visi</div>
+                            {{-- <div class="jq-tab-title" data-tab="2">Visi</div> --}}
+                            <div class="jq-tab-title" data-tab="2">Misi</div>
+                            <div class="jq-tab-title" data-tab="3">Tujuan</div>
+
+
 
                         </div>
                         <div class="jq-tab-content-wrapper">
                             <div class="jq-tab-content active" data-tab="1">
-                                When you enter into any new area of science, you almost always find yourself with a
-                                baffling new language of technical terms to learn before you can converse with the
-                                experts. This is certainly true in astronomy both in terms of terms that refer to the
-                                cosmos and terms that describe the tools of the trade, the most prevalent being the
-                                telescope.
-                                <br>
-                                <br>
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-                                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                                exercitation ullamco laboris nisi ut aliquip ex ea commodoconsequat. Duis aute irure
-                                dolor in reprehenderit in voluptate velit esse cillum. Lorem ipsum dolor sit amet,
-                                consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna
-                                aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-                                aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-                                velit esse cillum.
+                                <p>{{ $lpq->visi ?? 'Belum ada data Visi.' }}</p>
                             </div>
                             <div class="jq-tab-content" data-tab="2">
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-                                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-                                dolor in reprehenderit in voluptate velit esse cillum.
-                                <br>
-                                <br>
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-                                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                                exercitation ullamco laboris nisi ut aliquip ex ea commodoconsequat. Duis aute irure
-                                dolor in reprehenderit in voluptate velit esse cillum. Lorem ipsum dolor sit amet,
-                                consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna
-                                aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-                                aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-                                velit esse cillum.
+                                <p>{!! nl2br(e($lpq->misi ?? 'Belum ada data Misi.')) !!}</p>
                             </div>
-
-
-
+                            <div class="jq-tab-content" data-tab="3">
+                                <p>{!! nl2br(e($lpq->tujuan ?? 'Belum ada data Tujuan.')) !!}</p>
+                            </div>
                         </div>
                     </div>
                 </div>

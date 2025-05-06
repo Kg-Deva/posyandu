@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ContoController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MenuController;
@@ -15,50 +16,184 @@ use App\Http\Controllers\MenuController;
 |
 */
 
-Route::get('/', function () {
-    return view('home');
-});
-
-Route::get('/profil-tpq', function () {
-    return view('profil-tpq');
-});
-
-Route::get('/profil-guru', function () {
-    return view('profil-guru');
-});
-
-Route::get('/gallery', function () {
-    return view('gallery');
-});
-
-Route::get('/form-pengaduan', function () {
-    return view('pengaduan');
-});
-
-Route::get('/berita', function () {
-    return view('berita');
-});
-
-Route::get('/agenda', function () {
-    return view('agenda');
-});
-
-// ADMIN
-
-// Route::get('/login-tpq', function () {
-//     return view('login');
+// Route::get('/', function () {
+//     return view('home');
 // });
+
+Route::get('/', [MenuController::class, 'home'])->name('/');
+Route::get('/berita-show/{id}', [MenuController::class, 'beritashow'])->name('beritashow');
+Route::get('/agenda-show/{id}', [MenuController::class, 'agendashow'])->name('agendashow');
+Route::get('/gallery-show/{id}', [MenuController::class, 'galleryshow'])->name('galleryshow');
+
+
+Route::get('/berita', [MenuController::class, 'beritauser'])->name('beritauser');
+Route::get('/profil-lpq', [MenuController::class, 'lpquser'])->name('lpquser');
+Route::get('/profil-pengajar', [MenuController::class, 'pengajaruser'])->name('pengajaruser');
+Route::get('/struktur-organisasi', [MenuController::class, 'strukturuser'])->name('strukturuser');
+Route::get('/gallery', [MenuController::class, 'galleryuser'])->name('galleryuser');
+Route::get('/agenda', [MenuController::class, 'agendauser'])->name('agendauser');
+Route::get('/program-pendidikan', [MenuController::class, 'programuser'])->name('programuser');
+
+
+Route::get('/kritik-saran', [MenuController::class, 'kritiksaran'])->name('kritiksaran');
+Route::post('/simpan-kritiksaran', [MenuController::class, 'simpankritiksaran'])->name('simpan-kritiksaran')
+->middleware('throttle:kritik_saran');
+;
+
+
+// Route::get('/kritik-saran', function () {
+//     return view('kritik-saran');
+// });
+
 
 Route::get('/login-lpq', [LoginController::class, 'index'])->name('login-lpq');
 Route::get('/postlogin', [LoginController::class, 'postlogin'])->name('postlogin');
-Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+// Route::resource('/conto', ContoController::class);
+
+
+/*
+|--------------------------------------------------------------------------
+| Admin
+|--------------------------------------------------------------------------
+*/
+Route::group(['middleware' => ['auth', 'ceklevel:adminpengelola,adminkonten']], function () {
+
+
 
 Route::get('/dashboard', [MenuController::class, 'dashboard'])->name('dashboard');
+
+// beranda
 Route::get('/beranda', [MenuController::class, 'beranda'])->name('beranda');
-
 Route::get('/tambah-beranda', [MenuController::class, 'tambahberanda'])->name('tambah-beranda');
+Route::post('/simpan-beranda', [MenuController::class, 'simpanberanda'])->name('simpan-beranda');
+Route::get('/edit-beranda/{id}', [MenuController::class, 'editberanda'])->name('edit-beranda');
+Route::post('/update-beranda/{id}', [MenuController::class, 'updateberanda'])->name('update-beranda');
+Route::get('/delete-beranda/{id}', [MenuController::class, 'destroyberanda'])->name('delete-beranda');
+
+// anggota
+// Route::get('/tambah-anggota', [MenuController::class, 'tambahanggota'])->name('tambah-anggota');
+// Route::post('/simpan-anggota', [MenuController::class, 'simpananggota'])->name('simpan-anggota');
+Route::get('/edit-anggota/{id}', [MenuController::class, 'editanggota'])->name('edit-anggota');
+Route::post('/update-anggota/{id}', [MenuController::class, 'updateanggota'])->name('update-anggota');
+Route::get('/delete-anggota/{id}', [MenuController::class, 'destroy'])->name('delete-anggota');
+
+// Profil
+
+Route::get('/profil', [MenuController::class, 'profil'])->name('profil');
+Route::get('/tambah-profil', [MenuController::class, 'tambahprofil'])->name('tambah-profil');
+Route::post('/simpan-profil', [MenuController::class, 'simpanprofil'])->name('simpan-profil');
+Route::get('/edit-profil/{id}', [MenuController::class, 'editprofil'])->name('edit-profil');
+Route::post('/update-profil/{id}', [MenuController::class, 'updateprofil'])->name('update-profil');
+Route::get('/delete-profil/{id}', [MenuController::class, 'destroyprofil'])->name('delete-profil');
 
 
+// Profil Pengajar
+
+Route::get('/admin/profil-pengajar', [MenuController::class, 'pengajar'])->name('pengajar');
+Route::get('/tambah-profilpengajar', [MenuController::class, 'tambahpengajar'])->name('tambah-profilpengajar');
+Route::post('/simpan-profilpengajar', [MenuController::class, 'simpanprofilpengajar'])->name('simpan-profilpengajar');
+Route::get('/edit-profilpengajar/{id}', [MenuController::class, 'editprofilpengajar'])->name('edit-profilpengajar');
+Route::post('/update-profilpengajar/{id}', [MenuController::class, 'updateprofilpengajar'])->name('update-profilpengajar');
+Route::get('/delete-profilpengajar/{id}', [MenuController::class, 'destroyprofilpengajar'])->name('delete-profilpengajar');
+
+
+// Gallery
+
+Route::get('/gallery-item', [MenuController::class, 'galleryitem'])->name('gallery-item');
+Route::get('/tambah-gallery', [MenuController::class, 'tambahgallery'])->name('tambah-gallery');
+Route::post('/simpan-gallery', [MenuController::class, 'simpangallery'])->name('simpan-gallery');
+Route::get('/edit-gallery/{id}', [MenuController::class, 'editgallery'])->name('edit-gallery');
+Route::post('/update-gallery/{id}', [MenuController::class, 'updategallery'])->name('update-gallery');
+Route::get('/delete-gallery/{id}', [MenuController::class, 'destroygallery'])->name('delete-gallery');
+
+// Struktur Organisasi
+
+Route::get('/admin/struktur-organisasi', [MenuController::class, 'struktur'])->name('struktur');
+Route::get('/tambah-struktur', [MenuController::class, 'tambahstruktur'])->name('tambah-struktur');
+Route::post('/simpan-struktur', [MenuController::class, 'simpanstruktur'])->name('simpan-struktur');
+Route::get('/edit-struktur/{id}', [MenuController::class, 'editstruktur'])->name('edit-struktur');
+Route::post('/update-struktur/{id}', [MenuController::class, 'updatestruktur'])->name('update-struktur');
+Route::get('/delete-struktur/{id}', [MenuController::class, 'destroystruktur'])->name('delete-struktur');
+
+
+
+//Berita
+
+
+Route::get('/admin/berita', [MenuController::class, 'berita'])->name('berita');
+Route::get('/tambah-berita', [MenuController::class, 'tambahberita'])->name('tambah-berita');
+Route::post('/simpan-berita', [MenuController::class, 'simpanberita'])->name('simpan-berita');
+Route::get('/edit-berita/{id}', [MenuController::class, 'editberita'])->name('edit-berita');
+Route::post('/update-berita/{id}', [MenuController::class, 'updateberita'])->name('update-berita');
+Route::get('/delete-berita/{id}', [MenuController::class, 'destroyberita'])->name('delete-berita');
+
+
+
+//Berita
+
+
+Route::get('/admin/agenda', [MenuController::class, 'agenda'])->name('agenda');
+Route::get('/tambah-agenda', [MenuController::class, 'tambahagenda'])->name('tambah-agenda');
+Route::post('/simpan-agenda', [MenuController::class, 'simpanagenda'])->name('simpan-agenda');
+Route::get('/edit-agenda/{id}', [MenuController::class, 'editagenda'])->name('edit-agenda');
+Route::post('/update-agenda/{id}', [MenuController::class, 'updateagenda'])->name('update-agenda');
+Route::get('/delete-agenda/{id}', [MenuController::class, 'destroyagenda'])->name('delete-agenda');
+
+
+//Kontak
+Route::get('/kontak', [MenuController::class, 'kontak'])->name('kontak');
+Route::get('/tambah-kontak', [MenuController::class, 'tambahkontak'])->name('tambah-kontak');
+Route::post('/simpan-kontak', [MenuController::class, 'simpankontak'])->name('simpan-kontak');
+Route::get('/edit-kontak/{id}', [MenuController::class, 'editkontak'])->name('edit-kontak');
+Route::post('/update-kontak/{id}', [MenuController::class, 'updatekontak'])->name('update-kontak');
+Route::get('/delete-kontak/{id}', [MenuController::class, 'destroykontak'])->name('delete-kontak');
+
+
+
+//  Program
+Route::get('/program', [MenuController::class, 'program'])->name('program');
+Route::get('/tambah-program', [MenuController::class, 'tambahprogram'])->name('tambah-program');
+Route::post('/simpan-program', [MenuController::class, 'simpanprogram'])->name('simpan-program');
+Route::get('/edit-program/{id}', [MenuController::class, 'editprogram'])->name('edit-program');
+Route::post('/update-program/{id}', [MenuController::class, 'updateprogram'])->name('update-program');
+Route::get('/delete-program/{id}', [MenuController::class, 'destroyprogram'])->name('delete-program');
+
+
+
+//  ekstra
+Route::get('/ekstra', [MenuController::class, 'ekstra'])->name('ekstra');
+Route::get('/tambah-ekstra', [MenuController::class, 'tambahekstra'])->name('tambah-ekstra');
+Route::post('/simpan-ekstra', [MenuController::class, 'simpanekstra'])->name('simpan-ekstra');
+Route::get('/edit-ekstra/{id}', [MenuController::class, 'editekstra'])->name('edit-ekstra');
+Route::post('/update-ekstra/{id}', [MenuController::class, 'updateekstra'])->name('update-ekstra');
+Route::get('/delete-ekstra/{id}', [MenuController::class, 'destroyekstra'])->name('delete-ekstra');
+
+
+
+// kritik dan saran
+
+Route::get('/admin-kritik', [MenuController::class, 'kritikadmin'])->name('admin-kritik');
+Route::get('/delete-kritik/{id}', [MenuController::class, 'deletekritik'])->name('delete-kritik');
+
+});
+
+
+Route::group(['middleware' => ['auth', 'ceklevel:adminpengelola']], function () {
+
+    Route::get('/tambah-anggota', [MenuController::class, 'tambahanggota'])->name('tambah-anggota');
+    Route::post('/simpan-anggota', [MenuController::class, 'simpananggota'])->name('simpan-anggota');
+    //profil lpq
+    // Route::get('/tambah-profil', [MenuController::class, 'tambahprofil'])->name('tambah-profil');
+    // Route::post('/simpan-profil', [MenuController::class, 'simpanprofil'])->name('simpan-profil');
+    //kontak
+    // Route::get('/tambah-kontak', [MenuController::class, 'tambahkontak'])->name('tambah-kontak');
+    // Route::post('/simpan-kontak', [MenuController::class, 'simpankontak'])->name('simpan-kontak');
+
+
+
+});
 // Route::get('/dashboard', function () {
 //     return view('admin-page.dashboard');
 // });

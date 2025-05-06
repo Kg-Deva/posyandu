@@ -1,8 +1,9 @@
 <style>
     .custom-about-banner {
         position: relative;
-        background: url({{ asset('landing-page/img/gallery/g1.jpg') }}) right;
+        background: url("{{ asset(isset($berandas) && $berandas->gambar ? 'storage/' . $berandas->gambar : 'storage/default/default.jpg') }}") right;
         background-size: cover;
+       
     }
 
     .custom-overlay-bg {

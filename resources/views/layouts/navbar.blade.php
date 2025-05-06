@@ -2,45 +2,76 @@
     <div class="header-top">
         <div class="container">
             <div class="row">
-                <div class="col-lg-6 col-sm-6 col-8 header-top-left no-padding">
-                    <ul>
-                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                        <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-                        <li><a href="#"><i class="fa fa-dribbble"></i></a></li>
-                        <li><a href="#"><i class="fa fa-behance"></i></a></li>
-                    </ul>
+              
+
+
+
+                {{-- yang asli --}}
+                {{-- <div class="col-lg-6 col-sm-6 col-4 header-top-right no-padding text-end">
+                    @if($kontaks)
+                        <a href="tel:{{ $kontaks->no_telp }}">
+                            <i class="fa fa-phone"></i> <span class="text">{{ $kontaks->no_telp }}</span>
+                        </a>
+                        <a href="mailto:{{ $kontaks->email }}" class="ms-3">
+                            <i class="fa fa-envelope"></i> <span class="text">{{ $kontaks->email }}</span>
+                        </a>
+                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $kontaks->whatsapp) }}" class="ms-3" target="_blank">
+                            <i class="fa fa-whatsapp"></i> <span class="text">WhatsApp</span>
+                        </a>
+                    @endif
+                </div> --}}
+
+                {{-- improve --}}
+                <div class="col-lg-12 col-sm-12 col-4 header-top-right no-padding text-end">
+                    @if($kontaks)
+                        @if($kontaks->no_telp)
+                            <a href="tel:{{ $kontaks->no_telp }}">
+                                <i class="fa fa-phone"></i> <span class="text">{{ $kontaks->no_telp }}</span>
+                            </a>
+                        @endif
+                
+                        @if($kontaks->email)
+                            <a href="mailto:{{ $kontaks->email }}" class="ms-3">
+                                <i class="fa fa-envelope"></i> <span class="text">{{ $kontaks->email }}</span>
+                            </a>
+                        @endif
+                
+                       
+                        @if($kontaks->whatsapp)
+                            <a href="https://wa.me/62{{ ltrim(preg_replace('/[^0-9]/', '', $kontaks->whatsapp), '0') }}" 
+                            class="ms-3" target="_blank">
+                                <i class="fa fa-whatsapp"></i> <span class="text">WhatsApp</span>
+                            </a>
+                        @endif
+
+                    @else
+                        <p class="text-muted">Kontak belum tersedia.</p>
+                    @endif
                 </div>
-                <div class="col-lg-6 col-sm-6 col-4 header-top-right no-padding">
-                    <a href="tel:+953 012 3654 896"><span class="lnr lnr-phone-handset"></span> <span
-                            class="text">+953 012 3654 896</span></a>
-                    <a href="mailto:support@colorlib.com"><span class="lnr lnr-envelope"></span> <span
-                            class="text">support@colorlib.com</span></a>
-                </div>
+                
+                
             </div>
         </div>
     </div>
+    
     <div class="container main-menu">
-        <div class="row align-items-center justify-content-between d-flex">
-            <div id="logo">
-                <a href="index.html"><img src="{{ asset('landing-page/img/logo.png') }}" alt=""
-                        title="" /></a>
-            </div>
+        <div class="d-flex align-items-center justify-content-between">
+          <div id="logo" class="me-3">
+            <a href="/">
+              <img src="{{ asset('landing-page/img/logoo.png') }}" alt="Logo" style="height: 60px;">
+            </a>
+          </div>
             <nav id="nav-menu-container">
                 <ul class="nav-menu">
                     <li><a href="/">Beranda</a></li>
                     <li class="menu-has-children"><a href="">Profil</a>
                         <ul>
-                            <li><a href="/profil-tpq">Profil TPQ Baiturrahmah</a></li>
-                            <li><a href="/profil-guru">Profil Guru</a></li>
+                            <li><a href="/profil-lpq">Profil LPQ Baiturrahmah</a></li>
+                            {{-- <li><a href="/profil-pengajar">Profil Pengajar</a></li> --}}
+                            <li><a href="/struktur-organisasi">Struktur Organisasi</a></li>
                         </ul>
                     </li>
-                    <li><a href="/gallery">Gallery</a></li>
-                    <li class="menu-has-children"><a href="">Akademik</a>
-                        <ul>
-                            <li><a href="blog-home.html">Kalender Akademik</a></li>
-                            <li><a href="blog-single.html">Peraturan Akademik</a></li>
-                        </ul>
-                    </li>
+                    <li><a href="/gallery">Galeri</a></li>
 
                     <li class="menu-has-children"><a href="">Informasi</a>
                         <ul>
@@ -48,8 +79,9 @@
                             <li><a href="/agenda">Agenda</a></li>
                         </ul>
                     </li>
-                    <li><a href="/form-pengaduan">Form Pengaduan</a></li>
-                    <li><a href="/login-lpq">Login</a></li>
+                    <li><a href="/program-pendidikan">Program Pendidikan</a></li>
+                    <li><a href="/kritik-saran">Kritik & Saran</a></li>
+                    {{-- <li><a href="/login-lpq">Login</a></li> --}}
                 </ul>
             </nav><!-- #nav-menu-container -->
         </div>
