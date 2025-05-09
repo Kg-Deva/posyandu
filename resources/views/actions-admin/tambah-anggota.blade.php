@@ -30,7 +30,7 @@
             <div class="section d-flex justify-content-center align-items-center flex-grow-1">
 
                 <div class="page-heading">
-                    <h3>Tambah Anggota</h3>
+                    <h3>Tambah Admin Konten</h3>
                 </div>
             </div>
             {{-- <form action="{{ route('simpan-anggota') }}" method="POST">
