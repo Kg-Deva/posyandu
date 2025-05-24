@@ -13,7 +13,7 @@
 
     <link rel="stylesheet" href="{{ asset('admin/assets/css/shared/iconly.css') }}">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <link href="{{ mix('css/app.css') }}" rel="stylesheet">
+   
     <style>
         /* Umum untuk Quill editor */
         .ql-container.ql-snow {

@@ -154,6 +154,7 @@
                                                                 <td>{{ $item->email }}</td>
                                                                 <td class="text-bold-500">{{ $item->level }}</td>
                                                                 <td>
+                                                                     @if($item->level == 'adminkonten')
                                                                     <div class="d-flex gap-2">
                                                                         <a class="btn btn-sm btn-primary" href="{{ url('edit-anggota', $item->id) }}">
                                                                             <i data-feather="edit"></i> Edit
@@ -161,7 +162,11 @@
                                                                         <a class="btn btn-sm btn-danger" href="{{ url('delete-anggota', $item->id) }}" onclick="confirmation(event)">
                                                                             <i data-feather="trash"></i> Delete
                                                                         </a>
+                                                                        {{-- @else
+                                                                        <!-- Kalau admin pengelola lain, tombol tidak ditampilkan / disabled -->
+                                                                        <span class="text-muted">No Action</span> --}}
                                                                     </div>
+                                                                    @endif
                                                                 </td>
                                                             </tr>
                                                             @endif

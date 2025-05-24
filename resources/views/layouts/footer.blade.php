@@ -19,7 +19,7 @@
                 <div class="single-footer-widget">
                     <h4>Program<br>Pendidikan</h4>
                     <ul>
-                        <li><a href="#">Daftar Program Pendidikan</a></li>
+                        <li><a href="/program-pendidikan">Daftar Program Pendidikan</a></li>
                     </ul>
                 </div>
             </div>
