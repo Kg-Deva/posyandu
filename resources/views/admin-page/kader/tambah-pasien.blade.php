@@ -33,15 +33,14 @@
                     <h3>Tambah Admin Konten</h3>
                 </div>
             </div>
-            {{-- <form action="{{ route('simpan-anggota') }}" method="POST">
-                @csrf --}}
+          
             
             <div class="section d-flex justify-content-center align-items-center flex-grow-1">
                 <div class="col-md-7">
                     <div class="card mb-4">
                         <section class="section d-flex justify-content-center align-items-center flex-grow-1">
                             <div class="card w-100 w-md-30 w-lg-20">
-                                <form action="{{ route('simpan-anggota') }}" method="POST">
+                                <form action="{{ route('simpan-pasien') }}" method="POST">
                                     @csrf
                                 <div class="card-body">
 
@@ -63,9 +62,6 @@
                                             <div class="position-relative">
                                                 <select id="level-select" name="level" class="form-control" required>
                                                     <option value="">-- Pilih Level --</option>
-                                                    @if(auth()->user()->level == 'admin')
-                                                        <option value="kader">Kader</option>
-                                                    @endif
                                                     <option value="balita">Balita</option>
                                                     <option value="remaja">Remaja</option>
                                                     <option value="dewasa">Dewasa</option>
@@ -113,7 +109,7 @@
                                     </div>
                                     <div class="d-flex flex-column mt-4">
                                         <button type="submit" class="btn btn-primary w-100 mb-2">Submit</button>
-                                        <a href="/dashboard" class="btn btn-secondary w-100">Kembali</a>
+                                        <a href="/kader-home" class="btn btn-secondary w-100">Kembali</a>
                                     </div>
                                 </div>
                             </div>

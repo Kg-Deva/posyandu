@@ -129,7 +129,7 @@
                                         </div>
                                         <div class="card-body">
                                             <p>
-                                                <a class="dropdown-item text-success" href="{{ url('tambah-anggota') }}">
+                                                <a class="dropdown-item text-success" href="{{ url('tambah-pasien') }}">
                                                     <i data-feather="plus"></i> Tambah
                                                 </a>
                                             </p>
@@ -147,11 +147,11 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody id="anggota-table-body">
-                                                        @php $no = 1; @endphp
                                                         @foreach($data as $item)
                                                             @if($item->id != auth()->user()->id)
                                                             <tr>
-                                                                <td>{{ $no++ }}</td>
+                                                                {{-- <td>{{ $no++ }}</td> --}}
+                                                                <td>{{ ($data->currentPage() - 1) * $data->perPage() + $loop->iteration }}</td>
                                                                 <td class="text-bold-500">{{ $item->name }}</td>
                                                                 <td>{{ $item->email }}</td>
                                                                 <td class="text-bold-500">{{ $item->level }}</td>
@@ -163,15 +163,20 @@
                                                                     @endif
                                                                 </td>
                                                                 <td>
-                                                                    @if($item->level != 'admin')
+                                                                    @if($item->level != 'admin' && $item->level != 'kader')
                                                                     <div class="d-flex gap-2">
-                                                                        <a class="btn btn-sm btn-primary" href="{{ url('edit-anggota', $item->id) }}">
+                                                                        <a class="btn btn-sm btn-primary" href="{{ url('edit-pasien', $item->id) }}">
                                                                             <i data-feather="edit"></i> Edit
                                                                         </a>
-                                                                        <a class="btn btn-sm btn-danger" href="{{ url('delete-anggota', $item->id) }}" onclick="confirmation(event)">
+                                                                        <a class="btn btn-sm btn-danger" href="{{ url('delete-pasien', $item->id) }}" onclick="confirmation(event)">
                                                                             <i data-feather="trash"></i> Delete
                                                                         </a>
                                                                     </div>
+                                                                    <td>
+                                                                    <button class="btn btn-sm btn-warning lengkapi-data-btn" data-id="{{ $item->id }}">
+                                                                        <i data-feather="user-check"></i> Lengkapi Data
+                                                                    </button>
+                                                                    </td>
                                                                     @endif
                                                                 </td>
                                                             </tr>
@@ -179,6 +184,9 @@
                                                         @endforeach
                                                     </tbody>
                                                 </table>
+                                                <div class="mt-3">
+                                                    {{ $data->links('pagination::bootstrap-4') }}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -205,46 +213,140 @@
 @verbatim
 <script>
 document.getElementById('search-anggota').addEventListener('keyup', function() {
-    let q = this.value;
-    fetch('/search-anggota?q=' + encodeURIComponent(q))
-        .then(res => res.json())
-        .then(data => {
-            let tbody = document.getElementById('anggota-table-body');
-            tbody.innerHTML = '';
-            let no = 1;
-            data.forEach(item => {
-                if(item.id != currentUserId) {
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>${no++}</td>
-                            <td class="text-bold-500">${item.name}</td>
-                            <td>${item.email}</td>
-                            <td class="text-bold-500">${item.level}</td>
-                            <td>
-                                ${item.status ? 
-                                    '<span class="badge bg-success">Aktif</span>' : 
-                                    '<span class="badge bg-danger">Tidak Aktif</span>'}
-                            </td>
-                            <td>
-                                ${item.level !== 'admin' ? `
-                                <div class="d-flex gap-2">
-                                    <a class="btn btn-sm btn-primary" href="/edit-anggota/${item.id}">
-                                        <i data-feather="edit"></i> Edit
-                                    </a>
-                                    <a class="btn btn-sm btn-danger" href="/delete-anggota/${item.id}" onclick="confirmation(event)">
-                                        <i data-feather="trash"></i> Delete
-                                    </a>
-                                </div>
-                                ` : ''}
-                            </td>
-                        </tr>
-                    `;
-                }
-            });
-        });
+    let q = this.value.toLowerCase();
+    let rows = document.querySelectorAll('#anggota-table-body tr');
+    rows.forEach(row => {
+        let nama = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+        let email = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+        if (nama.includes(q) || email.includes(q)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
 });
 </script>
 @endverbatim
+
+<!-- Modal Lengkapi Data -->
+<div class="modal fade" id="lengkapiDataModal" tabindex="-1" aria-labelledby="lengkapiDataLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" id="modal-lengkapi-data-content">
+      <!-- Form akan dimuat via AJAX -->
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.lengkapi-data-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var userId = this.getAttribute('data-id');
+            fetch('/lengkapi-data/' + userId)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('modal-lengkapi-data-content').innerHTML = html;
+                    var modal = new bootstrap.Modal(document.getElementById('lengkapiDataModal'));
+                    modal.show();
+                });
+        });
+    });
+});
+</script>
+
+<script>
+function hitungUmur(tanggal) {
+    if (!tanggal) return '';
+    const today = new Date();
+    const birthDate = new Date(tanggal);
+    let umur = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        umur--;
+    }
+    if (umur < 0 || isNaN(umur)) return '';
+    return umur + ' tahun';
+}
+
+function updateUmurField() {
+    const tgl = document.getElementById('tanggal_lahir');
+    const umur = document.getElementById('umur');
+    if (tgl && umur) {
+        function update() {
+            umur.value = hitungUmur(tgl.value);
+        }
+        tgl.removeEventListener('change', update); // prevent double
+        tgl.addEventListener('change', update);
+        update();
+    }
+}
+
+// Lebih efektif: trigger saat modal Bootstrap benar-benar tampil
+document.addEventListener('shown.bs.modal', function(e) {
+    if (e.target.id === 'lengkapiDataModal') { // pastikan id modal benar
+        updateUmurField();
+    }
+});
+
+// Fallback jika modal bukan Bootstrap atau script termuat langsung
+setTimeout(updateUmurField, 300);
+</script>
+{{-- //modalllll --}}
+<script>
+function hitungUmur(tanggal) {
+    if (!tanggal) return '';
+    const today = new Date();
+    const birthDate = new Date(tanggal);
+
+    // Buat tanggal tanpa jam
+    const tglToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const tglLahir = new Date(birthDate.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+
+    let tahun = tglToday.getFullYear() - tglLahir.getFullYear();
+    let bulan = tglToday.getMonth() - tglLahir.getMonth();
+    let hari = tglToday.getDate() - tglLahir.getDate();
+
+    if (hari < 0) {
+        bulan--;
+        // Ambil jumlah hari di bulan sebelumnya
+        let prevMonth = new Date(tglToday.getFullYear(), tglToday.getMonth(), 0);
+        hari += prevMonth.getDate();
+    }
+    if (bulan < 0) {
+        tahun--;
+        bulan += 12;
+    }
+
+    if (tahun >= 1) {
+        return tahun + ' tahun';
+    } else if (bulan >= 1) {
+        return bulan + ' bulan ' + hari + ' hari';
+    } else {
+        // Jika kurang dari 1 bulan, tampilkan hari (minimal 1 hari)
+        const diffHari = Math.round((tglToday - tglLahir) / (1000 * 60 * 60 * 24));
+        return (diffHari < 1 ? 1 : diffHari) + ' hari';
+    }
+}
+
+function updateUmurField() {
+    const tgl = document.getElementById('tanggal_lahir');
+    const umur = document.getElementById('umur');
+    if (tgl && umur) {
+        function update() {
+            umur.value = hitungUmur(tgl.value);
+        }
+        tgl.removeEventListener('change', update);
+        tgl.addEventListener('change', update);
+        update();
+    }
+}
+
+document.addEventListener('shown.bs.modal', function(e) {
+    if (e.target.id === 'lengkapiDataModal') {
+        updateUmurField();
+    }
+});
+</script>
 </body>
 
 </html>

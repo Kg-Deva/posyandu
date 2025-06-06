@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -165,22 +164,24 @@ class MenuController extends Controller
     }
     public function simpananggota(Request $request)
     {
-        // dd($request->all());
         $request->validate([
             'name' => 'required|string|max:255',
+            'level' => 'required|string',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6',
         ]);
 
-        User::create([
+        $data = [
             'name' => $request->name,
+            'level' => $request->level,
             'email' => $request->email,
             'password' => bcrypt($request->password),
-            'level' => 'adminkonten'
-        ]);
+            'status' => $request->has('status') ? 1 : 0,
+        ];
+
+        User::create($data);
 
         return redirect()->route('dashboard')->with('success', 'Anggota berhasil ditambahkan!');
-        // return redirect()->back()->with('success', 'Anggota berhasil ditambahkan!');
     }
 
     public function editanggota($id)
@@ -190,26 +191,54 @@ class MenuController extends Controller
         // return view('admin.edit', ['No' => $data]);
     }
 
-    public function updateanggota(Request $request, $id)
-    {
-        $data = User::findOrFail($id);
+    // public function updateanggota(Request $request, $id)
+    // {
+    //     $request->validate([
+    //         'name' => 'required|string|max:255',
+    //         'level' => 'required|string',
+    //         'email' => 'required|email|unique:users,email,'.$id,
+    //     ]);
 
-        // Validasi data yang diterima dari form, tanpa password
-        $validateData = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $id, // Mengabaikan email yang sama untuk ID saat ini
-        ]);
+    //     $data = [
+    //         'name' => $request->name,
+    //         'level' => $request->level,
+    //         'email' => $request->email,
+    //         'status' => $request->has('status') ? 1 : 0,
+    //     ];
 
-        // Jangan update password, cukup validasi dan update data lainnya
-        // Pastikan level tetap sama dengan data sebelumnya
-        $validateData['level'] = $data->level;
+    //     if ($request->filled('password')) {
+    //         $data['password'] = bcrypt($request->password);
+    //     }
 
-        // Update data anggota tanpa mengubah password
-        $data->update($validateData);
+    //     User::where('id', $id)->update($data);
 
-        // Redirect ke halaman profil atau halaman lain dengan pesan sukses
-        return redirect()->route('dashboard')->with('success', 'Data anggota berhasil diperbarui!');
+    //     return redirect()->route('dashboard')->with('success', 'Anggota berhasil diupdate!');
+    // }
+    
+public function updateanggota(Request $request, $id)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'level' => 'required|string',
+        'email' => 'required|email|unique:users,email,'.$id,
+        'password' => 'nullable|min:6', // password opsional
+    ]);
+
+    $data = [
+        'name' => $request->name,
+        'level' => $request->level,
+        'email' => $request->email,
+        'status' => $request->has('status') ? 1 : 0,
+    ];
+
+    if ($request->filled('password')) {
+        $data['password'] = bcrypt($request->password);
     }
+
+    User::where('id', $id)->update($data);
+
+    return redirect()->route('dashboard')->with('success', 'Anggota berhasil diupdate!');
+}
 
     public function destroy($id)
     {
@@ -369,6 +398,7 @@ class MenuController extends Controller
     
         // Menangani upload gambar jika ada
         if ($request->hasFile('gambar')) {
+            // Hapus gambar lama jika ada
             if (file_exists(public_path('storage/' . $beranda->gambar))) {
                 unlink(public_path('storage/' . $beranda->gambar));
             }
@@ -765,8 +795,6 @@ private function extractIframeSrc($iframe)
         // Redirect dengan pesan sukses
         return redirect()->route('gallery-item')->with('success', 'Gambar berhasil dihapus');
     }
-
-
 
 
 
@@ -1348,4 +1376,120 @@ public function simpankritiksaran(Request $request)
         KritikSaran::where('id', $id)->delete();
         return redirect()->route('admin-kritik')->with('success', 'Kritik & Saran berhasil dihapus.');    }
 
+    public function searchAnggota(Request $request)
+    {
+        $q = $request->q;
+        $data = User::where('name', 'like', "%$q%")
+            ->orWhere('email', 'like', "%$q%")
+            ->get();
+        return response()->json($data);
+    }
+
+   
+    public function kaderHome()
+    {
+        $beritaCount = Berita::count();
+        $agendaCount = Agenda::count();
+        $galleryCount = Gallery::count();
+        $kritikCount = kritiksaran::count();
+
+        // Hanya tampilkan user yang level-nya BUKAN admin dan kader
+        $data = User::whereNotIn('level', ['admin', 'kader'])->paginate(10);
+
+        return view('admin-page.kader.dashboard', compact('beritaCount', 'agendaCount', 'galleryCount', 'kritikCount', 'data'));
+    }
+        public function tambahpasien()
+        {
+            return view('admin-page.kader.tambah-pasien');
+        }
+    public function simpanpasien(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'level' => 'required|string',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6',
+        ]);
+
+        $data = [
+            'name' => $request->name,
+            'level' => $request->level,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'status' => $request->has('status') ? 1 : 0,
+        ];
+
+        User::create($data);
+
+return redirect()->route('kader-home')->with('success', 'Pasien berhasil ditambahkan!');    }
+
+    public function editpasien($id)
+    {
+        $data = User::findorfail($id);
+        return view('admin-page.kader.edit-pasien', compact('data'));
+        // return view('admin.edit', ['No' => $data]);
+    }
+
+    public function updatepasien(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'level' => 'required|string',
+            'email' => 'required|email|unique:users,email,'.$id,
+        ]);
+
+        $data = [
+            'name' => $request->name,
+            'level' => $request->level,
+            'email' => $request->email,
+            'status' => $request->has('status') ? 1 : 0,
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = bcrypt($request->password);
+        }
+
+        User::where('id', $id)->update($data);
+
+        return redirect()->route('kader-home')->with('success', 'pasien berhasil diupdate!');
+    }
+
+
+
+    public function formLengkapiData($id)
+{
+    $user = User::findOrFail($id);
+    return view('admin-page.kader.formdata', compact('user'));
+}
+
+public function simpanLengkapiData(Request $request, $id)
+{
+    $request->validate([
+        'nama_lengkap' => 'required|string|max:255',
+        'tanggal_lahir' => 'required|date',
+        'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
+        'alamat' => 'required|string',
+        'no_telepon' => 'required|string|max:15',
+        'golongan_darah' => 'nullable|string|max:5',
+        'riwayat_penyakit' => 'nullable|string',
+        'alergi' => 'nullable|string'
+    ]);
+
+    $user = User::findOrFail($id);
+    
+    // Update data user
+    $user->update([
+        'nama_lengkap' => $request->nama_lengkap,
+        'tanggal_lahir' => $request->tanggal_lahir,
+        'jenis_kelamin' => $request->jenis_kelamin,
+        'alamat' => $request->alamat,
+        'no_telepon' => $request->no_telepon,
+        'golongan_darah' => $request->golongan_darah,
+        'riwayat_penyakit' => $request->riwayat_penyakit,
+        'alergi' => $request->alergi,
+        'data_lengkap' => true
+    ]);
+
+    return response()->json(['success' => true, 'message' => 'Data berhasil disimpan']);
+}
 }

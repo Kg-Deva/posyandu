@@ -16,38 +16,11 @@ use App\Http\Controllers\MenuController;
 |
 */
 
-// Route::get('/', function () {
-//     return view('home');
-// });
-
-Route::get('/', [MenuController::class, 'home'])->name('/');
-Route::get('/berita-show/{id}', [MenuController::class, 'beritashow'])->name('beritashow');
-Route::get('/agenda-show/{id}', [MenuController::class, 'agendashow'])->name('agendashow');
-Route::get('/gallery-show/{id}', [MenuController::class, 'galleryshow'])->name('galleryshow');
 
 
-Route::get('/berita', [MenuController::class, 'beritauser'])->name('beritauser');
-Route::get('/profil-lpq', [MenuController::class, 'lpquser'])->name('lpquser');
-Route::get('/profil-pengajar', [MenuController::class, 'pengajaruser'])->name('pengajaruser');
-Route::get('/struktur-organisasi', [MenuController::class, 'strukturuser'])->name('strukturuser');
-Route::get('/gallery', [MenuController::class, 'galleryuser'])->name('galleryuser');
-Route::get('/agenda', [MenuController::class, 'agendauser'])->name('agendauser');
-Route::get('/program-pendidikan', [MenuController::class, 'programuser'])->name('programuser');
-
-
-Route::get('/kritik-saran', [MenuController::class, 'kritiksaran'])->name('kritiksaran');
-Route::post('/simpan-kritiksaran', [MenuController::class, 'simpankritiksaran'])->name('simpan-kritiksaran')
-->middleware('throttle:kritik_saran');
-;
-
-
-// Route::get('/kritik-saran', function () {
-//     return view('kritik-saran');
-// });
-
-
-Route::get('/login-lpq', [LoginController::class, 'index'])->name('login-lpq');
-Route::get('/postlogin', [LoginController::class, 'postlogin'])->name('postlogin');
+Route::get('/', [LoginController::class, 'index'])->name('login');
+// Route::get('/login', [LoginController::class, 'index'])->name('login');
+Route::post('/postlogin', [LoginController::class, 'postlogin'])->name('postlogin');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Route::resource('/conto', ContoController::class);
@@ -58,26 +31,20 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 | Admin
 |--------------------------------------------------------------------------
 */
-Route::group(['middleware' => ['auth', 'ceklevel:adminpengelola,adminkonten']], function () {
 
 
+// Route::group(['middleware' => ['auth', 'ceklevel:admin,kader', 'redirectrole:admin,kader']], function () {
+//     Route::get('/tambah-anggota', [MenuController::class, 'tambahanggota'])->name('tambah-anggota');
+//     Route::post('/simpan-anggota', [MenuController::class, 'simpananggota'])->name('simpan-anggota');
+// });
+Route::group(['middleware' => ['auth', 'ceklevel:admin', 'redirectrole:admin']], function () {
 
-Route::get('/dashboard', [MenuController::class, 'dashboard'])->name('dashboard');
-
-// beranda
-Route::get('/beranda', [MenuController::class, 'beranda'])->name('beranda');
-Route::get('/tambah-beranda', [MenuController::class, 'tambahberanda'])->name('tambah-beranda');
-Route::post('/simpan-beranda', [MenuController::class, 'simpanberanda'])->name('simpan-beranda');
-Route::get('/edit-beranda/{id}', [MenuController::class, 'editberanda'])->name('edit-beranda');
-Route::post('/update-beranda/{id}', [MenuController::class, 'updateberanda'])->name('update-beranda');
-Route::get('/delete-beranda/{id}', [MenuController::class, 'destroyberanda'])->name('delete-beranda');
-
-// anggota
-// Route::get('/tambah-anggota', [MenuController::class, 'tambahanggota'])->name('tambah-anggota');
-// Route::post('/simpan-anggota', [MenuController::class, 'simpananggota'])->name('simpan-anggota');
-Route::get('/edit-anggota/{id}', [MenuController::class, 'editanggota'])->name('edit-anggota');
-Route::post('/update-anggota/{id}', [MenuController::class, 'updateanggota'])->name('update-anggota');
-Route::get('/delete-anggota/{id}', [MenuController::class, 'destroy'])->name('delete-anggota');
+    Route::get('/dashboard', [MenuController::class, 'dashboard'])->name('dashboard');
+    Route::get('/tambah-anggota', [MenuController::class, 'tambahanggota'])->name('tambah-anggota');
+    Route::post('/simpan-anggota', [MenuController::class, 'simpananggota'])->name('simpan-anggota');
+    Route::get('/edit-anggota/{id}', [MenuController::class, 'editanggota'])->name('edit-anggota');
+    Route::post('/update-anggota/{id}', [MenuController::class, 'updateanggota'])->name('update-anggota');
+    Route::get('/delete-anggota/{id}', [MenuController::class, 'destroy'])->name('delete-anggota');
 
 // Profil
 
@@ -179,22 +146,41 @@ Route::get('/delete-kritik/{id}', [MenuController::class, 'deletekritik'])->name
 
 });
 
+Route::get('/search-anggota', [MenuController::class, 'searchAnggota'])->name('search-anggota');
 
-Route::group(['middleware' => ['auth', 'ceklevel:adminpengelola']], function () {
-
-    Route::get('/tambah-anggota', [MenuController::class, 'tambahanggota'])->name('tambah-anggota');
-    Route::post('/simpan-anggota', [MenuController::class, 'simpananggota'])->name('simpan-anggota');
-    //profil lpq
-    // Route::get('/tambah-profil', [MenuController::class, 'tambahprofil'])->name('tambah-profil');
-    // Route::post('/simpan-profil', [MenuController::class, 'simpanprofil'])->name('simpan-profil');
-    //kontak
-    // Route::get('/tambah-kontak', [MenuController::class, 'tambahkontak'])->name('tambah-kontak');
-    // Route::post('/simpan-kontak', [MenuController::class, 'simpankontak'])->name('simpan-kontak');
-
-
+Route::group(['middleware' => ['auth', 'ceklevel:kader', 'redirectrole:kader']], function () {
+   Route::get('/lengkapi-data/{id}', [MenuController::class, 'formLengkapiData']);
+    Route::post('/lengkapi-data/{id}', [MenuController::class, 'simpanLengkapiData']);
+   
+    Route::get('/kader-home', [MenuController::class, 'kaderHome'])->name('kader-home');
+    Route::get('/tambah-pasien', [MenuController::class, 'tambahpasien'])->name('tambah-pasien');
+    Route::post('/simpan-pasien', [MenuController::class, 'simpanpasien'])->name('simpan-pasien');
+    Route::get('/edit-pasien/{id}', [MenuController::class, 'editpasien'])->name('edit-pasien');
+    Route::post('/update-pasien/{id}', [MenuController::class, 'updatepasien'])->name('update-pasien');
+    Route::get('/delete-pasien/{id}', [MenuController::class, 'destroy'])->name('delete-pasien');
 
 });
-// Route::get('/dashboard', function () {
-//     return view('admin-page.dashboard');
-// });
 
+Route::group(['middleware' => ['auth', 'ceklevel:balita', 'redirectrole:balita']], function () {
+    Route::get('/balita-home', [MenuController::class, 'balitaHome'])->name('balita-home');
+});
+
+Route::group(['middleware' => ['auth', 'ceklevel:remaja', 'redirectrole:remaja']], function () {
+    Route::get('/remaja-home', [MenuController::class, 'remajaHome'])->name('remaja-home');
+});
+
+Route::group(['middleware' => ['auth', 'ceklevel:dewasa', 'redirectrole:dewasa']], function () {
+    Route::get('/dewasa-home', [MenuController::class, 'dewasaHome'])->name('dewasa-home');
+});
+
+Route::group(['middleware' => ['auth', 'ceklevel:ibu hamil', 'redirectrole:ibu hamil']], function () {
+    Route::get('/ibu-hamil-home', [MenuController::class, 'ibuHamilHome'])->name('ibu-hamil-home');
+});
+
+Route::group(['middleware' => ['auth', 'ceklevel:lansia', 'redirectrole:lansia']], function () {
+    Route::get('/lansia-home', [MenuController::class, 'lansiaHome'])->name('lansia-home');
+});
+
+Route::fallback(function () {
+    return response()->view('errors.404', [], 404);
+});

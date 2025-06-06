@@ -15,7 +15,7 @@
             <p>Copyright &copy; <script>document.write(new Date().getFullYear());</script> </p>
         </div>
         <div class="float-end">
-            <p> LPQ Baiturrahmah. All Rights Reserved.</a></p>
+            <p> Posyandu Kalilangse. All Rights Reserved.</a></p>
         </div>
     </div>
 

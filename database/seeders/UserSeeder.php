@@ -12,25 +12,23 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
-            'name' => 'Admin',
-            'level' => 'adminpengelola',
-            'email' => 'admin@gmail.com',
-            'password' => bcrypt('password'),
-        ]);
+        // User::create([
+        //     'name' => 'Admin',
+        //     'level' => 'adminpengelola',
+        //     'email' => 'admin@gmail.com',
+        //     'password' => bcrypt('password'),
+        //     'status' => 1, // tambahkan ini agar bisa login
+
+        // ]);
 
         User::create([
-            'name' => 'Admin',
-            'level' => 'adminpengelola',
-            'email' => 'adminlpq@gmail.com',
-            'password' => bcrypt('adminlpq123'),
+            'name' => 'Admin Posyandu',
+            'level' => 'admin',
+            'email' => 'adminposyandu@gmail.com',
+            'password' => bcrypt('admin123'),
+            'status' => 1,
         ]);
 
-        User::create([
-            'name' => 'coba',
-            'level' => 'adminkonten',
-            'email' => 'coba@gmail.com',
-            'password' => bcrypt('password'),
-        ]);
+       
     }
 }

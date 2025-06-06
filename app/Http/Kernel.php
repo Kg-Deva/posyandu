@@ -47,6 +47,7 @@ class Kernel extends HttpKernel
 
     protected $routeMiddleware = [
         'ceklevel' => \App\Http\Middleware\CekLevel::class,
+        'redirectrole' => \App\Http\Middleware\RedirectRole::class,
     ];
     
     /**

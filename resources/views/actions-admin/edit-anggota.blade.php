@@ -57,10 +57,11 @@
                                     </div>
                                     <div class="mb-3">
                                         <div class="form-group has-icon-left">
-                                            <label for="email-id-vertical">Level</label>
+                                            <label for="level-edit">Level</label>
                                             <div class="position-relative">
-                                                <input type="email" id="email-id-vertical" class="form-control"
-                                                    name="level"  value="{!! $data['level'] !!}" disabled>
+                                                <input type="text" id="level-edit" class="form-control"
+                                                    name="level" value="{{ $data['level'] }}" disabled>
+                                                <input type="hidden" name="level" value="{{ $data['level'] }}">
                                                 <div class="form-control-icon">
                                                     <i class="bi bi-person-badge"></i>
                                                 </div>
@@ -79,18 +80,43 @@
                                             </div>
                                         </div>
                                     </div>
-                                    {{-- <div class="mb-3">
+                                   <div class="mb-3">
+                                <div class="form-group has-icon-left">
+                                    <label for="password-vertical">Password Baru (Opsional)</label>
+                                    <div class="position-relative">
+                                        <input type="password" id="password-vertical" class="form-control"
+                                            name="password" placeholder="Kosongkan jika tidak ingin mengubah">
+                                        <div class="form-control-icon" onclick="togglePasswordVisibility()">
+                                            <i id="password-icon" class="bi bi-eye"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <script>
+                            function togglePasswordVisibility() {
+                                const input = document.getElementById('password-vertical');
+                                const icon = document.getElementById('password-icon');
+                                if (input.type === "password") {
+                                    input.type = "text";
+                                    icon.classList.remove('bi-eye');
+                                    icon.classList.add('bi-eye-slash');
+                                } else {
+                                    input.type = "password";
+                                    icon.classList.remove('bi-eye-slash');
+                                    icon.classList.add('bi-eye');
+                                }
+                            }
+                            </script>
+                                    <div class="mb-3">
                                         <div class="form-group has-icon-left">
-                                            <label for="password-vertical">Password</label>
-                                            <div class="position-relative">
-                                                <input type="password" id="password-vertical" class="form-control"
-                                                    name="password" value="{!! $data['password'] !!}" disabled>
-                                                <div class="form-control-icon" onclick="togglePasswordVisibility()">
-                                                    <i id="password-icon" class="bi bi-eye"></i>
-                                                </div>
+                                            <label>Status</label>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="status-switch" name="status"
+                                                    {{ $data['status'] == 1 ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="status-switch">Aktif</label>
                                             </div>
                                         </div>
-                                    </div> --}}
+                                    </div>
                                     <div class="d-flex flex-column mt-4">
                                         <button type="submit" class="btn btn-primary w-100 mb-2">Submit</button>
                                         <a href="/dashboard" class="btn btn-secondary w-100">Kembali</a>

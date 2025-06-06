@@ -10,7 +10,7 @@
     <meta name="author" content="">
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('landing-page/img/logoo.png') }}">
-    <title>Login LPQ Baiturrahmah</title>
+    <title>Login Posyandu</title>
     <!-- Custom CSS -->
     <link href="{{ asset('login/dist/css/style.min.css') }}" rel="stylesheet">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -52,6 +52,15 @@
             padding-right: 40px;
             /* Menambah ruang untuk tombol */
         }
+/* 
+        .modal-bg-img {
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100%;
+            width: 100%;
+            height: 100%;
+        } */
     </style>
 </head>
 
@@ -72,7 +81,7 @@
         <!-- ============================================================== -->
         <!-- Login box.scss -->
         <!-- ============================================================== -->
-        
+
         <div class="auth-wrapper d-flex no-block justify-content-center align-items-center position-relative"
             style="background:url('{{ asset('landing-page/img/bgdasar.jpeg') }}') no-repeat center center;">
             {{-- {{ asset('login/assets/images/big/auth-bg.jpg') }} --}}
@@ -80,19 +89,26 @@
                 <div class="col-lg-7 col-md-5 modal-bg-img"
                     style="background-image: url('{{ asset('landing-page/img/bg.jpeg') }}');">
                 </div>
-               
+
                 <div class="col-lg-5 col-md-7 bg-white">
                     <div class="p-3">
                         {{-- <div class="text-center">
                             <img src="{{ asset('login/assets/images/big/icon.png') }}" alt="wrapkit">
                         </div> --}}
-              
+
+                        @if(isset($roleChanged) && $roleChanged)
+                            <div class="alert alert-warning">
+                                Sesi anda telah berubah, silakan login ulang.
+                            </div>
+                        @endif
+
                         @if(session('error'))
-                        <div class="alert alert-danger">{{ session('error') }}</div>
-                    @endif
+                            <div class="alert alert-danger">{{ session('error') }}</div>
+                        @endif
                         <h2 class="mt-3 text-center">Login</h2>
                         <p class="text-center">Masukan Email dan Password</p>
-                        <form id="formAuthentication" method="GET" action="{{ route('postlogin') }}">
+                        <form id="formAuthentication" method="POST" action="{{ route('postlogin') }}">
+                            @csrf
                             <div class="row">
                                 <div class="col-lg-12">
                                     <div class="form-group">
@@ -114,13 +130,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                {{-- <div class="col-lg-12">
-                                    <div class="form-group">
-                                        <label class="text-dark" for="password">Password</label>
-                                        <input class="form-control" id="password" type="password" name="password"
-                                            required placeholder="Masukan Password">
-                                    </div>
-                                </div> --}}
+                              
                                 <div class="col-lg-12 text-center">
                                     <button type="submit" class="btn btn-block btn-dark">Login</button>
                                 </div>
