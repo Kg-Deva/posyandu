@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<title>Dashboard</title>
+@include('admin-layouts.header')
+
+<body>
+    <div id="app">
+        <div id="sidebar" class="active">
+            <div class="sidebar-wrapper active">
+                <div class="sidebar-header position-relative">
+                    <div class="d-flex justify-content-between align-items-center">
+                        @include('admin-layouts.icon')
+
+                        <div class="sidebar-toggler  x">
+                            <a href="#" class="sidebar-hide d-xl-none d-block"><i
+                                    class="bi bi-x bi-middle"></i></a>
+                        </div>
+                    </div>
+                </div>
+                @include('admin-layouts.navbar')
+            </div>
+        </div>
+        <div id="main">
+            <header class="mb-3">
+                <a href="#" class="burger-btn d-block d-xl-none">
+                    <i class="bi bi-justify fs-3"></i>
+                </a>
+            </header>
+            @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+        
+            <div class="page-heading">
+                <h3>Dashboard</h3>
+                <h5 class="text-muted">
+                    {{ Auth::user()->name ?? 'Nama Tidak Tersedia' }}, 
+                    <span class="fw-bold">{{ Auth::user()->level ?? 'Level Tidak Tersedia' }}</span>
+                </h5>
+            </div>
+            <div class="page-content">
+                <section class="row">
+                    {{-- <div class="col-12 col-lg-9"> --}}
+                    <div class="col-lg-16">
+                        <div class="row">
+                            <div class="col-6 col-lg-3 col-md-6">
+                                <div class="card">
+                                    <div class="card-body px-4 py-4-5">
+                                        <div class="row">
+                                            <div class="col-md-4 d-flex justify-content-start">
+                                                <div class="stats-icon purple mb-2">
+                                                    <i class="iconly-boldPaper"></i> <!-- Icon Berita -->
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <h6 class="text-muted font-semibold">Berita</h6>
+                                                <h6 class="font-extrabold mb-0">{{ $beritaCount }}</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="col-6 col-lg-3 col-md-6">
+                                <div class="card">
+                                    <div class="card-body px-4 py-4-5">
+                                        <div class="row">
+                                            <div class="col-md-4 d-flex justify-content-start">
+                                                <div class="stats-icon blue mb-2">
+                                                    <i class="iconly-boldCalendar"></i> <!-- Icon Agenda -->
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <h6 class="text-muted font-semibold">Agenda</h6>
+                                                <h6 class="font-extrabold mb-0">{{ $agendaCount }}</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="col-6 col-lg-3 col-md-6">
+                                <div class="card">
+                                    <div class="card-body px-4 py-4-5">
+                                        <div class="row">
+                                            <div class="col-md-4 d-flex justify-content-start">
+                                                <div class="stats-icon green mb-2">
+                                                    <i class="iconly-boldImage"></i> <!-- Icon Gallery -->
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <h6 class="text-muted font-semibold">Galeri</h6>
+                                                <h6 class="font-extrabold mb-0">{{ $galleryCount }}</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="col-6 col-lg-3 col-md-6">
+                                <div class="card">
+                                    <div class="card-body px-4 py-4-5">
+                                        <div class="row">
+                                            <div class="col-md-4 d-flex justify-content-start">
+                                                <div class="stats-icon red mb-2">
+                                                     <i class="iconly-boldChat"></i> <!-- Icon Admin -->
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <h6 class="text-muted font-semibold">Kritik & Saran</h6>
+                                                <h6 class="font-extrabold mb-0">{{ $kritikCount }}</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    
+                        
+                    {{-- @if (auth()->user()->level == 'adminpengelola')     --}}
+                        <!-- Hoverable rows start -->
+                        <section class="section">
+                            <div class="row" id="table-hover-row">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h4 class="card-title">Daftar Admin</h4>
+                                            <input type="text" id="search-anggota" class="form-control mt-2" placeholder="Cari nama/email anggota...">
+                                        </div>
+                                        <div class="card-body">
+                                            <p>
+                                                <a class="dropdown-item text-success" href="{{ url('tambah-pasien') }}">
+                                                    <i data-feather="plus"></i> Tambah
+                                                </a>
+                                            </p>
+                                            <!-- table hover -->
+                                            <div class="table-responsive">
+                                                <table class="table table-hover mb-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>No</th>
+                                                            <th>Nama</th>
+                                                            <th>Email</th>
+                                                            <th>Level</th>
+                                                            <th>Status</th>
+                                                            <th>Aksi</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="anggota-table-body">
+                                                        @foreach($data as $item)
+                                                            @if($item->id != auth()->user()->id)
+                                                            <tr>
+                                                                {{-- <td>{{ $no++ }}</td> --}}
+                                                                <td>{{ ($data->currentPage() - 1) * $data->perPage() + $loop->iteration }}</td>
+                                                                <td class="text-bold-500">{{ $item->name }}</td>
+                                                                <td>{{ $item->email }}</td>
+                                                                <td class="text-bold-500">{{ $item->level }}</td>
+                                                                <td>
+                                                                    @if($item->status)
+                                                                        <span class="badge bg-success">Aktif</span>
+                                                                    @else
+                                                                        <span class="badge bg-danger">Tidak Aktif</span>
+                                                                    @endif
+                                                                </td>
+                                                                <td>
+                                                                    @if($item->level != 'admin' && $item->level != 'kader')
+                                                                    <div class="d-flex gap-2">
+                                                                        <a class="btn btn-sm btn-primary" href="{{ url('edit-pasien', $item->id) }}">
+                                                                            <i data-feather="edit"></i> Edit
+                                                                        </a>
+                                                                        <a class="btn btn-sm btn-danger" href="{{ url('delete-pasien', $item->id) }}" onclick="confirmation(event)">
+                                                                            <i data-feather="trash"></i> Delete
+                                                                        </a>
+                                                                    </div>
+                                                                    <td>
+                                                                    <button class="btn btn-sm btn-warning lengkapi-data-btn" data-id="{{ $item->id }}">
+                                                                        <i data-feather="user-check"></i> Lengkapi Data
+                                                                    </button>
+                                                                    </td>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                            @endif
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                                <div class="mt-3">
+                                                    {{ $data->links('pagination::bootstrap-4') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <!-- Hoverable rows end -->
+                        {{-- @endif   --}}
+
+                    </div>
+
+                </section>
+            </div>
+
+            @include('admin-layouts.footer')
+        </div>
+    </div>
+    @include('admin-layouts.js')
+
+    <script>
+    // Simpan user id ke JS variable
+    const currentUserId = {{ auth()->user()->id }};
+</script>
+@verbatim
+<script>
+document.getElementById('search-anggota').addEventListener('keyup', function() {
+    let q = this.value.toLowerCase();
+    let rows = document.querySelectorAll('#anggota-table-body tr');
+    rows.forEach(row => {
+        let nama = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+        let email = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+        if (nama.includes(q) || email.includes(q)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+</script>
+@endverbatim
+
+<!-- Modal Lengkapi Data -->
+<div class="modal fade" id="lengkapiDataModal" tabindex="-1" aria-labelledby="lengkapiDataLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" id="modal-lengkapi-data-content">
+      <!-- Form akan dimuat via AJAX -->
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.lengkapi-data-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var userId = this.getAttribute('data-id');
+            fetch('/lengkapi-data/' + userId)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('modal-lengkapi-data-content').innerHTML = html;
+                    var modal = new bootstrap.Modal(document.getElementById('lengkapiDataModal'));
+                    modal.show();
+                });
+        });
+    });
+});
+</script>
+
+<script>
+function hitungUmur(tanggal) {
+    if (!tanggal) return '';
+    const today = new Date();
+    const birthDate = new Date(tanggal);
+    let umur = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        umur--;
+    }
+    if (umur < 0 || isNaN(umur)) return '';
+    return umur + ' tahun';
+}
+
+function updateUmurField() {
+    const tgl = document.getElementById('tanggal_lahir');
+    const umur = document.getElementById('umur');
+    if (tgl && umur) {
+        function update() {
+            umur.value = hitungUmur(tgl.value);
+        }
+        tgl.removeEventListener('change', update); // prevent double
+        tgl.addEventListener('change', update);
+        update();
+    }
+}
+
+// Lebih efektif: trigger saat modal Bootstrap benar-benar tampil
+document.addEventListener('shown.bs.modal', function(e) {
+    if (e.target.id === 'lengkapiDataModal') { // pastikan id modal benar
+        updateUmurField();
+    }
+});
+
+// Fallback jika modal bukan Bootstrap atau script termuat langsung
+setTimeout(updateUmurField, 300);
+</script>
+{{-- //modalllll --}}
+<script>
+function hitungUmur(tanggal) {
+    if (!tanggal) return '';
+    const today = new Date();
+    const birthDate = new Date(tanggal);
+
+    // Buat tanggal tanpa jam
+    const tglToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const tglLahir = new Date(birthDate.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+
+    let tahun = tglToday.getFullYear() - tglLahir.getFullYear();
+    let bulan = tglToday.getMonth() - tglLahir.getMonth();
+    let hari = tglToday.getDate() - tglLahir.getDate();
+
+    if (hari < 0) {
+        bulan--;
+        // Ambil jumlah hari di bulan sebelumnya
+        let prevMonth = new Date(tglToday.getFullYear(), tglToday.getMonth(), 0);
+        hari += prevMonth.getDate();
+    }
+    if (bulan < 0) {
+        tahun--;
+        bulan += 12;
+    }
+
+    if (tahun >= 1) {
+        return tahun + ' tahun';
+    } else if (bulan >= 1) {
+        return bulan + ' bulan ' + hari + ' hari';
+    } else {
+        // Jika kurang dari 1 bulan, tampilkan hari (minimal 1 hari)
+        const diffHari = Math.round((tglToday - tglLahir) / (1000 * 60 * 60 * 24));
+        return (diffHari < 1 ? 1 : diffHari) + ' hari';
+    }
+}
+
+function updateUmurField() {
+    const tgl = document.getElementById('tanggal_lahir');
+    const umur = document.getElementById('umur');
+    if (tgl && umur) {
+        function update() {
+            umur.value = hitungUmur(tgl.value);
+        }
+        tgl.removeEventListener('change', update);
+        tgl.addEventListener('change', update);
+        update();
+    }
+}
+
+document.addEventListener('shown.bs.modal', function(e) {
+    if (e.target.id === 'lengkapiDataModal') {
+        updateUmurField();
+    }
+});
+</script>
+</body>
+
+</html>
