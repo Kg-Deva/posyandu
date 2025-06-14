@@ -30,7 +30,7 @@
             <div class="section d-flex justify-content-center align-items-center flex-grow-1">
 
                 <div class="page-heading">
-                    <h3>Tambah Admin Konten</h3>
+                    <h3>Tambah Pasien</h3>
                 </div>
             </div>
           
@@ -43,19 +43,28 @@
                                 <form action="{{ route('simpan-pasien') }}" method="POST">
                                     @csrf
                                 <div class="card-body">
-
+                                @if ($errors->any())
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <strong>Terjadi kesalahan:</strong>
+                                        <ul class="mb-0 mt-1 ps-3">
+                                            @foreach ($errors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                @endif
                                     <div class="mb-3">
                                         <div class="form-group has-icon-left">
                                             <label for="first-name-vertical">Nama</label>
                                             <div class="position-relative">
                                                 <input type="text" id="first-name-vertical" class="form-control"
-                                                    name="name" placeholder="Masukan Nama Lengkap">
+                                                    name="name" placeholder="Masukan Nama">
                                                 <div class="form-control-icon">
                                                     <i class="bi bi-person"></i>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
                                     <div class="mb-3">
                                         <div class="form-group has-icon-left">
                                             <label for="level-select">Level</label>
@@ -80,6 +89,20 @@
                                             <div class="form-check form-switch">
                                                 <input class="form-check-input" type="checkbox" id="status-switch" name="status" checked>
                                                 <label class="form-check-label" for="status-switch">Aktif</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="form-group has-icon-left">
+                                            <label>Status Warga</label>
+                                            <div class="position-relative">
+                                                <select name="type" class="form-control" required>
+                                                    <option value="warga">Warga</option>
+                                                    <option value="bukan warga">Bukan Warga</option>
+                                                </select>
+                                                <div class="form-control-icon">
+                                                    <i class="bi bi-people"></i>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -123,7 +146,7 @@
         </div>
     </div>
     @include('admin-layouts.js')
-    <script>
+    {{-- <script>
 document.getElementById('level-select').addEventListener('change', function() {
     const statusGroup = document.getElementById('status-group');
     if (this.value === 'admin') {
@@ -132,7 +155,9 @@ document.getElementById('level-select').addEventListener('change', function() {
         statusGroup.style.display = 'none';
     }
 });
-</script>
+</script> --}}
+
+
 
 </body>
 

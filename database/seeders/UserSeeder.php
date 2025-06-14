@@ -26,7 +26,8 @@ class UserSeeder extends Seeder
             'level' => 'admin',
             'email' => 'adminposyandu@gmail.com',
             'password' => bcrypt('admin123'),
-            'status' => 1,
+            'status' => 1, // <-- ini status aktif
+            'type' => 'warga', // <-- tambahkan ini
         ]);
 
        

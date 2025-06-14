@@ -1,22 +1,11 @@
+{{-- filepath: resources/views/admin-layouts/footer.blade.php --}}
 <footer>
-    {{-- <div class="footer clearfix mb-0 text-muted">
-        <div class="float-start">
-            <p>2021 &copy; Mazer</p>
-        </div>
-        <div class="float-end">
-            <p>Crafted with <span class="text-danger"><i class="bi bi-heart"></i></span> by <a
-                    href="https://saugi.me">Saugi</a></p>
-        </div>
-    </div> --}}
-
-
-    <div class="footer clearfix mb-0 text-muted">
-        <div class="float-start">
-            <p>Copyright &copy; <script>document.write(new Date().getFullYear());</script> </p>
-        </div>
-        <div class="float-end">
-            <p> Posyandu Kalilangse. All Rights Reserved.</a></p>
-        </div>
+    <div class="footer mb-0 text-muted text-center py-2" style="width:100%;">
+        <span>
+            &copy; <span id="tahun-footer"></span> Posyandu Gajahmungkur. All Rights Reserved.
+        </span>
     </div>
-
+    <script>
+        document.getElementById('tahun-footer').textContent = new Date().getFullYear();
+    </script>
 </footer>

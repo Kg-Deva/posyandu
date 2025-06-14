@@ -2,43 +2,62 @@
     <ul class="menu">
         <li class="sidebar-title">Menu</li>
 
-        <li class="sidebar-item {{ Request::is('dashboard') ? 'active' : '' }}">
-            <a href="/dashboard" class='sidebar-link'>
-                <i class="bi bi-grid-fill"></i>
-                <span>Dashboard</span>
-            </a>
-        </li>
+        {{-- Menu khusus admin --}}
+        @if(auth()->check() && auth()->user()->level == 'admin')
+            <li class="sidebar-item {{ Request::is('dashboard') ? 'active' : '' }}">
+                <a href="/dashboard" class='sidebar-link'>
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            
+            {{-- <li class="sidebar-item {{ Request::is('gallery-item') ? 'active' : '' }}">
+                <a href="/gallery-item" class='sidebar-link'>
+                    <i class="bi bi-images"></i>
+                    <span>Galeri</span>
+                </a>
+            </li> --}}
+            {{-- Tambahkan menu admin lain di sini --}}
+        @endif
 
-        <li class="sidebar-item {{ Request::is('beranda') ? 'active' : '' }}">
-            <a href="/beranda" class='sidebar-link'>
-                <i class="bi bi-house"></i>
-                <span>Beranda</span>
-            </a>
-        </li>
+        {{-- Menu khusus kader --}}
+        @if(auth()->check() && auth()->user()->level == 'kader')
+            <li class="sidebar-item {{ Request::is('kader-home') ? 'active' : '' }}">
+                <a href="/kader-home" class='sidebar-link'>
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="sidebar-item has-sub
+                {{ Request::is('input-pemeriksaan') ||
+                   Request::is('data-pemeriksaan') ||
+                   Request::is('profil') ||
+                   Request::is('admin/struktur-organisasi')
+                   ? 'active' : '' }}">
+                <a href="#" class='sidebar-link'>
+                    <i class="bi bi-stack"></i>
+                    <span>Pemeriksaan</span>
+                </a>
+                <ul class="submenu">
+                    <li class="submenu-item {{ Request::is('input-pemeriksaan') ? 'active' : '' }}">
+                        <a href="/input-pemeriksaan">Input Pemeriksaan</a>
+                    </li>
+                    <li class="submenu-item {{ Request::is('data-pemeriksaan') ? 'active' : '' }}">
+                        <a href="/data-pemeriksaan">Data Pemeriksaan</a>
+                    </li>
+                </ul>
+            </li>
+            {{-- <li class="sidebar-item {{ Request::is('gallery-item') ? 'active' : '' }}">
+                <a href="/gallery-item" class='sidebar-link'>
+                    <i class="bi bi-images"></i>
+                    <span>Galeri</span>
+                </a>
+            </li> --}}
+            {{-- Tambahkan menu kader lain di sini --}}
+        @endif
 
-        <li class="sidebar-item has-sub {{ Request::is('profil') || Request::is('admin/struktur-organisasi') ? 'active' : '' }}">
-            <a href="#" class='sidebar-link'>
-                <i class="bi bi-stack"></i>
-                <span>Profil</span>
-            </a>
-            <ul class="submenu">
-                <li class="submenu-item {{ Request::is('profil') ? 'active' : '' }}">
-                    <a href="/profil">LPQ Baiturrahmah</a>
-                </li>
-                <li class="submenu-item {{ Request::is('admin/struktur-organisasi') ? 'active' : '' }}">
-                    <a href="/admin/struktur-organisasi">Struktur Organisasi</a>
-                </li>
-            </ul>
-        </li>
-
-        <li class="sidebar-item {{ Request::is('gallery-item') ? 'active' : '' }}">
-            <a href="/gallery-item" class='sidebar-link'>
-                <i class="bi bi-images"></i>
-                <span>Galeri</span>
-            </a>
-        </li>
-
-        <li class="sidebar-item has-sub {{ Request::is('admin/berita') || Request::is('admin/agenda') ? 'active' : '' }}">
+        {{-- Menu umum (bisa diakses semua role) --}}
+        {{-- <li class="sidebar-item {{ Request::is('admin/berita') || Request::is('admin/agenda') ? 'active' : '' }}">
             <a href="#" class='sidebar-link'>
                 <i class="bi bi-info-circle"></i>
                 <span>Informasi</span>
@@ -52,7 +71,6 @@
                 </li>
             </ul>
         </li>
-
         <li class="sidebar-item has-sub {{ Request::is('program') || Request::is('ekstra') ? 'active' : '' }}">
             <a href="#" class='sidebar-link'>
                 <i class="bi bi-book-half"></i>
@@ -67,20 +85,18 @@
                 </li>
             </ul>
         </li>
-
         <li class="sidebar-item {{ Request::is('admin-kritik') ? 'active' : '' }}">
             <a href="/admin-kritik" class='sidebar-link'>
                 <i class="bi bi-chat-dots"></i>
                 <span>Kritik & Saran</span>
             </a>
         </li>
-
         <li class="sidebar-item {{ Request::is('kontak') ? 'active' : '' }}">
             <a href="/kontak" class='sidebar-link'>
                 <i class="bi bi-person-rolodex"></i>
-                <span>kontak</span>
+                <span>Kontak</span>
             </a>
-        </li>
+        </li> --}}
 
         <li class="sidebar-title">Logout</li>
         <li class="sidebar-item">
@@ -89,7 +105,6 @@
                 <span>Logout</span>
             </a>
         </li>
-
         <form id="logoutForm" action="{{ route('logout') }}" method="POST" style="display: none;">
             @csrf
         </form>

@@ -42,77 +42,124 @@
                     {{-- <div class="col-12 col-lg-9"> --}}
                     <div class="col-lg-16">
                         <div class="row">
-                            <div class="col-6 col-lg-3 col-md-6">
-                                <div class="card">
-                                    <div class="card-body px-4 py-4-5">
-                                        <div class="row">
-                                            <div class="col-md-4 d-flex justify-content-start">
-                                                <div class="stats-icon purple mb-2">
-                                                    <i class="iconly-boldPaper"></i> <!-- Icon Berita -->
+                            {{-- <div class="row mb-4"> --}}
+                                <!-- 1. BALITA -->
+                                <div class="col-6 col-lg-4 col-md-4">
+                                    <div class="card">
+                                        <div class="card-body px-4 py-4-5">
+                                            <div class="row">
+                                                <div class="col-md-4 d-flex justify-content-start">
+                                                    <div class="stats-icon blue mb-2">
+                                                        <i class="iconly-boldProfile"></i> <!-- Icon Balita -->
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-md-8">
-                                                <h6 class="text-muted font-semibold">Berita</h6>
-                                                <h6 class="font-extrabold mb-0">{{ $beritaCount }}</h6>
+                                                <div class="col-md-8">
+                                                    <h6 class="text-muted font-semibold">Balita</h6>
+                                                    <h6 class="font-extrabold mb-0">{{ $balitaCount ?? 0 }}</h6>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        
-                            <div class="col-6 col-lg-3 col-md-6">
-                                <div class="card">
-                                    <div class="card-body px-4 py-4-5">
-                                        <div class="row">
-                                            <div class="col-md-4 d-flex justify-content-start">
-                                                <div class="stats-icon blue mb-2">
-                                                    <i class="iconly-boldCalendar"></i> <!-- Icon Agenda -->
+
+                                <!-- 2. REMAJA -->
+                                <div class="col-6 col-lg-4 col-md-4">
+                                    <div class="card">
+                                        <div class="card-body px-4 py-4-5">
+                                            <div class="row">
+                                                <div class="col-md-4 d-flex justify-content-start">
+                                                    <div class="stats-icon purple mb-2">
+                                                        <i class="iconly-boldUser"></i> <!-- Icon Remaja -->
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-md-8">
-                                                <h6 class="text-muted font-semibold">Agenda</h6>
-                                                <h6 class="font-extrabold mb-0">{{ $agendaCount }}</h6>
+                                                <div class="col-md-8">
+                                                    <h6 class="text-muted font-semibold">Remaja</h6>
+                                                    <h6 class="font-extrabold mb-0">{{ $remajaCount ?? 0 }}</h6>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        
-                            <div class="col-6 col-lg-3 col-md-6">
-                                <div class="card">
-                                    <div class="card-body px-4 py-4-5">
-                                        <div class="row">
-                                            <div class="col-md-4 d-flex justify-content-start">
-                                                <div class="stats-icon green mb-2">
-                                                    <i class="iconly-boldImage"></i> <!-- Icon Gallery -->
+
+                                <!-- 3. DEWASA -->
+                                <div class="col-6 col-lg-4 col-md-4">
+                                    <div class="card">
+                                        <div class="card-body px-4 py-4-5">
+                                            <div class="row">
+                                                <div class="col-md-4 d-flex justify-content-start">
+                                                    <div class="stats-icon green mb-2">
+                                                        <i class="iconly-boldWork"></i> <!-- Icon Dewasa -->
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-md-8">
-                                                <h6 class="text-muted font-semibold">Galeri</h6>
-                                                <h6 class="font-extrabold mb-0">{{ $galleryCount }}</h6>
+                                                <div class="col-md-8">
+                                                    <h6 class="text-muted font-semibold">Dewasa</h6>
+                                                    <h6 class="font-extrabold mb-0">{{ $dewasaCount ?? 0 }}</h6>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        
-                            <div class="col-6 col-lg-3 col-md-6">
-                                <div class="card">
-                                    <div class="card-body px-4 py-4-5">
-                                        <div class="row">
-                                            <div class="col-md-4 d-flex justify-content-start">
-                                                <div class="stats-icon red mb-2">
-                                                     <i class="iconly-boldChat"></i> <!-- Icon Admin -->
+
+
+                                <!-- ROW 2: Kategori pasien posyandu (3 item) -->
+                                {{-- <div class="row mb-4"> --}}
+                                <!-- 4. IBU HAMIL -->
+                                <div class="col-6 col-lg-4 col-md-4">
+                                    <div class="card">
+                                        <div class="card-body px-4 py-4-5">
+                                            <div class="row">
+                                                <div class="col-md-4 d-flex justify-content-start">
+                                                    <div class="stats-icon bg-danger mb-2">
+                                                        <i class="iconly-boldHeart"></i> <!-- Icon Ibu Hamil -->
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-md-8">
-                                                <h6 class="text-muted font-semibold">Kritik & Saran</h6>
-                                                <h6 class="font-extrabold mb-0">{{ $kritikCount }}</h6>
+                                                <div class="col-md-8">
+                                                    <h6 class="text-muted font-semibold">Ibu Hamil</h6>
+                                                    <h6 class="font-extrabold mb-0">{{ $ibuhamilCount ?? 0 }}</h6>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+
+                                <!-- 5. LANSIA -->
+                                <div class="col-6 col-lg-4 col-md-4">
+                                    <div class="card">
+                                        <div class="card-body px-4 py-4-5">
+                                            <div class="row">
+                                                <div class="col-md-4 d-flex justify-content-start">
+                                                    <div class="stats-icon red mb-2">
+                                                        <i class="iconly-boldStar"></i> <!-- Icon Lansia -->
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <h6 class="text-muted font-semibold">Lansia</h6>
+                                                    <h6 class="font-extrabold mb-0">{{ $lansiaCount ?? 0 }}</h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 6. TOTAL PASIEN -->
+                                <div class="col-6 col-lg-4 col-md-4">
+                                    <div class="card">
+                                        <div class="card-body px-4 py-4-5">
+                                            <div class="row">
+                                                <div class="col-md-4 d-flex justify-content-start">
+                                                    <div class="stats-icon bg-primary mb-2">
+                                                        <i class="iconly-boldActivity"></i> <!-- Icon Total -->
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <h6 class="text-muted font-semibold">Total Akun</h6>
+                                                    <h6 class="font-extrabold mb-0">{{ $totalPasien ?? 0 }}</h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {{-- </div> --}}
                         </div>
                         
                     
@@ -124,8 +171,8 @@
                                 <div class="col-12">
                                     <div class="card">
                                         <div class="card-header">
-                                            <h4 class="card-title">Daftar Admin</h4>
-                                            <input type="text" id="search-anggota" class="form-control mt-2" placeholder="Cari nama/email anggota...">
+                                            <h4 class="card-title">Daftar Role Akun / Pasien</h4>
+                                            <input type="text" id="search-anggota" class="form-control mt-2" placeholder="Cari nama/email akun...">
                                         </div>
                                         <div class="card-body">
                                             <p>
@@ -147,12 +194,21 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody id="anggota-table-body">
-                                                        @php $no = 1; @endphp
-                                                        @foreach($data as $item)
-                                                            @if($item->id != auth()->user()->id)
+                                                      @php
+                                                        $no = ($data->currentPage() - 1) * $data->perPage() + 1;
+                                                    @endphp
+                                                    @foreach($data as $item)
+                                                        @if($item->id != auth()->user()->id)
                                                             <tr>
                                                                 <td>{{ $no++ }}</td>
-                                                                <td class="text-bold-500">{{ $item->name }}</td>
+                                                                {{-- <td>{{ ($data->currentPage() - 1) * $data->perPage() + $loop->iteration }}</td> --}}
+                                                                <td class="text-bold-500">
+                                                                        {{ $item->name }}
+                                                                        @if ($item->type == 'bukan warga')
+                                                                            <span class="badge bg-secondary ms-1"
+                                                                                title="Bukan warga">NW</span>
+                                                                        @endif
+                                                                    </td>
                                                                 <td>{{ $item->email }}</td>
                                                                 <td class="text-bold-500">{{ $item->level }}</td>
                                                                 <td>
@@ -179,6 +235,9 @@
                                                         @endforeach
                                                     </tbody>
                                                 </table>
+                                                 <div class="mt-3">
+                                                    {{ $data->links('pagination::bootstrap-4') }}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

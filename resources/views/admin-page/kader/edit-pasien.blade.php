@@ -42,7 +42,17 @@
                                     method="POST" enctype="multipart/form-data">
                                     {{ csrf_field() }}
                                 <div class="card-body">
-
+                                @if ($errors->any())
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <strong>Terjadi kesalahan:</strong>
+                                        <ul class="mb-0 mt-1 ps-3">
+                                            @foreach ($errors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                @endif
                                     <div class="mb-3">
                                         <div class="form-group has-icon-left">
                                             <label for="first-name-vertical">Nama</label>
@@ -59,8 +69,14 @@
                                         <div class="form-group has-icon-left">
                                             <label for="level-edit">Level</label>
                                             <div class="position-relative">
-                                                <input type="text" id="level-edit" class="form-control"
-                                                    name="level" value="{{ $data['level'] }}" disabled>
+                                                <select id="level-edit" name="level" class="form-control" required>
+                                                    <option value="kader" {{ $data->level == 'kader' ? 'selected' : '' }}>Kader</option>
+                                                    <option value="balita" {{ $data->level == 'balita' ? 'selected' : '' }}>Balita</option>
+                                                    <option value="remaja" {{ $data->level == 'remaja' ? 'selected' : '' }}>Remaja</option>
+                                                    <option value="dewasa" {{ $data->level == 'dewasa' ? 'selected' : '' }}>Dewasa</option>
+                                                    <option value="ibu hamil" {{ $data->level == 'ibu hamil' ? 'selected' : '' }}>Ibu Hamil</option>
+                                                    <option value="lansia" {{ $data->level == 'lansia' ? 'selected' : '' }}>Lansia</option>
+                                                </select>
                                                 <div class="form-control-icon">
                                                     <i class="bi bi-person-badge"></i>
                                                 </div>
@@ -72,25 +88,13 @@
                                             <label for="email-id-vertical">Email</label>
                                             <div class="position-relative">
                                                 <input type="email" id="email-id-vertical" class="form-control"
-                                                    name="email" value="{!! $data['email'] !!}">
+                                                    name="email" value="{!! $data['email'] !!}" readonly>
                                                 <div class="form-control-icon">
                                                     <i class="bi bi-envelope"></i>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    {{-- <div class="mb-3">
-                                        <div class="form-group has-icon-left">
-                                            <label for="password-vertical">Password</label>
-                                            <div class="position-relative">
-                                                <input type="password" id="password-vertical" class="form-control"
-                                                    name="password" value="{!! $data['password'] !!}" disabled>
-                                                <div class="form-control-icon" onclick="togglePasswordVisibility()">
-                                                    <i id="password-icon" class="bi bi-eye"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div> --}}
                                     <div class="mb-3">
                                         <div class="form-group has-icon-left">
                                             <label>Status</label>
@@ -101,7 +105,48 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <input type="hidden" name="level" value="{{ $data['level'] }}">
+                                    <div class="mb-3">
+                                        <div class="form-group has-icon-left">
+                                            <label>Status Warga</label>
+                                            <div class="position-relative">
+                                                <select name="type" class="form-control" required>
+                                                    <option value="warga" {{ $data['type'] == 'warga' ? 'selected' : '' }}>Warga</option>
+                                                    <option value="bukan warga" {{ $data['type'] == 'bukan warga' ? 'selected' : '' }}>Bukan Warga</option>
+                                                </select>
+                                                <div class="form-control-icon">
+                                                    <i class="bi bi-people"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="form-group has-icon-left">
+                                            <label for="password-vertical">Password Baru (Opsional)</label>
+                                            <div class="position-relative">
+                                                <input type="password" id="password-vertical" class="form-control"
+                                                    name="password" placeholder="Kosongkan jika tidak ingin mengubah">
+                                                <div class="form-control-icon" onclick="togglePasswordVisibility()">
+                                                    <i id="password-icon" class="bi bi-eye"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <script>
+                                    function togglePasswordVisibility() {
+                                        const input = document.getElementById('password-vertical');
+                                        const icon = document.getElementById('password-icon');
+                                        if (input.type === "password") {
+                                            input.type = "text";
+                                            icon.classList.remove('bi-eye');
+                                            icon.classList.add('bi-eye-slash');
+                                        } else {
+                                            input.type = "password";
+                                            icon.classList.remove('bi-eye-slash');
+                                            icon.classList.add('bi-eye');
+                                        }
+                                    }
+                                    </script>
+                                    {{-- <input type="hidden" name="level" value="{{ $data['level'] }}"> --}}
                                     <div class="d-flex flex-column mt-4">
                                         <button type="submit" class="btn btn-primary w-100 mb-2">Submit</button>
                                         <a href="/kader-home" class="btn btn-secondary w-100">Kembali</a>
