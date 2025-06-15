@@ -413,9 +413,14 @@
             } else if (bulan >= 1) {
                 return bulan + ' bulan ' + hari + ' hari';
             } else {
-                // Jika kurang dari 1 bulan, tampilkan hari (minimal 1 hari)
+                // Jika kurang dari 1 bulan, tampilkan hari
                 const diffHari = Math.round((tglToday - tglLahir) / (1000 * 60 * 60 * 24));
-                return (diffHari < 1 ? 1 : diffHari) + ' hari';
+    
+                if (diffHari === 0) {
+                    return 'Baru lahir (0 hari)';
+                } else {
+                    return diffHari + ' hari';
+                }
             }
         }
 

@@ -18,7 +18,10 @@ use App\Models\Kontak;
 use App\Models\Program;
 use App\Models\Ekstra;
 use App\Models\kritiksaran;
-
+use Illuminate\Support\Facades\Storage;
+use App\Models\PemeriksaanBalita;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -1535,19 +1538,47 @@ class MenuController extends Controller
         return view('admin-page.kader.input-pemeriksaan');
     }
 
+    // public function cariPasien(Request $request)
+    // {
+    //     $q = $request->input('q');
+    //     $user = User::where('nik', $q)->orWhere('nama', 'like', "%$q%")->first();
+
+    //     if ($user) {
+    //         // Render partial blade sesuai role user
+    //         return view('admin-page.pemeriksaan-form-partial', compact('user'))->render();
+    //     } else {
+    //         return response()->json(['error' => 'Data tidak ditemukan'], 404);
+    //     }
+    // }
+
+
     public function cariPasien(Request $request)
     {
         $q = $request->input('q');
         $user = User::where('nik', $q)->orWhere('nama', 'like', "%$q%")->first();
 
         if ($user) {
-            // Render partial blade sesuai role user
-            return view('admin-page.pemeriksaan-form-partial', compact('user'))->render();
+            // ❌ MASALAH: View ini tidak ada!
+            // return view('admin-page.pemeriksaan-form-partial', compact('user'))->render();
+
+            // ✅ FIX: Return view berdasarkan level user
+            if ($user->level === 'balita') {
+                return view('admin-page.pemeriksaan-form.balita', compact('user'))->render();
+            } elseif ($user->level === 'remaja') {
+                return view('admin-page.pemeriksaan-form.remaja', compact('user'))->render();
+            } elseif ($user->level === 'dewasa') {
+                return view('admin-page.pemeriksaan-form.dewasa', compact('user'))->render();
+            } elseif ($user->level === 'ibu hamil') {
+                return view('admin-page.pemeriksaan-form.ibu-hamil', compact('user'))->render();
+            } elseif ($user->level === 'lansia') {
+                return view('admin-page.pemeriksaan-form.lansia', compact('user'))->render();
+            } else {
+                return response()->json(['error' => 'Level user tidak dikenali'], 400);
+            }
         } else {
             return response()->json(['error' => 'Data tidak ditemukan'], 404);
         }
     }
-
 
 
     public function simpanPemeriksaan(Request $request, $id)
@@ -1555,5 +1586,169 @@ class MenuController extends Controller
         // Validasi dan simpan data pemeriksaan sesuai kebutuhan
         // Misal: Pemeriksaan::create([...]);
         return back()->with('success', 'Data pemeriksaan berhasil disimpan!');
+    }
+
+    //input pemeriksaan balita
+
+
+    // Tambah method ini di MenuController
+
+
+
+
+
+
+
+
+
+
+
+    // public function simpanPemeriksaanBalita(Request $request)
+    // {
+    //     try {
+    //         Log::info('🚀 SIMPAN PEMERIKSAAN BALITA');
+
+    //         $validated = $request->validate([
+    //             'nik' => 'required|string',
+    //             'bb' => 'required|numeric|min:0.5|max:50',
+    //             'tb' => 'required|numeric|min:30|max:150',
+    //             'umur' => 'required|integer|min:0|max:60',
+    //             'tanggal_pemeriksaan' => 'required|date',
+    //             'pemeriksa' => 'required|string'
+    //         ], [
+    //             // ✅ CUSTOM ERROR MESSAGES
+    //             'bb.min' => 'Berat badan minimal 0.5 kg',
+    //             'bb.max' => 'Berat badan maksimal 50 kg',
+    //             'tb.min' => 'Tinggi badan minimal 30 cm',
+    //             'tb.max' => 'Tinggi badan maksimal 150 cm',
+    //             'umur.min' => 'Umur minimal 0 bulan',
+    //             'umur.max' => 'Umur maksimal 60 bulan',
+    //             'bb.numeric' => 'Berat badan harus berupa angka',
+    //             'tb.numeric' => 'Tinggi badan harus berupa angka',
+    //             'umur.integer' => 'Umur harus berupa angka bulat'
+    //         ]);
+
+    //         $pemeriksaan = PemeriksaanBalita::create([
+    //             'nik' => $validated['nik'],
+    //             'bb' => $validated['bb'],
+    //             'tb' => $validated['tb'],
+    //             'umur' => $validated['umur'],
+    //             'tanggal_pemeriksaan' => $validated['tanggal_pemeriksaan'],
+    //             'kesimpulan_bbu' => $request->input('kesimpulan_bbu', 'Belum dihitung'),
+    //             'kesimpulan_tbuu' => $request->input('kesimpulan_tbuu', 'Belum dihitung'),
+    //             'kesimpulan_bbtb' => $request->input('kesimpulan_bbtb', 'Belum dihitung'),
+    //             'pemeriksa' => $validated['pemeriksa']
+    //         ]);
+
+    //         Log::info('✅ SUCCESS - ID: ' . $pemeriksaan->id);
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Data pemeriksaan balita berhasil disimpan!',
+    //             'id' => $pemeriksaan->id
+    //         ]);
+    //     } catch (\Illuminate\Validation\ValidationException $e) {
+    //         Log::error('💥 VALIDATION ERROR: ' . json_encode($e->errors()));
+
+    //         // ✅ GET FIRST ERROR MESSAGE
+    //         $firstError = collect($e->errors())->flatten()->first();
+
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => $firstError  // ✅ SPECIFIC ERROR MESSAGE
+    //         ], 422);
+    //     } catch (\Exception $e) {
+    //         Log::error('💥 ERROR: ' . $e->getMessage());
+
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Gagal menyimpan data'
+    //         ], 500);
+    //     }
+    // }
+    // ✅ GANTI METHOD simpanPemeriksaanBalita JADI INI:
+    public function simpanPemeriksaanBalita(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'nik' => 'required|string|max:16',
+                'tanggal_pemeriksaan' => 'required|date',
+                'bb' => 'required|numeric|min:0|max:100',
+                'tb' => 'required|numeric|min:0|max:200',
+                'umur' => 'required|integer|min:0|max:60',
+                'kesimpulan_bbu' => 'nullable|string',
+                'kesimpulan_tbuu' => 'nullable|string',
+                'kesimpulan_bbtb' => 'nullable|string',
+                'status_perubahan_bb' => 'nullable|string|max:1000',
+                'pemeriksa' => 'nullable|string'
+            ]);
+
+            // ✅ CREATE DENGAN SEMUA FIELD TERMASUK status_perubahan_bb
+            $pemeriksaan = PemeriksaanBalita::create($validated);
+
+            $user = User::where('nik', $validated['nik'])->first();
+            $namaBalita = $user ? $user->nama : 'NIK: ' . $validated['nik'];
+
+            // ✅ LOG UNTUK DEBUG
+            Log::info('📊 PEMERIKSAAN BALITA SAVED', [
+                'nik' => $validated['nik'],
+                'nama' => $namaBalita,
+                'bb' => $validated['bb'],
+                'status_perubahan_bb' => $validated['status_perubahan_bb'],
+                'id' => $pemeriksaan->id
+            ]);
+            // ✅ GANTI BARIS 1689-1691 JADI INI:
+            return redirect('/input-pemeriksaan')
+                ->with('success', 'Data berhasil disimpan')
+                ->with('message', 'Pemeriksaan ' . $namaBalita . ' telah dicatat');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect('/input-pemeriksaan')
+                // ->with('error', 'Gagal Menyimpan, Data tidak valid: ' . implode(', ', $e->validator->errors()->all()));'
+                ->with('error', 'Gagal Menyimpan data, data tidak valid, silakan periksa kembali input Anda');
+        } catch (\Exception $e) {
+            return redirect('/input-pemeriksaan')
+                ->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
+        }
+    }
+
+    public function cekBBTerakhir(Request $request)
+    {
+        $nik = $request->input('nik');
+
+        $bbTerakhir = PemeriksaanBalita::where('nik', $nik)
+            ->orderBy('tanggal_pemeriksaan', 'desc')
+            ->value('bb');
+
+        return response()->json([
+            'bb_terakhir' => $bbTerakhir
+        ]);
+    }
+
+
+
+
+
+
+    public function getLastExamination($nik)
+    {
+        $currentDate = request()->get('current_date', date('Y-m-d'));
+
+        // ✅ RULES BARU - CARI DATA BASELINE (YANG PALING LAMA SEBELUM HARI INI)
+        $baselineExam = DB::table('pemeriksaan_balita')
+            ->where('nik', $nik)
+            ->where('tanggal_pemeriksaan', '<', $currentDate) // ✅ SEBELUM TANGGAL INPUT SEKARANG
+            ->orderBy('tanggal_pemeriksaan', 'desc') // ✅ AMBIL YANG TERBARU DARI DATA LAMA
+            ->first();
+
+        // ✅ LOG UNTUK DEBUG RULES BARU
+        Log::info('📊 PERBANDINGAN DATA RULES', [
+            'nik' => $nik,
+            'tanggal_input_sekarang' => $currentDate,
+            'data_baseline_ditemukan' => $baselineExam ? $baselineExam->tanggal_pemeriksaan : 'tidak ada',
+            'bb_baseline' => $baselineExam ? $baselineExam->bb : 'tidak ada',
+            'logic' => 'Data baseline (' . ($baselineExam ? $baselineExam->tanggal_pemeriksaan : 'none') . ') akan dibandingkan DENGAN data input hari ini (' . $currentDate . ')'
+        ]);
+
+        return response()->json($baselineExam);
     }
 }

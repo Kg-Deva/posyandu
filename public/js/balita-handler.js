@@ -1,8 +1,7 @@
-// public/js/balita-handler.js
 class BalitaHandler {
   constructor() {
     this.initializeZScoreData();
-    this.initializeEventListeners();
+    this.lastBBData = null; // Store last BB data
   }
 
   initializeZScoreData() {
@@ -1798,48 +1797,179 @@ class BalitaHandler {
   }
 
   initializeEventListeners() {
-    console.log('=== INISIALISASI FORM BALITA DIMULAI ===');
+    console.log('=== BALITA HANDLER INITIALIZATION ===');
 
-    // Cek apakah form balita ada di halaman
-    if (document.getElementById('bb')) {
-      console.log('Form balita DITEMUKAN!');
+    const formBalita = document.getElementById('form-balita');
 
-      document.querySelectorAll('#bb, #tb, #umur').forEach((input) => {
-        console.log('Menambah event listener ke:', input.id);
-
-        input.addEventListener('input', () => {
-          this.calculateAndUpdateResults();
-        });
-      });
-    } else {
-      console.log('Form balita TIDAK DITEMUKAN!');
+    if (!formBalita) {
+      console.log('❌ Form balita not found');
+      return;
     }
 
-    console.log('=== INISIALISASI FORM BALITA SELESAI ===');
+    console.log('✅ Form balita found, setting up handlers...');
+
+    // ✅ GET BASELINE EXAMINATION DATA
+    this.fetchLastExaminationData();
+
+    // ✅ 1. CALCULATION EVENT LISTENERS
+    document.querySelectorAll('#bb, #tb, #umur').forEach((input) => {
+      console.log('📊 Adding calculation listener to:', input.id);
+      input.addEventListener('input', () => {
+        this.calculateAndUpdateResults();
+      });
+    });
+
+    // ✅ 2. TANGGAL CHANGE LISTENER - REFETCH BASELINE
+    const tanggalInput = document.getElementById('tanggal_pemeriksaan');
+    if (tanggalInput) {
+      tanggalInput.addEventListener('change', () => {
+        console.log('📅 Date changed, refetching BASELINE data...');
+        this.fetchLastExaminationData();
+        // ✅ RECALCULATE AFTER DATE CHANGE
+        this.calculateAndUpdateResults();
+      });
+    }
+
+    console.log('✅ Balita handlers attached successfully');
   }
 
+  // ✅ FETCH LAST EXAMINATION DATA
+  fetchLastExaminationData() {
+    const nikInput = document.getElementById('nik_balita');
+    const tanggalInput = document.getElementById('tanggal_pemeriksaan');
+
+    if (!nikInput || !nikInput.value) {
+      console.log('📊 No NIK found, skipping baseline data fetch');
+      return;
+    }
+
+    const nik = nikInput.value;
+    const currentDate = tanggalInput ? tanggalInput.value : new Date().toISOString().split('T')[0];
+
+    console.log('📊 Fetching BASELINE data for NIK:', nik, 'before date:', currentDate);
+
+    // ✅ KIRIM CURRENT DATE UNTUK MENCARI DATA BASELINE
+    fetch(`/get-last-examination/${nik}?current_date=${currentDate}`)
+      .then((response) => response.json())
+      .then((baselineData) => {
+        console.log('📊 Baseline data found:', baselineData);
+
+        if (baselineData && baselineData.bb) {
+          // ✅ STORE BASELINE DATA (BUKAN LAST DATA)
+          this.lastBBData = {
+            bb: parseFloat(baselineData.bb),
+            tanggal: baselineData.tanggal_pemeriksaan,
+          };
+          console.log('✅ Baseline data stored:', this.lastBBData);
+        } else {
+          console.log('📊 No baseline data found - pemeriksaan pertama');
+          this.lastBBData = null;
+        }
+      })
+      .catch((error) => {
+        console.log('📊 Error fetching baseline data:', error);
+        this.lastBBData = null;
+      });
+  }
+
+  // ✅ CALCULATE AND UPDATE RESULTS (EXISTING + NEW BB COMPARISON)
   calculateAndUpdateResults() {
-    console.log('=== INPUT EVENT TRIGGERED ===');
+    console.log('=== CALCULATING RESULTS ===');
 
     const bb = parseFloat(document.getElementById('bb').value);
     const tb = parseFloat(document.getElementById('tb').value);
     const umur = parseInt(document.getElementById('umur').value);
 
-    console.log('Parsed values - BB:', bb, 'TB:', tb, 'Umur:', umur);
+    console.log('Values - BB:', bb, 'TB:', tb, 'Umur:', umur);
 
+    // ✅ EXISTING CALCULATIONS
     const kesimpulanBBU = !isNaN(bb) && !isNaN(umur) ? this.getKesimpulanBBU(bb, umur) : '';
     const kesimpulanTBU = !isNaN(tb) && !isNaN(umur) ? this.getKesimpulanTBU(tb, umur) : '';
     const kesimpulanBBTB = !isNaN(bb) && !isNaN(tb) ? this.getKesimpulanBBTB(bb, tb) : '';
 
-    console.log('Kesimpulan BBU:', kesimpulanBBU);
-    console.log('Kesimpulan TBU:', kesimpulanTBU);
-    console.log('Kesimpulan BBTB:', kesimpulanBBTB);
+    // ✅ NEW BB COMPARISON CALCULATION
+    const statusPerubahanBB = !isNaN(bb) ? this.getStatusPerubahanBB(bb) : '';
 
+    // ✅ UPDATE FORM FIELDS
     document.getElementById('kesimpulan_bbu').value = kesimpulanBBU;
     document.getElementById('kesimpulan_tbuu').value = kesimpulanTBU;
     document.getElementById('kesimpulan_bbtb').value = kesimpulanBBTB;
+    document.getElementById('status_perubahan_bb').value = statusPerubahanBB;
 
-    console.log('=== SELESAI UPDATE KESIMPULAN ===');
+    console.log('✅ Results updated with BB comparison');
+  }
+
+  // ✅ NEW METHOD: GET STATUS PERUBAHAN BB
+  getStatusPerubahanBB(currentBB) {
+    console.log(
+      '📊 Calculating BB comparison - Current BB:',
+      currentBB,
+      'vs Baseline:',
+      this.lastBBData
+    );
+
+    if (!this.lastBBData) {
+      // return 'Pemeriksaan pertama - Data baseline';
+      return 'Pemeriksaan pertama ';
+    }
+
+    const baselineBB = this.lastBBData.bb; // ✅ DATA LAMA SEBAGAI BASELINE
+    const newBB = currentBB; // ✅ DATA BARU SEBAGAI COMPARISON
+    const perubahan = newBB - baselineBB; // ✅ PERUBAHAN DARI BASELINE KE BARU
+    const persentasePerubahan = (perubahan / baselineBB) * 100;
+    const tanggalBaseline = this.formatDate(this.lastBBData.tanggal);
+
+    console.log('📊 COMPARISON LOGIC:', {
+      'Baseline (Data Lama)': `${baselineBB}kg pada ${tanggalBaseline}`,
+      'Current (Data Baru)': `${newBB}kg hari ini`,
+      Perubahan: `${perubahan.toFixed(2)}kg (${persentasePerubahan.toFixed(1)}%)`,
+    });
+
+    if (perubahan > 0) {
+      // ✅ BERAT BERTAMBAH DARI BASELINE
+      if (persentasePerubahan >= 10) {
+        return `Dari ${tanggalBaseline} (${baselineBB}kg), berat badan naik signifikan menjadi ${newBB}kg (+${perubahan.toFixed(
+          2
+        )}kg, +${persentasePerubahan.toFixed(1)}%)`;
+      } else if (persentasePerubahan >= 5) {
+        return `Dari ${tanggalBaseline} (${baselineBB}kg), berat badan naik menjadi ${newBB}kg (+${perubahan.toFixed(
+          2
+        )}kg, +${persentasePerubahan.toFixed(1)}%)`;
+      } else {
+        return `Dari ${tanggalBaseline} (${baselineBB}kg), berat badan naik menjadi ${newBB}kg (+${perubahan.toFixed(
+          2
+        )}kg, +${persentasePerubahan.toFixed(1)}%)`;
+      }
+    } else if (perubahan < 0) {
+      // ✅ BERAT BERKURANG DARI BASELINE
+      const persentaseNegatif = Math.abs(persentasePerubahan);
+      if (persentaseNegatif >= 10) {
+        return `Dari ${tanggalBaseline} (${baselineBB}kg), berat badan turun signifikan menjadi ${newBB}kg (${perubahan.toFixed(
+          2
+        )}kg, ${persentasePerubahan.toFixed(1)}%) - Perlu evaluasi`;
+      } else if (persentaseNegatif >= 5) {
+        return `Dari ${tanggalBaseline} (${baselineBB}kg), berat badan turun cukup banyak menjadi ${newBB}kg (${perubahan.toFixed(
+          2
+        )}kg, ${persentasePerubahan.toFixed(1)}%) - Perlu perhatian`;
+      } else {
+        return `Dari ${tanggalBaseline} (${baselineBB}kg), berat badan turun sedikit menjadi ${newBB}kg (${perubahan.toFixed(
+          2
+        )}kg, ${persentasePerubahan.toFixed(1)}%)`;
+      }
+    } else {
+      // ✅ BERAT SAMA DENGAN BASELINE
+      return `Berat badan stabil pada ${newBB}kg (tidak ada perubahan dari ${tanggalBaseline})`;
+    }
+  }
+
+  formatDate(dateString) {
+    const date = new Date(dateString);
+    const options = {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    };
+    return date.toLocaleDateString('id-ID', options);
   }
 
   getKesimpulanBBU(bb, umur) {
@@ -1880,6 +2010,7 @@ class BalitaHandler {
     return 'Tinggi melebihi normal';
   }
 
+  // ✅ VERSI SIMPLE - HAPUS SEMUA KETERANGAN KURUNG:
   getKesimpulanBBTB(bb, tb) {
     if (bb < 1 || bb > 50) {
       return `⚠️ BB ${bb} kg tampak tidak wajar`;
@@ -1895,23 +2026,14 @@ class BalitaHandler {
     if (!data) {
       if (tbBulat < 65) {
         data = this.zscoreBBTB.find((d) => d.tb === 65);
-        if (data) {
-          const kesimpulan =
-            bb < data.sd3
-              ? 'Gizi buruk'
-              : bb < data.sd2
-              ? 'Gizi kurang'
-              : bb <= data.sd1plus
-              ? 'Gizi baik'
-              : bb <= data.sd2plus
-              ? 'Beresiko gizi lebih'
-              : 'Gizi lebih';
-          return `${kesimpulan} (TB ${tb}cm sangat pendek)`;
-        }
       }
-      return `Data tidak tersedia untuk TB ${tb}cm`;
+
+      if (!data) {
+        return `Data tidak tersedia untuk TB ${tb}cm`;
+      }
     }
 
+    // ✅ SIMPLE CLASSIFICATION - TANPA KURUNG APAPUN
     if (bb < data.sd3) return 'Gizi buruk';
     if (bb < data.sd2) return 'Gizi kurang';
     if (bb <= data.sd1plus) return 'Gizi baik';
@@ -1921,15 +2043,46 @@ class BalitaHandler {
   }
 }
 
-// Function untuk initialize dari external call
+// ✅ CREATE GLOBAL INSTANCE BUT DON'T AUTO-INITIALIZE
+const balitaHandler = new BalitaHandler();
+
+// ✅ GLOBAL FUNCTION FOR EXTERNAL INITIALIZATION
 function initializeBalitaHandler() {
-  console.log('Initializing Balita Handler...');
-  new BalitaHandler();
+  console.log('🔄 Initializing Balita Handler from external call...');
+  balitaHandler.initializeEventListeners();
 }
 
-// Auto-initialize jika DOM sudah ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeBalitaHandler);
-} else {
-  initializeBalitaHandler();
-}
+// ✅ MAKE GLOBALLY AVAILABLE
+window.initializeBalitaHandler = initializeBalitaHandler;
+
+// ✅ OBSERVER FOR DYNAMIC FORM DETECTION
+document.addEventListener('DOMContentLoaded', function () {
+  console.log('🔧 Balita handler DOM ready, setting up observer...');
+
+  // ✅ MUTATION OBSERVER FOR DYNAMIC FORM INJECTION
+  const observer = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+      mutation.addedNodes.forEach(function (node) {
+        if (node.nodeType === 1) {
+          // ✅ CHECK IF BALITA FORM WAS ADDED
+          if (node.id === 'form-balita' || node.querySelector('#form-balita')) {
+            console.log('🔄 Balita form detected in DOM, auto-initializing...');
+            setTimeout(() => {
+              initializeBalitaHandler();
+            }, 100);
+          }
+        }
+      });
+    });
+  });
+
+  // ✅ OBSERVE FORM CONTAINER
+  const formContainer = document.getElementById('form-pemeriksaan');
+  if (formContainer) {
+    observer.observe(formContainer, {
+      childList: true,
+      subtree: true,
+    });
+    console.log('✅ Form observer attached to #form-pemeriksaan');
+  }
+});

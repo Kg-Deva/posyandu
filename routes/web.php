@@ -161,8 +161,11 @@ Route::group(['middleware' => ['auth', 'ceklevel:kader', 'redirectrole:kader']],
     // input pemeriksaan
     Route::get('/input-pemeriksaan', [MenuController::class, 'inputPemeriksaan'])->name('input-pemeriksaan');
     Route::post('/cari-pasien', [MenuController::class, 'cariPasien'])->name('cari-pasien');
-
     Route::post('/simpan-pemeriksaan/{id}', [MenuController::class, 'simpanPemeriksaan'])->name('simpan-pemeriksaan');
+    // input pemeriksaan balita
+    Route::post('/simpan-pemeriksaan-balita', [MenuController::class, 'simpanPemeriksaanBalita'])->name('simpan-pemeriksaan-balita');
+    Route::post('/cek-bb-terakhir', [MenuController::class, 'cekBBTerakhir']);
+    Route::get('/get-last-examination/{nik}', [MenuController::class, 'getLastExamination']);
 });
 
 Route::group(['middleware' => ['auth', 'ceklevel:balita', 'redirectrole:balita']], function () {
