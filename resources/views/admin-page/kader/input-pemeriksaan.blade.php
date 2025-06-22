@@ -34,7 +34,9 @@
     <div id="form-pemeriksaan"></div>
 </div>
 
+{{-- ✅ LOAD EXTERNAL JS FILES --}}
 <script src="{{ asset('js/balita-handler.js') }}"></script>
+<script src="{{ asset('js/gejala-sakit-balita.js') }}"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -136,15 +138,24 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Form balita detected:', hasBalitaForm);
             
             if (hasBalitaForm) {
-                console.log('🔄 Initializing balita handler...');
+                console.log('🔄 Initializing balita components...');
                 
                 // ✅ WAIT FOR HTML INJECTION THEN INITIALIZE
                 setTimeout(() => {
+                    // ✅ INIT BALITA HANDLER (KALKULASI BB/TB)
                     if (typeof initializeBalitaHandler === 'function') {
                         console.log('📊 Calling initializeBalitaHandler...');
                         initializeBalitaHandler();
                     } else {
                         console.error('❌ initializeBalitaHandler not found');
+                    }
+                    
+                    // ✅ INIT GEJALA SAKIT TOGGLE (DARI EXTERNAL JS)
+                    if (typeof window.setupGejalaSakitToggleAfterAjax === 'function') {
+                        console.log('🔄 Calling setupGejalaSakitToggleAfterAjax...');
+                        window.setupGejalaSakitToggleAfterAjax();
+                    } else {
+                        console.error('❌ setupGejalaSakitToggleAfterAjax not found');
                     }
                 }, 200);
             }
@@ -170,5 +181,4 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ Input pemeriksaan handlers attached successfully');
 });
 </script>
-
 @endsection

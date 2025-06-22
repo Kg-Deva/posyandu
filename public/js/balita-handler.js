@@ -1,6 +1,8 @@
 class BalitaHandler {
   constructor() {
     this.initializeZScoreData();
+    this.initializeLingkarKepalaData();
+    this.initializeLilaData();
     this.lastBBData = null; // Store last BB data
   }
 
@@ -1795,12 +1797,200 @@ class BalitaHandler {
       },
     ];
   }
+  initializeLilaData() {
+    // Standar LILA untuk umur 6-60 bulan (berdasarkan tabel yang dikirim)
+    this.standarLila = {
+      // Gizi buruk: < 11.5 cm (SAM - Merah)
+      // Gizi kurang: 11.5-12.4 cm (MAM - Kuning)
+      // Gizi baik: ≥ 12.5 cm (Normal - Hijau)
+      gizi_buruk_threshold: 11.5,
+      gizi_kurang_min: 11.5,
+      gizi_kurang_max: 12.4,
+      gizi_baik_min: 12.5,
+    };
+  }
 
+  // ✅ TAMBAH METHOD VALIDASI UMUR LILA
+  validateUmurLila() {
+    const umurField = document.getElementById('umur');
+    const lilaField = document.getElementById('lila');
+    const lilaStatus = document.getElementById('lila-status');
+    const kesimpulanLilaField = document.getElementById('kesimpulan_lila');
+    const kesimpulanLilaInfo = document.getElementById('kesimpulan-lila-info');
+
+    if (!umurField || !lilaField || !lilaStatus) return;
+
+    const umur = parseInt(umurField.value) || 0;
+
+    if (umur < 6) {
+      // DISABLE FIELD JIKA BELUM 6 BULAN
+      lilaField.disabled = true;
+      lilaField.value = '';
+      lilaField.style.backgroundColor = '#f8f9fa';
+      lilaField.style.cursor = 'not-allowed';
+      lilaStatus.innerHTML =
+        '<i class="bi bi-exclamation-triangle text-warning me-1"></i>Belum berumur 6 bulan, LILA tidak diukur';
+
+      if (kesimpulanLilaField) {
+        kesimpulanLilaField.value = 'Belum berumur 6 bulan';
+        kesimpulanLilaField.className = 'form-control bg-light';
+      }
+      if (kesimpulanLilaInfo) {
+        kesimpulanLilaInfo.textContent = 'LILA hanya diukur untuk balita usia 6-60 bulan';
+      }
+    } else if (umur >= 6 && umur <= 60) {
+      // ENABLE FIELD JIKA SUDAH 6 BULAN
+      lilaField.disabled = false;
+      lilaField.style.backgroundColor = '';
+      lilaField.style.cursor = '';
+      lilaStatus.innerHTML =
+        '<i class="bi bi-check-circle text-success me-1"></i>Dapat diukur LILA (usia 6-60 bulan)';
+
+      if (kesimpulanLilaInfo) {
+        kesimpulanLilaInfo.textContent = 'Kesimpulan otomatis berdasarkan input LILA';
+      }
+
+      // EVALUASI LILA JIKA SUDAH ADA VALUE
+      this.evaluasiLila();
+    } else {
+      // UMUR > 60 BULAN
+      lilaField.disabled = true;
+      lilaField.value = '';
+      lilaField.style.backgroundColor = '#f8f9fa';
+      lilaField.style.cursor = 'not-allowed';
+      lilaStatus.innerHTML =
+        '<i class="bi bi-info-circle text-info me-1"></i>Usia > 60 bulan, LILA tidak diperlukan';
+
+      if (kesimpulanLilaField) {
+        kesimpulanLilaField.value = 'Usia > 60 bulan';
+        kesimpulanLilaField.className = 'form-control bg-light';
+      }
+    }
+  }
+
+  // ✅ TAMBAH METHOD EVALUASI LILA
+  evaluasiLila() {
+    const umurField = document.getElementById('umur');
+    const lilaField = document.getElementById('lila');
+    const kesimpulanField = document.getElementById('kesimpulan_lila');
+
+    if (!umurField || !lilaField || !kesimpulanField) return;
+
+    const umur = parseInt(umurField.value) || 0;
+    const lila = parseFloat(lilaField.value) || 0;
+
+    // SKIP JIKA UMUR TIDAK VALID ATAU LILA KOSONG
+    if (umur < 6 || umur > 60 || !lila) {
+      if (umur >= 6 && umur <= 60 && !lila) {
+        kesimpulanField.value = '';
+        kesimpulanField.className = 'form-control bg-light';
+      }
+      return;
+    }
+
+    let kesimpulan = '';
+
+    // EVALUASI BERDASARKAN STANDAR TABEL
+    if (lila < this.standarLila.gizi_buruk_threshold) {
+      kesimpulan = 'Gizi buruk (SAM)'; // < 11.5 cm
+    } else if (
+      lila >= this.standarLila.gizi_kurang_min &&
+      lila <= this.standarLila.gizi_kurang_max
+    ) {
+      kesimpulan = 'Gizi kurang (MAM)'; // 11.5 - 12.4 cm
+    } else if (lila >= this.standarLila.gizi_baik_min) {
+      kesimpulan = 'Gizi baik (Normal)'; // ≥ 12.5 cm
+    } else {
+      kesimpulan = 'Data tidak valid';
+    }
+
+    kesimpulanField.value = kesimpulan;
+    kesimpulanField.className = 'form-control bg-light';
+  }
+  initializeLingkarKepalaData() {
+    this.standarLingkarKepala = {
+      L: [
+        // Laki-laki
+        { min_bulan: 0, max_bulan: 6, min_lk: 34.0, max_lk: 43.5 },
+        { min_bulan: 6, max_bulan: 12, min_lk: 43.5, max_lk: 46.0 },
+        { min_bulan: 12, max_bulan: 24, min_lk: 46.0, max_lk: 48.3 },
+        { min_bulan: 24, max_bulan: 36, min_lk: 48.3, max_lk: 49.5 },
+        { min_bulan: 36, max_bulan: 48, min_lk: 49.5, max_lk: 50.3 },
+        { min_bulan: 48, max_bulan: 60, min_lk: 50.3, max_lk: 50.8 },
+      ],
+      P: [
+        // Perempuan
+        { min_bulan: 0, max_bulan: 6, min_lk: 34.0, max_lk: 42.0 },
+        { min_bulan: 6, max_bulan: 12, min_lk: 42.0, max_lk: 45.0 },
+        { min_bulan: 12, max_bulan: 24, min_lk: 45.0, max_lk: 47.2 },
+        { min_bulan: 24, max_bulan: 36, min_lk: 47.2, max_lk: 48.5 },
+        { min_bulan: 36, max_bulan: 48, min_lk: 48.5, max_lk: 49.4 },
+        { min_bulan: 48, max_bulan: 60, min_lk: 49.4, max_lk: 50.0 },
+      ],
+    };
+  }
+  // ✅ 3. TAMBAH METHOD BARU
+  getJenisKelaminFromNIK(nik) {
+    if (!nik || nik.length < 16) return null;
+    const digitKe17 = parseInt(nik.charAt(15));
+    return digitKe17 % 2 === 1 ? 'L' : 'P';
+  }
+
+  // ✅ 4. TAMBAH METHOD BARU - EVALUASI LINGKAR KEPALA
+  // ✅ GANTI METHOD evaluasiLingkarKepala() YANG ADA DENGAN INI:
+  evaluasiLingkarKepala() {
+    const umurField = document.getElementById('umur');
+    const lingkarKepalaField = document.getElementById('lingkar_kepala');
+    const kesimpulanField = document.getElementById('kesimpulan_lingkar_kepala');
+    const nikField = document.getElementById('nik_balita');
+
+    // Skip jika element tidak ada (tidak merusak form lain)
+    if (!umurField || !lingkarKepalaField || !kesimpulanField || !nikField) {
+      return;
+    }
+
+    const umur = parseInt(umurField.value) || 0;
+    const lingkarKepala = parseFloat(lingkarKepalaField.value) || 0;
+    const nik = nikField.value;
+    const jenisKelamin = this.getJenisKelaminFromNIK(nik);
+
+    // Reset jika input kosong
+    if (!umur || !lingkarKepala || !jenisKelamin) {
+      kesimpulanField.value = '';
+      kesimpulanField.className = 'form-control bg-light'; // ✅ UNIFORM CLASS
+      return;
+    }
+
+    const standar = this.standarLingkarKepala[jenisKelamin];
+    if (!standar) {
+      kesimpulanField.value = 'Jenis kelamin tidak valid';
+      kesimpulanField.className = 'form-control bg-light'; // ✅ UNIFORM CLASS
+      return;
+    }
+
+    let kesimpulan = 'Umur di luar standar';
+
+    for (let range of standar) {
+      if (umur >= range.min_bulan && umur < range.max_bulan) {
+        if (lingkarKepala < range.min_lk) {
+          kesimpulan = 'Kurang dari normal';
+        } else if (lingkarKepala > range.max_lk) {
+          kesimpulan = 'Melebihi normal';
+        } else {
+          kesimpulan = 'Normal';
+        }
+        break;
+      }
+    }
+
+    // ✅ SET HASIL DENGAN CLASS UNIFORM (SAMA SEPERTI FIELD LAIN)
+    kesimpulanField.value = kesimpulan;
+    kesimpulanField.className = 'form-control bg-light'; // ✅ SAMA SEPERTI FIELD KESIMPULAN LAINNYA
+  }
   initializeEventListeners() {
     console.log('=== BALITA HANDLER INITIALIZATION ===');
 
     const formBalita = document.getElementById('form-balita');
-
     if (!formBalita) {
       console.log('❌ Form balita not found');
       return;
@@ -1811,26 +2001,61 @@ class BalitaHandler {
     // ✅ GET BASELINE EXAMINATION DATA
     this.fetchLastExaminationData();
 
-    // ✅ 1. CALCULATION EVENT LISTENERS
-    document.querySelectorAll('#bb, #tb, #umur').forEach((input) => {
-      console.log('📊 Adding calculation listener to:', input.id);
+    // document.querySelectorAll('#bb, #tb, #umur, #lingkar_kepala').forEach((input) => {
+    //   input.addEventListener('input', () => {
+    //     this.calculateAndUpdateResults();
+
+    //     // ✅ TAMBAH EVALUASI LINGKAR KEPALA
+    //     if (input.id === 'lingkar_kepala' || input.id === 'umur') {
+    //       this.evaluasiLingkarKepala();
+    //     }
+    //   });
+    // });
+    document.querySelectorAll('#bb, #tb, #umur, #lingkar_kepala, #lila').forEach((input) => {
       input.addEventListener('input', () => {
         this.calculateAndUpdateResults();
+
+        // ✅ EVALUASI LINGKAR KEPALA
+        if (input.id === 'lingkar_kepala' || input.id === 'umur') {
+          this.evaluasiLingkarKepala();
+        }
+
+        // ✅ EVALUASI LILA
+        if (input.id === 'umur') {
+          this.validateUmurLila(); // Validasi umur dulu
+        }
+        if (input.id === 'lila') {
+          this.evaluasiLila(); // Evaluasi LILA
+        }
       });
     });
 
-    // ✅ 2. TANGGAL CHANGE LISTENER - REFETCH BASELINE
+    // ✅ 2. TANGGAL CHANGE LISTENER
     const tanggalInput = document.getElementById('tanggal_pemeriksaan');
     if (tanggalInput) {
       tanggalInput.addEventListener('change', () => {
         console.log('📅 Date changed, refetching BASELINE data...');
         this.fetchLastExaminationData();
-        // ✅ RECALCULATE AFTER DATE CHANGE
         this.calculateAndUpdateResults();
       });
     }
 
+    // ✅ 3. TBC SKRINING LISTENERS
+    document.querySelectorAll('.skrining-tbc').forEach((checkbox) => {
+      console.log('🔍 Adding TBC screening listener to:', checkbox.id);
+      checkbox.addEventListener('change', () => {
+        this.calculateTBCScreening();
+      });
+    });
+
     console.log('✅ Balita handlers attached successfully');
+
+    const nikInput = document.getElementById('nik_balita');
+    if (nikInput) {
+      nikInput.addEventListener('input', () => {
+        this.evaluasiLingkarKepala();
+      });
+    }
   }
 
   // ✅ FETCH LAST EXAMINATION DATA
@@ -1896,6 +2121,9 @@ class BalitaHandler {
     document.getElementById('kesimpulan_bbtb').value = kesimpulanBBTB;
     document.getElementById('status_perubahan_bb').value = statusPerubahanBB;
 
+    // ✅ TAMBAH BARIS INI SAJA
+    this.evaluasiLingkarKepala();
+    this.validateUmurLila();
     console.log('✅ Results updated with BB comparison');
   }
 
@@ -2040,6 +2268,67 @@ class BalitaHandler {
     if (bb <= data.sd2plus) return 'Beresiko gizi lebih';
     if (bb <= data.sd3plus) return 'Gizi lebih';
     return 'Gizi lebih';
+  }
+
+  // ✅ TAMBAH METHOD BARU - CALCULATE TBC SCREENING:
+  calculateTBCScreening() {
+    console.log('🔍 Calculating TBC screening...');
+
+    const batukTerusMenerus = document.getElementById('batuk_terus_menerus').checked;
+    const demam2Minggu = document.getElementById('demam_2_minggu').checked;
+    const bbTidakNaik = document.getElementById('bb_tidak_naik').checked;
+    const kontakTBC = document.getElementById('kontak_tbc').checked;
+
+    // ✅ HITUNG JUMLAH GEJALA
+    let jumlahGejala = 0;
+    const gejalaList = [];
+
+    if (batukTerusMenerus) {
+      jumlahGejala++;
+      gejalaList.push('Batuk terus menerus');
+    }
+    if (demam2Minggu) {
+      jumlahGejala++;
+      gejalaList.push('Demam > 2 minggu');
+    }
+    if (bbTidakNaik) {
+      jumlahGejala++;
+      gejalaList.push('BB tidak naik/turun');
+    }
+    if (kontakTBC) {
+      jumlahGejala++;
+      gejalaList.push('Kontak erat TBC');
+    }
+
+    console.log('🔍 TBC Screening Results:', {
+      'Jumlah Gejala': jumlahGejala,
+      'Gejala Terdeteksi': gejalaList,
+      'Perlu Rujukan': jumlahGejala >= 2,
+    });
+
+    // ✅ UPDATE FIELD JUMLAH GEJALA
+    const jumlahGejalaField = document.getElementById('jumlah_gejala_tbc');
+    if (jumlahGejalaField) {
+      if (jumlahGejala === 0) {
+        jumlahGejalaField.value = 'Tidak ada gejala TBC';
+      } else {
+        jumlahGejalaField.value = `${jumlahGejala} gejala: ${gejalaList.join(', ')}`;
+      }
+    }
+
+    // ✅ UPDATE FIELD RUJUKAN
+    const rujukField = document.getElementById('rujuk_puskesmas');
+    if (rujukField) {
+      if (jumlahGejala >= 2) {
+        rujukField.value = 'RUJUK - Perlu pemeriksaan lebih lanjut di Puskesmas';
+        rujukField.className = 'form-control bg-danger text-white font-weight-bold';
+      } else {
+        rujukField.value = 'TIDAK RUJUK - Gejala TBC tidak mencukupi';
+        rujukField.className = 'form-control bg-success text-white';
+      }
+    }
+
+    console.log('✅ TBC screening updated');
   }
 }
 

@@ -4,6 +4,8 @@
     {{-- <meta name="csrf-token" content="{{ csrf_token() }}"> --}}
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Tambahkan ini di dalam <head> -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{{ asset('admin/assets/css/main/app.css') }}">
@@ -48,6 +50,14 @@
     {{-- @vite('resources/js/app.js') --}}
 
     
+ <style>
+        .bi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
 
+        </style>
 
 </head>

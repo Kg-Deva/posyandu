@@ -288,7 +288,7 @@
     </div>
     @include('admin-layouts.js')
 
-    <script>
+    {{-- <script>
         // Simpan user id ke JS variable
         const currentUserId = {{ auth()->user()->id }};
     </script>
@@ -309,6 +309,124 @@
             });
         </script>
     @endverbatim
+</script> --}}
+
+
+
+<script>
+    const currentUserId = {{ auth()->user()->id }};
+    let isSearchMode = false;
+    let searchTimeout = null;
+</script>
+
+<script>
+document.getElementById('search-anggota').addEventListener('keyup', function() {
+    let q = this.value.trim();
+    let tbody = document.getElementById('anggota-table-body');
+    
+    clearTimeout(searchTimeout);
+    
+    // ✅ JIKA KOSONG - RELOAD PAGINATION
+    if (q === '') {
+        if (isSearchMode) {
+            window.location.reload();
+        }
+        return;
+    }
+    
+    isSearchMode = true;
+    
+    // ✅ DEBOUNCE SEARCH
+    searchTimeout = setTimeout(() => {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-3">🔍 Mencari...</td></tr>';
+
+        fetch('/search-pasien?q=' + encodeURIComponent(q))
+            .then(res => res.json())
+            .then(data => {
+                console.log('Data received:', data); // ✅ DEBUG LOG
+                
+                tbody.innerHTML = '';
+                
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">❌ Data tidak ditemukan</td></tr>';
+                    return;
+                }
+                
+                // ✅ BUILD TABLE HTML
+                let html = '';
+                data.forEach(item => {
+                    if(item.id != currentUserId) {
+                        html += `
+                            <tr>
+                                <td>${item.row_number}</td>
+                                <td class="text-bold-500">
+                                    ${item.name}
+                                    ${item.type == 'bukan warga' ? '<span class="badge bg-secondary ms-1">NW</span>' : ''}
+                                </td>
+                                <td>${item.email}</td>
+                                <td class="text-bold-500">${item.level}</td>
+                                <td>
+                                    ${item.status ? '<span class="badge bg-success">Aktif</span>' : '<span class="badge bg-danger">Tidak Aktif</span>'}
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a class="btn btn-sm btn-primary" href="/edit-pasien/${item.id}">
+                                            <i data-feather="edit"></i> Edit
+                                        </a>
+                                        <a class="btn btn-sm btn-danger" href="/delete-pasien/${item.id}" onclick="return confirm('Yakin hapus?')">
+                                            <i data-feather="trash"></i> Delete
+                                        </a>
+                                    </div>
+                                </td>
+                                <td>
+                                    ${item.status ? `
+                                        <button class="btn btn-sm ${item.data_lengkap ? 'btn-info' : 'btn-warning'} lengkapi-data-btn" data-id="${item.id}">
+                                            <i data-feather="${item.data_lengkap ? 'edit' : 'user-check'}"></i>
+                                            ${item.data_lengkap ? 'Edit Data' : 'Lengkapi Data'}
+                                        </button>
+                                    ` : ''}
+                                </td>
+                            </tr>
+                        `;
+                    }
+                });
+                
+                tbody.innerHTML = html;
+                
+                // ✅ HIDE PAGINATION
+                const paginationDiv = document.querySelector('.mt-3');
+                if (paginationDiv) {
+                    paginationDiv.style.display = 'none';
+                }
+                
+                // ✅ RE-INIT LENGKAPI DATA BUTTONS (INLINE)
+                document.querySelectorAll('.lengkapi-data-btn').forEach(btn => {
+                    btn.onclick = function() {
+                        let userId = this.dataset.id;
+                        fetch('/lengkapi-data/' + userId)
+                            .then(res => res.text())
+                            .then(html => {
+                                document.getElementById('modal-lengkapi-data-content').innerHTML = html;
+                                new bootstrap.Modal(document.getElementById('lengkapiDataModal')).show();
+                            });
+                    };
+                });
+                
+                // ✅ RE-INIT FEATHER ICONS
+                if (typeof feather !== 'undefined') {
+                    feather.replace();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error); // ✅ DEBUG LOG
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-3">❌ Error loading data</td></tr>';
+            });
+    }, 300);
+});
+</script>
+
+
+</script>
 
     <!-- Modal Lengkapi Data -->
     <div class="modal fade" id="lengkapiDataModal" tabindex="-1" aria-labelledby="lengkapiDataLabel"

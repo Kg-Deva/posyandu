@@ -1328,17 +1328,40 @@ class MenuController extends Controller
     }
 
 
+
+
+
+    // GANTI METHOD searchPasien YANG ADA
+
+
+    // GANTI METHOD cariPasien YANG ADA (SEKITAR LINE 1300+)
+
+    public function searchPasien(Request $request)
+    {
+        $q = $request->q;
+
+        if (empty($q)) {
+            return response()->json([]);
+        }
+
+        $data = User::whereNotIn('level', ['admin', 'kader'])
+            ->where(function ($query) use ($q) {
+                $query->where('name', 'like', "%$q%")
+                    ->orWhere('email', 'like', "%$q%");
+            })
+            ->orderBy('id')
+            ->get()
+            ->map(function ($item, $index) {
+                $item->row_number = $index + 1;
+                return $item;
+            });
+
+        return response()->json($data);
+    }
+
     public function kaderHome()
     {
 
-        // Data konten
-        // $balitaCount = User::where('level', 'balita')->where('status', 1)->count();
-        // $remajaCount = User::where('level', 'remaja')->where('status', 1)->count();
-        // $dewasaCount = User::where('level', 'dewasa')->where('status', 1)->count();
-        // $ibuhamilCount = User::where('level', 'ibu hamil')->where('status', 1)->count();
-        // $lansiaCount = User::where('level', 'lansia')->where('status', 1)->count();
-
-        // $totalPasien = $balitaCount + $remajaCount + $dewasaCount + $ibuhamilCount + $lansiaCount;
 
         $balitaCount = User::where('level', 'balita')->count();
         $remajaCount = User::where('level', 'remaja')->count();
@@ -1538,18 +1561,7 @@ class MenuController extends Controller
         return view('admin-page.kader.input-pemeriksaan');
     }
 
-    // public function cariPasien(Request $request)
-    // {
-    //     $q = $request->input('q');
-    //     $user = User::where('nik', $q)->orWhere('nama', 'like', "%$q%")->first();
 
-    //     if ($user) {
-    //         // Render partial blade sesuai role user
-    //         return view('admin-page.pemeriksaan-form-partial', compact('user'))->render();
-    //     } else {
-    //         return response()->json(['error' => 'Data tidak ditemukan'], 404);
-    //     }
-    // }
 
 
     public function cariPasien(Request $request)
@@ -1588,144 +1600,408 @@ class MenuController extends Controller
         return back()->with('success', 'Data pemeriksaan berhasil disimpan!');
     }
 
-    //input pemeriksaan balita
 
 
-    // Tambah method ini di MenuController
+    public function balitaHome()
+    {
+        $user = Auth::user();
+
+        // ✅ PASTIKAN USER ADALAH BALITA
+        if ($user->level !== 'balita') {
+            return redirect('/')->with('error', 'Akses ditolak');
+        }
+
+        // ✅ AMBIL DATA PEMERIKSAAN BALITA
+        $dataPemeriksaan = PemeriksaanBalita::where('nik', $user->nik)
+            ->orderBy('tanggal_pemeriksaan', 'asc')
+            ->get();
+
+        // ✅ SIAPKAN DATA UNTUK CHART
+        $chartData = [
+            'labels' => $dataPemeriksaan->pluck('tanggal_pemeriksaan')->map(function ($date) {
+                return Carbon::parse($date)->format('M Y');
+            })->toArray(),
+            'bb' => $dataPemeriksaan->pluck('bb')->toArray(),
+            'tb' => $dataPemeriksaan->pluck('tb')->toArray(),
+        ];
+
+        // ✅ DATA STATISTIK
+        $pemeriksaanTerakhir = $dataPemeriksaan->last();
+        $totalPemeriksaan = $dataPemeriksaan->count();
+
+        // ✅ HITUNG PROGRESS PERTUMBUHAN
+        $progressBB = 0;
+        $progressTB = 0;
+        if ($dataPemeriksaan->count() >= 2) {
+            $sebelumnya = $dataPemeriksaan->slice(-2, 1)->first(); // Data sebelum terakhir
+            $terakhir = $dataPemeriksaan->last(); // Data terakhir
+
+            if ($sebelumnya && $terakhir) {
+                $progressBB = round($terakhir->bb - $sebelumnya->bb, 2);
+                $progressTB = round($terakhir->tb - $sebelumnya->tb, 1);
+            }
+        }
+
+        // ✅ STATUS KESEHATAN BERDASARKAN PEMERIKSAAN TERAKHIR
+        $statusKesehatan = $this->hitungStatusKesehatan($pemeriksaanTerakhir);
+
+        return view('admin-page.balita.balita-home', compact(
+            'user',
+            'dataPemeriksaan',
+            'chartData',
+            'pemeriksaanTerakhir',
+            'totalPemeriksaan',
+            'progressBB',
+            'progressTB',
+            'statusKesehatan' // ✅ TAMBAH INI
+        ));
+    }
 
 
 
 
 
 
+    // GANTI METHOD hitungStatusKesehatan() (SEKITAR LINE 1500+)
 
+    // GANTI METHOD hitungStatusKesehatan() (SEKITAR LINE 1769+)
+    private function hitungStatusKesehatan($pemeriksaan)
+    {
+        if (!$pemeriksaan) {
+            return [
+                'status' => 'Belum Ada Data',
+                'class' => 'secondary',
+                'icon' => 'question-circle',
+                'skor' => 0,
+                'persentase' => 0,
+                'umur_bulan' => 0
+            ];
+        }
 
+        // ✅ HITUNG UMUR
+        $umurBulan = $pemeriksaan->umur ?? 12;
 
+        // 🎯 TENTUKAN PROGRAM WAJIB BERDASARKAN USIA (LOGIC BARU!)
+        if ($umurBulan < 6) {
+            // 0-6 bulan: ASI + Imunisasi
+            $wajib1 = $pemeriksaan->asi_eksklusif ?? false;
+            $wajib2 = $pemeriksaan->imunisasi ?? false;
+        } else {
+            // 6+ bulan: MPASI + Imunisasi
+            $wajib1 = $pemeriksaan->mp_asi ?? false;
+            $wajib2 = $pemeriksaan->imunisasi ?? false;
+        }
 
+        // ✅ HITUNG STATUS BERDASARKAN PROGRAM WAJIB
+        $completed = 0;
+        if ($wajib1) $completed++;
+        if ($wajib2) $completed++;
+
+        // ✅ EVALUASI KONDISI KESEHATAN (TBC & GIZI)
+        $gejalaTBC = $pemeriksaan->jumlah_gejala_tbc ?? 0;
+        $kontakTBC = $pemeriksaan->kontak_tbc ?? false;
+        $adaGejalaSakit = $pemeriksaan->ada_gejala_sakit ?? false;
+
+        $kesimpulan = strtolower(
+            ($pemeriksaan->kesimpulan_bbu ?? '') . ' ' .
+                ($pemeriksaan->kesimpulan_tbuu ?? '') . ' ' .
+                ($pemeriksaan->kesimpulan_bbtb ?? '')
+        );
+
+        // 🆕 EVALUASI LILA & LINGKAR KEPALA
+        $kesimpulanLila = strtolower($pemeriksaan->kesimpulan_lila ?? '');
+        $kesimpulanLingkarKepala = strtolower($pemeriksaan->kesimpulan_lingkar_kepala ?? '');
+
+        // Cek kondisi LILA dan Lingkar Kepala
+        $lilaKurang = str_contains($kesimpulanLila, 'kurang') ||
+            str_contains($kesimpulanLila, 'buruk') ||
+            str_contains($kesimpulanLila, 'merah');
+
+        $lingkarKepalaKurang = str_contains($kesimpulanLingkarKepala, 'kurang') ||
+            str_contains($kesimpulanLingkarKepala, 'buruk') ||
+            str_contains($kesimpulanLingkarKepala, 'kecil') ||
+            str_contains($kesimpulanLingkarKepala, 'mikro');
+
+        // 🚦 TENTUKAN STATUS FINAL
+        // 🔴 MERAH - KONDISI DARURAT (termasuk LILA & Lingkar Kepala)
+        if (
+            $completed == 0 || // Tidak ada program wajib yang terpenuhi
+            $gejalaTBC >= 2 ||
+            ($gejalaTBC >= 1 && $kontakTBC) ||
+            str_contains($kesimpulan, 'buruk') ||
+            str_contains($kesimpulan, 'sangat pendek') ||
+            ($lilaKurang && $lingkarKepalaKurang) // 🆕 KEDUA LILA & LK KURANG = DARURAT!
+        ) {
+            return [
+                'status' => 'Butuh Penanganan Segera',
+                'class' => 'danger',
+                'icon' => 'exclamation-triangle-fill',
+                'skor' => $completed * 40,
+                'persentase' => $completed * 50,
+                'umur_bulan' => $umurBulan,
+                'detail' => [
+                    'lila_kurang' => $lilaKurang,
+                    'lingkar_kepala_kurang' => $lingkarKepalaKurang
+                ]
+            ];
+        }
+
+        // 🟡 KUNING - PERLU PERHATIAN (termasuk LILA & Lingkar Kepala)
+        if (
+            $completed == 1 || // Cuma 1 program wajib yang terpenuhi
+            $gejalaTBC == 1 ||
+            $kontakTBC ||
+            $adaGejalaSakit ||
+            str_contains($kesimpulan, 'kurang') ||
+            str_contains($kesimpulan, 'pendek') ||
+            $lilaKurang || // 🆕 SALAH SATU LILA KURANG = PERHATIAN!
+            $lingkarKepalaKurang // 🆕 SALAH SATU LK KURANG = PERHATIAN!
+        ) {
+            return [
+                'status' => 'Perlu Perhatian',
+                'class' => 'warning',
+                'icon' => 'exclamation-triangle',
+                'skor' => $completed * 40,
+                'persentase' => $completed * 50,
+                'umur_bulan' => $umurBulan,
+                'detail' => [
+                    'lila_kurang' => $lilaKurang,
+                    'lingkar_kepala_kurang' => $lingkarKepalaKurang
+                ]
+            ];
+        }
+
+        // ✅ HIJAU - SEHAT
+        return [
+            'status' => 'Sehat',
+            'class' => 'success',
+            'icon' => 'check-circle-fill',
+            'skor' => $completed * 40,
+            'persentase' => 100,
+            'umur_bulan' => $umurBulan,
+            'detail' => [
+                'lila_kurang' => false,
+                'lingkar_kepala_kurang' => false
+            ]
+        ];
+    }
+
+    private function tentukanStatusFinal($gejalaTBC, $kontakTBC, $kesimpulan, $adaGejalaSakit, $umurBulan, $pemeriksaan, $persentase)
+    {
+        // 🚨 STATUS DARURAT (RED ALERT) - LIFE THREATENING
+        if (
+            $gejalaTBC >= 2 || // Multiple TBC symptoms = dangerous
+            ($gejalaTBC >= 1 && $kontakTBC) || // Gejala + kontak = high risk combo
+            str_contains($kesimpulan, 'buruk') || // Severe malnutrition
+            str_contains($kesimpulan, 'sangat pendek') || // Severe stunting
+            (!$pemeriksaan->imunisasi && $umurBulan >= 4) // No immunization = high infection risk
+        ) {
+            return [
+                'status' => 'Butuh Penanganan Segera',
+                'class' => 'danger',
+                'icon' => 'exclamation-triangle-fill'
+            ];
+        }
+
+        // ⚠️ STATUS PERLU PERHATIAN (YELLOW WARNING) - NEED MONITORING
+        if (
+            $gejalaTBC == 1 || // Single TBC symptom
+            $kontakTBC || // TBC contact - need monitoring
+            $adaGejalaSakit || // Other illness symptoms
+            str_contains($kesimpulan, 'kurang') || // Mild malnutrition
+            str_contains($kesimpulan, 'pendek') || // Mild stunting
+            (!$pemeriksaan->asi_eksklusif && $umurBulan <= 3) || // Critical period no exclusive BF
+            (!$pemeriksaan->mp_asi && $umurBulan >= 8) || // Late complementary feeding
+            (!$pemeriksaan->vitamin_a && $umurBulan >= 6) || // Missing Vitamin A
+            $persentase < 75 // Low overall score
+        ) {
+            return [
+                'status' => 'Perlu Perhatian',
+                'class' => 'warning',
+                'icon' => 'exclamation-triangle'
+            ];
+        }
+
+        // ✅ STATUS SEHAT (GREEN) - ALL GOOD
+        return [
+            'status' => 'Sehat',
+            'class' => 'success',
+            'icon' => 'check-circle-fill'
+        ];
+    }
 
     // public function simpanPemeriksaanBalita(Request $request)
     // {
     //     try {
-    //         Log::info('🚀 SIMPAN PEMERIKSAAN BALITA');
-
-    //         $validated = $request->validate([
-    //             'nik' => 'required|string',
+    //         // ✅ BASIC VALIDATION DULU
+    //         $request->validate([
+    //             'nik' => 'required|string|max:16',
+    //             'tanggal_pemeriksaan' => 'required|date',
     //             'bb' => 'required|numeric|min:0.5|max:50',
     //             'tb' => 'required|numeric|min:30|max:150',
     //             'umur' => 'required|integer|min:0|max:60',
-    //             'tanggal_pemeriksaan' => 'required|date',
-    //             'pemeriksa' => 'required|string'
-    //         ], [
-    //             // ✅ CUSTOM ERROR MESSAGES
-    //             'bb.min' => 'Berat badan minimal 0.5 kg',
-    //             'bb.max' => 'Berat badan maksimal 50 kg',
-    //             'tb.min' => 'Tinggi badan minimal 30 cm',
-    //             'tb.max' => 'Tinggi badan maksimal 150 cm',
-    //             'umur.min' => 'Umur minimal 0 bulan',
-    //             'umur.max' => 'Umur maksimal 60 bulan',
-    //             'bb.numeric' => 'Berat badan harus berupa angka',
-    //             'tb.numeric' => 'Tinggi badan harus berupa angka',
-    //             'umur.integer' => 'Umur harus berupa angka bulat'
+    //             'pemeriksa' => 'required|string|max:255',
     //         ]);
 
-    //         $pemeriksaan = PemeriksaanBalita::create([
-    //             'nik' => $validated['nik'],
-    //             'bb' => $validated['bb'],
-    //             'tb' => $validated['tb'],
-    //             'umur' => $validated['umur'],
-    //             'tanggal_pemeriksaan' => $validated['tanggal_pemeriksaan'],
-    //             'kesimpulan_bbu' => $request->input('kesimpulan_bbu', 'Belum dihitung'),
-    //             'kesimpulan_tbuu' => $request->input('kesimpulan_tbuu', 'Belum dihitung'),
-    //             'kesimpulan_bbtb' => $request->input('kesimpulan_bbtb', 'Belum dihitung'),
-    //             'pemeriksa' => $validated['pemeriksa']
-    //         ]);
+    //         // ✅ MANUAL DATA PREPARATION
+    //         $data = [
+    //             'nik' => $request->nik,
+    //             'tanggal_pemeriksaan' => $request->tanggal_pemeriksaan,
+    //             'bb' => (float)$request->bb,
+    //             'tb' => (float)$request->tb,
+    //             'umur' => (int)$request->umur,
+    //             'pemeriksa' => $request->pemeriksa,
 
-    //         Log::info('✅ SUCCESS - ID: ' . $pemeriksaan->id);
+    //             // ✅ KESIMPULAN
+    //             'kesimpulan_bbu' => $request->kesimpulan_bbu,
+    //             'kesimpulan_tbuu' => $request->kesimpulan_tbuu,
+    //             'kesimpulan_bbtb' => $request->kesimpulan_bbtb,
+    //             'status_perubahan_bb' => $request->status_perubahan_bb,
 
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Data pemeriksaan balita berhasil disimpan!',
-    //             'id' => $pemeriksaan->id
-    //         ]);
-    //     } catch (\Illuminate\Validation\ValidationException $e) {
-    //         Log::error('💥 VALIDATION ERROR: ' . json_encode($e->errors()));
+    //             // ✅ CHECKBOX FIELDS - SAFE CONVERSION
+    //             'asi_eksklusif' => $request->has('asi_eksklusif'),
+    //             'mp_asi' => $request->has('mp_asi'),
+    //             'imunisasi' => $request->has('imunisasi'),
+    //             'vitamin_a' => $request->has('vitamin_a'),
+    //             'obat_cacing' => $request->has('obat_cacing'),
+    //             'mt_pangan_lokal' => $request->has('mt_pangan_lokal'),
+    //             'ada_gejala_sakit' => $request->has('ada_gejala_sakit'),
+    //             'sebutkan_gejala' => $request->sebutkan_gejala,
+    //             'mp_asi_protein_hewani' => $request->mp_asi_protein_hewani,
 
-    //         // ✅ GET FIRST ERROR MESSAGE
-    //         $firstError = collect($e->errors())->flatten()->first();
+    //             // ✅ TBC FIELDS - SAFE CONVERSION
+    //             'batuk_terus_menerus' => $request->has('batuk_terus_menerus'),
+    //             'demam_2_minggu' => $request->has('demam_2_minggu'),
+    //             'bb_tidak_naik' => $request->has('bb_tidak_naik'),
+    //             'kontak_tbc' => $request->has('kontak_tbc'),
+    //         ];
 
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => $firstError  // ✅ SPECIFIC ERROR MESSAGE
-    //         ], 422);
+    //         // ✅ CALCULATE TBC SYMPTOMS - GUARANTEED INTEGER
+    //         $gejalaTbc = 0;
+    //         if ($data['batuk_terus_menerus']) $gejalaTbc++;
+    //         if ($data['demam_2_minggu']) $gejalaTbc++;
+    //         if ($data['bb_tidak_naik']) $gejalaTbc++;
+    //         if ($data['kontak_tbc']) $gejalaTbc++;
+
+    //         // ✅ FORCE INTEGER TYPE
+    //         $data['jumlah_gejala_tbc'] = (int)$gejalaTbc;
+
+    //         // ✅ RUJUKAN STATUS
+    //         $data['rujuk_puskesmas'] = $gejalaTbc >= 1 ? 'Perlu Rujukan' : 'Tidak Perlu Rujukan';
+
+    //         // ✅ SAVE TO DATABASE
+    //         $pemeriksaan = PemeriksaanBalita::create($data);
+
+    //         return redirect('/input-pemeriksaan')
+    //             ->with('success', 'Data berhasil disimpan!')
+    //             ->with('message', 'Pemeriksaan TBC: ' . $gejalaTbc . ' gejala ditemukan');
     //     } catch (\Exception $e) {
-    //         Log::error('💥 ERROR: ' . $e->getMessage());
+    //         Log::error('PEMERIKSAAN ERROR', [
+    //             'message' => $e->getMessage(),
+    //             'input' => $request->all()
+    //         ]);
 
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Gagal menyimpan data'
-    //         ], 500);
+    //         return redirect('/input-pemeriksaan')
+    //             ->with('error', 'Gagal menyimpan: ' . $e->getMessage())
+    //             ->withInput();
     //     }
     // }
-    // ✅ GANTI METHOD simpanPemeriksaanBalita JADI INI:
+
+    // public function cekBBTerakhir(Request $request)
+    // {
+    //     $nik = $request->input('nik');
+
+    //     $bbTerakhir = PemeriksaanBalita::where('nik', $nik)
+    //         ->orderBy('tanggal_pemeriksaan', 'desc')
+    //         ->value('bb');
+
+    //     return response()->json([
+    //         'bb_terakhir' => $bbTerakhir
+    //     ]);
+    // }
+
+
+    // PASTIKAN DI METHOD simpanPemeriksaanBalita() ADA INI:
+
     public function simpanPemeriksaanBalita(Request $request)
     {
         try {
-            $validated = $request->validate([
+            // ✅ VALIDATION TERMASUK LINGKAR KEPALA & LILA
+            $request->validate([
                 'nik' => 'required|string|max:16',
                 'tanggal_pemeriksaan' => 'required|date',
-                'bb' => 'required|numeric|min:0|max:100',
-                'tb' => 'required|numeric|min:0|max:200',
+                'bb' => 'required|numeric|min:0.5|max:50',
+                'tb' => 'required|numeric|min:30|max:150',
+                'lingkar_kepala' => 'nullable|numeric|min:30|max:60',
+                'lila' => 'nullable|numeric|min:5|max:25',
                 'umur' => 'required|integer|min:0|max:60',
-                'kesimpulan_bbu' => 'nullable|string',
-                'kesimpulan_tbuu' => 'nullable|string',
-                'kesimpulan_bbtb' => 'nullable|string',
-                'status_perubahan_bb' => 'nullable|string|max:1000',
-                'pemeriksa' => 'nullable|string'
+                'pemeriksa' => 'required|string|max:255',
             ]);
 
-            // ✅ CREATE DENGAN SEMUA FIELD TERMASUK status_perubahan_bb
-            $pemeriksaan = PemeriksaanBalita::create($validated);
+            // ✅ MANUAL DATA PREPARATION
+            $data = [
+                'nik' => $request->nik,
+                'tanggal_pemeriksaan' => $request->tanggal_pemeriksaan,
+                'bb' => (float)$request->bb,
+                'tb' => (float)$request->tb,
+                'lingkar_kepala' => $request->lingkar_kepala ? (float)$request->lingkar_kepala : null,
+                'lila' => $request->lila ? (float)$request->lila : null,
+                'umur' => (int)$request->umur,
+                'pemeriksa' => $request->pemeriksa,
 
-            $user = User::where('nik', $validated['nik'])->first();
-            $namaBalita = $user ? $user->nama : 'NIK: ' . $validated['nik'];
+                // ✅ KESIMPULAN
+                'kesimpulan_bbu' => $request->kesimpulan_bbu,
+                'kesimpulan_tbuu' => $request->kesimpulan_tbuu,
+                'kesimpulan_bbtb' => $request->kesimpulan_bbtb,
+                'kesimpulan_lingkar_kepala' => $request->kesimpulan_lingkar_kepala,
+                'kesimpulan_lila' => $request->kesimpulan_lila,
+                'status_perubahan_bb' => $request->status_perubahan_bb,
 
-            // ✅ LOG UNTUK DEBUG
-            Log::info('📊 PEMERIKSAAN BALITA SAVED', [
-                'nik' => $validated['nik'],
-                'nama' => $namaBalita,
-                'bb' => $validated['bb'],
-                'status_perubahan_bb' => $validated['status_perubahan_bb'],
-                'id' => $pemeriksaan->id
-            ]);
-            // ✅ GANTI BARIS 1689-1691 JADI INI:
+                // ✅ PROGRAM FIELDS
+                'asi_eksklusif' => $request->has('asi_eksklusif'),
+                'mp_asi' => $request->has('mp_asi'),
+                'imunisasi' => $request->has('imunisasi'),
+                'vitamin_a' => $request->has('vitamin_a'),
+                'obat_cacing' => $request->has('obat_cacing'),
+                'mt_pangan_lokal' => $request->has('mt_pangan_lokal'),
+                'ada_gejala_sakit' => $request->has('ada_gejala_sakit'),
+                'sebutkan_gejala' => $request->sebutkan_gejala,
+                'mp_asi_protein_hewani' => $request->mp_asi_protein_hewani,
+
+                // ✅ TBC FIELDS
+                'batuk_terus_menerus' => $request->has('batuk_terus_menerus'),
+                'demam_2_minggu' => $request->has('demam_2_minggu'),
+                'bb_tidak_naik' => $request->has('bb_tidak_naik'),
+                'kontak_tbc' => $request->has('kontak_tbc'),
+            ];
+
+            // ✅ CALCULATE TBC SYMPTOMS
+            $gejalaTbc = 0;
+            if ($data['batuk_terus_menerus']) $gejalaTbc++;
+            if ($data['demam_2_minggu']) $gejalaTbc++;
+            if ($data['bb_tidak_naik']) $gejalaTbc++;
+            if ($data['kontak_tbc']) $gejalaTbc++;
+
+            $data['jumlah_gejala_tbc'] = (int)$gejalaTbc;
+            $data['rujuk_puskesmas'] = $gejalaTbc >= 1 ? 'Perlu Rujukan' : 'Tidak Perlu Rujukan';
+
+            // ✅ SAVE TO DATABASE
+            $pemeriksaan = PemeriksaanBalita::create($data);
+
             return redirect('/input-pemeriksaan')
-                ->with('success', 'Data berhasil disimpan')
-                ->with('message', 'Pemeriksaan ' . $namaBalita . ' telah dicatat');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return redirect('/input-pemeriksaan')
-                // ->with('error', 'Gagal Menyimpan, Data tidak valid: ' . implode(', ', $e->validator->errors()->all()));'
-                ->with('error', 'Gagal Menyimpan data, data tidak valid, silakan periksa kembali input Anda');
+                ->with('success', 'Data berhasil disimpan!')
+                ->with('message', 'Data lengkap termasuk Lingkar Kepala & LILA');
         } catch (\Exception $e) {
+            Log::error('PEMERIKSAAN ERROR', [
+                'message' => $e->getMessage(),
+                'input' => $request->all()
+            ]);
+
             return redirect('/input-pemeriksaan')
-                ->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
+                ->with('error', 'Gagal menyimpan: ' . $e->getMessage())
+                ->withInput();
         }
     }
-
-    public function cekBBTerakhir(Request $request)
-    {
-        $nik = $request->input('nik');
-
-        $bbTerakhir = PemeriksaanBalita::where('nik', $nik)
-            ->orderBy('tanggal_pemeriksaan', 'desc')
-            ->value('bb');
-
-        return response()->json([
-            'bb_terakhir' => $bbTerakhir
-        ]);
-    }
-
-
-
 
 
 

@@ -4,6 +4,7 @@ use App\Http\Controllers\ContoController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MenuController;
+use App\Http\Controllers\DataPemeriksaanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -148,6 +149,13 @@ Route::group(['middleware' => ['auth', 'ceklevel:admin', 'redirectrole:admin']],
 Route::get('/search-anggota', [MenuController::class, 'searchAnggota'])->name('search-anggota');
 
 Route::group(['middleware' => ['auth', 'ceklevel:kader', 'redirectrole:kader']], function () {
+
+
+
+    // searching akun yang ada di kader
+    Route::get('/search-pasien', [MenuController::class, 'searchPasien'])->name('search-pasien');
+
+    // lengkapi data
     Route::get('/lengkapi-data/{id}', [MenuController::class, 'formLengkapiData']);
     Route::post('/lengkapi-data/{id}', [MenuController::class, 'simpanLengkapiData']);
 
@@ -158,6 +166,8 @@ Route::group(['middleware' => ['auth', 'ceklevel:kader', 'redirectrole:kader']],
     Route::post('/update-pasien/{id}', [MenuController::class, 'updatepasien'])->name('update-pasien');
     Route::get('/delete-pasien/{id}', [MenuController::class, 'destroy'])->name('delete-pasien');
 
+
+
     // input pemeriksaan
     Route::get('/input-pemeriksaan', [MenuController::class, 'inputPemeriksaan'])->name('input-pemeriksaan');
     Route::post('/cari-pasien', [MenuController::class, 'cariPasien'])->name('cari-pasien');
@@ -166,10 +176,20 @@ Route::group(['middleware' => ['auth', 'ceklevel:kader', 'redirectrole:kader']],
     Route::post('/simpan-pemeriksaan-balita', [MenuController::class, 'simpanPemeriksaanBalita'])->name('simpan-pemeriksaan-balita');
     Route::post('/cek-bb-terakhir', [MenuController::class, 'cekBBTerakhir']);
     Route::get('/get-last-examination/{nik}', [MenuController::class, 'getLastExamination']);
+
+
+
+    // TAMBAH ROUTES INI BRO!
+    Route::get('/data-pemeriksaan', [DataPemeriksaanController::class, 'index']);
+    Route::get('/data-pemeriksaan/get-data', [DataPemeriksaanController::class, 'getData']);
+    Route::get('/data-pemeriksaan/filter-options', [DataPemeriksaanController::class, 'getFilterOptions']);
+    Route::get('/data-pemeriksaan/detail/{id}', [DataPemeriksaanController::class, 'detail']); // ✅ PERBAIKI INI
 });
 
 Route::group(['middleware' => ['auth', 'ceklevel:balita', 'redirectrole:balita']], function () {
     Route::get('/balita-home', [MenuController::class, 'balitaHome'])->name('balita-home');
+    // Halaman Balita Home
+    // Route::get('/balita-home', [MenuController::class, 'balitaHome'])->name('balita.home');
 });
 
 Route::group(['middleware' => ['auth', 'ceklevel:remaja', 'redirectrole:remaja']], function () {
