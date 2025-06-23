@@ -1,4 +1,4 @@
-{{-- filepath: resources/views/admin-page/input-pemeriksaan.blade.php --}}
+{{-- filepath: c:\laragon\www\posyandu\resources\views\admin-page\kader\input-pemeriksaan.blade.php --}}
 @extends('admin-layouts.main')
 @section('content')
 <div class="container">
@@ -37,6 +37,7 @@
 {{-- ✅ LOAD EXTERNAL JS FILES --}}
 <script src="{{ asset('js/balita-handler.js') }}"></script>
 <script src="{{ asset('js/gejala-sakit-balita.js') }}"></script>
+<script src="{{ asset('js/remaja-handler.js') }}"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -133,15 +134,19 @@ document.addEventListener('DOMContentLoaded', function() {
             // ✅ SUCCESS ALERT
             showAlert('Data ditemukan! Silakan isi form pemeriksaan', 'success');
             
-            // ✅ DETECT BALITA FORM
+            // ✅ DETECT FORM TYPE AND INITIALIZE
             const hasBalitaForm = html.includes('form-balita') || html.includes('Berat Badan Balita');
-            console.log('Form balita detected:', hasBalitaForm);
+            const hasRemajaForm = html.includes('form-remaja') || html.includes('Data Remaja') || html.includes('👤 Data Remaja');
             
-            if (hasBalitaForm) {
-                console.log('🔄 Initializing balita components...');
-                
-                // ✅ WAIT FOR HTML INJECTION THEN INITIALIZE
-                setTimeout(() => {
+            console.log('🔍 Form detection:');
+            console.log('  - Balita form:', hasBalitaForm ? '✅ FOUND' : '❌ NOT FOUND');
+            console.log('  - Remaja form:', hasRemajaForm ? '✅ FOUND' : '❌ NOT FOUND');
+            
+            // ✅ WAIT FOR HTML INJECTION THEN INITIALIZE
+            setTimeout(() => {
+                if (hasBalitaForm) {
+                    console.log('🔄 Initializing balita components...');
+                    
                     // ✅ INIT BALITA HANDLER (KALKULASI BB/TB)
                     if (typeof initializeBalitaHandler === 'function') {
                         console.log('📊 Calling initializeBalitaHandler...');
@@ -157,8 +162,29 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else {
                         console.error('❌ setupGejalaSakitToggleAfterAjax not found');
                     }
-                }, 200);
-            }
+                }
+                
+                if (hasRemajaForm) {
+                    console.log('🔄 Initializing remaja components...');
+                    
+                    // ✅ INIT REMAJA HANDLER (KALKULASI IMT, TEKANAN DARAH, dll)
+                    if (typeof initializeRemajaHandler === 'function') {
+                        console.log('📊 Calling initializeRemajaHandler...');
+                        const success = initializeRemajaHandler();
+                        if (success) {
+                            console.log('✅ Remaja handler initialized successfully');
+                        } else {
+                            console.error('❌ Failed to initialize remaja handler');
+                        }
+                    } else {
+                        console.error('❌ initializeRemajaHandler function not found in global scope');
+                        console.log('Available functions:', Object.keys(window).filter(key => key.includes('remaja') || key.includes('Remaja')));
+                    }
+                } else {
+                    console.log('ℹ️ No remaja form detected, skipping remaja initialization');
+                }
+                
+            }, 200);
         })
         .catch(error => {
             console.error('💥 Search error:', error);

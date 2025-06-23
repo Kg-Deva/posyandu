@@ -1,13 +1,32 @@
 <!-- filepath: c:\laragon\www\posyandu\resources\views\admin-page\pemeriksaan-form\balita.blade.php -->
 
+{{-- ✅ TAMBAHKAN CUSTOM STYLE UNTUK CARD --}}
+<style>
+.balita-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+    padding: 24px;
+    margin-bottom: 20px;
+}
+
+.balita-card h6 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+</style>
+
 <form id="form-balita" action="/simpan-pemeriksaan-balita" method="POST">
     @csrf
     
     <input type="hidden" id="nik_balita" name="nik" value="{{ $user->nik ?? '' }}">
     <!-- ✅ USE 'name' FIELD INSTEAD OF 'nama' -->
     <input type="hidden" name="pemeriksa" value="{{ auth()->user()->name ?? 'System' }}">
-    
-    <!-- ✅ CARD IDENTITAS TETAP BAGUS (JANGAN DIUBAH): -->
+    <input type="hidden" id="jenis_kelamin" name="jenis_kelamin" value="{{ $user->jenis_kelamin ?? '' }}">
+
+    <!-- ✅ CARD IDENTITAS TETAP SEPERTI SEKARANG -->
     @if(isset($user))
     <div class="data mb-3">
         <div class="mb-2">
@@ -25,7 +44,11 @@
             <span class="colon">:</span>
             <span class="value">{{ $user->nama }}</span>
         </div>
-        
+         <div class="info-row">
+            <span class="label">Kelamin</span>
+            <span class="colon">:</span>
+            <span class="value">{{ $user->jenis_kelamin ?? 'Belum diisi' }}</span>
+        </div>
         <div class="info-row">
             <span class="label">Pemeriksa</span>
             <span class="colon">:</span>
@@ -33,7 +56,7 @@
         </div>
     </div>
 
-    <!-- ✅ COMPARISON CARD TETAP BAGUS (JANGAN DIUBAH): -->
+    <!-- ✅ COMPARISON CARD TETAP SEPERTI SEKARANG -->
     <div id="bb-comparison-card" class="comparison-card mb-3" style="display: none;">
         <div class="d-flex align-items-center mb-2">
             <i class="bi bi-graph-up-arrow me-2"></i>
@@ -88,84 +111,92 @@
     </div>
     @endif
     
-    <!-- ✅ FORM FIELDS TETAP BAGUS (JANGAN DIUBAH): -->
-    <div class="row">
-        <div class="col-md-6">
-            <div class="mb-3">
-                <label for="tanggal_pemeriksaan" class="form-label">Tanggal Pemeriksaan</label>
-                <input type="date" class="form-control" id="tanggal_pemeriksaan" name="tanggal_pemeriksaan" 
-                       value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required>
-                <div class="form-text">Tidak boleh lebih dari hari ini</div>
+    <!-- ✅ CARD FORM FIELDS UTAMA -->
+    <div class="balita-card">
+        <h6>📋 Pemeriksaan Fisik</h6>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="tanggal_pemeriksaan" class="form-label">Tanggal Pemeriksaan</label>
+                    <input type="date" class="form-control" id="tanggal_pemeriksaan" name="tanggal_pemeriksaan" 
+                           value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required>
+                    <div class="form-text">Tidak boleh lebih dari hari ini</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="bb" class="form-label">Berat Badan (kg)</label>
+                    <input type="number" step="0.01" class="form-control" id="bb" name="bb" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="tb" class="form-label">Tinggi/Panjang Badan (cm)</label>
+                    <input type="number" step="0.1" class="form-control" id="tb" name="tb" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="umur" class="form-label">Umur Balita (bulan)</label>
+                    <input type="number" class="form-control" id="umur" name="umur" 
+                           placeholder="Masukkan umur dalam bulan" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="lingkar_kepala" class="form-label">Lingkar Kepala (Cm)</label>
+                    <input type="number" step="0.01" class="form-control" id="lingkar_kepala" name="lingkar_kepala" required>
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Ukur keliling kepala
+                    </small>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="lila" class="form-label">LILA - Lingkar Lengan Atas (Cm)</label>
+                    <input type="number" step="0.1" class="form-control" id="lila" name="lila">
+                    <small class="text-muted" id="lila-info">
+                        <i class="bi bi-info-circle me-1"></i>
+                        <span id="lila-status">Tunggu input umur untuk validasi...</span>
+                    </small>
+                </div>
             </div>
             
-            <div class="mb-3">
-                <label for="bb" class="form-label">Berat Badan (kg)</label>
-                <input type="number" step="0.01" class="form-control" id="bb" name="bb" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="tb" class="form-label">Tinggi/Panjang Badan (cm)</label>
-                <input type="number" step="0.1" class="form-control" id="tb" name="tb" required>
-            </div>
-            <div class="mb-3">
-                <label for="umur" class="form-label">Umur Balita (bulan)</label>
-                <input type="number" class="form-control" id="umur" name="umur" 
-                       placeholder="Masukkan umur dalam bulan" required>
-                {{-- <div class="form-text">Konversi dari "{{ $user->umur ?? 'Data umur' }}"</div> --}}
-            </div>
-            <div class="mb-3">
-                <label for="lingkar_kepala" class="form-label">Lingkar Kepala (Cm)</label>
-                <input type="number" step="0.01" class="form-control" id="lingkar_kepala" name="lingkar_kepala" required>
-                <small class="text-muted">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Ukur keliling kepala
-                </small>
-            </div>
-            <div class="mb-3">
-                <label for="lila" class="form-label">LILA - Lingkar Lengan Atas (Cm)</label>
-                <input type="number" step="0.1" class="form-control" id="lila" name="lila">
-                <small class="text-muted" id="lila-info">
-                    <i class="bi bi-info-circle me-1"></i>
-                    <span id="lila-status">Tunggu input umur untuk validasi...</span>
-                </small>
-            </div>
-        </div>
-        
-        <div class="col-md-6">
-            <div class="mb-3">
-                <label class="form-label">Kesimpulan BB/U (0-5 tahun)</label>
-                <input type="text" class="form-control bg-light" id="kesimpulan_bbu" name="kesimpulan_bbu" readonly>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Kesimpulan TB/U (0-5 tahun)</label>
-                <input type="text" class="form-control bg-light" id="kesimpulan_tbuu" name="kesimpulan_tbuu" readonly>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Kesimpulan Hasil Pengukuran BB/TB</label>
-                <input type="text" class="form-control bg-light" id="kesimpulan_bbtb" name="kesimpulan_bbtb" readonly>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Status Perubahan Berat Badan</label>
-                <input type="text" class="form-control bg-light" id="status_perubahan_bb" name="status_perubahan_bb" readonly>
-                <div class="form-text">Otomatis terisi berdasarkan perbandingan dengan pemeriksaan sebelumnya</div>
-            </div>
-             <div class="mb-3">
-                <label class="form-label">Kesimpulan Lingkar Kepala</label>
-                <input type="text" class="form-control bg-light" id="kesimpulan_lingkar_kepala" name="kesimpulan_lingkar_kepala" readonly>
-                <div class="form-text"> Kesimpulan otomatis berdasarkan input lingkar kepala</div>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Kesimpulan LILA</label>
-                <input type="text" class="form-control bg-light" id="kesimpulan_lila" name="kesimpulan_lila" readonly>
-                <div class="form-text" id="kesimpulan-lila-info">Kesimpulan otomatis berdasarkan input LILA</div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Kesimpulan BB/U (0-5 tahun)</label>
+                    <input type="text" class="form-control bg-light" id="kesimpulan_bbu" name="kesimpulan_bbu" readonly>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Kesimpulan TB/U (0-5 tahun)</label>
+                    <input type="text" class="form-control bg-light" id="kesimpulan_tbuu" name="kesimpulan_tbuu" readonly>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Kesimpulan Hasil Pengukuran BB/TB</label>
+                    <input type="text" class="form-control bg-light" id="kesimpulan_bbtb" name="kesimpulan_bbtb" readonly>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Status Perubahan Berat Badan</label>
+                    <input type="text" class="form-control bg-light" id="status_perubahan_bb" name="status_perubahan_bb" readonly>
+                    <div class="form-text">Otomatis terisi berdasarkan perbandingan dengan pemeriksaan sebelumnya</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Kesimpulan Lingkar Kepala</label>
+                    <input type="text" class="form-control bg-light" id="kesimpulan_lingkar_kepala" name="kesimpulan_lingkar_kepala" readonly>
+                    <div class="form-text">Kesimpulan otomatis berdasarkan input lingkar kepala</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Kesimpulan LILA</label>
+                    <input type="text" class="form-control bg-light" id="kesimpulan_lila" name="kesimpulan_lila" readonly>
+                    <div class="form-text">Kesimpulan otomatis berdasarkan input LILA</div>
+                </div>
             </div>
         </div>
     </div>
 
-   
-
-    <!-- ✅ 1. BALITA MENDAPATKAN SECTION (SIMPLE): -->
-    <div class="mb-4">
+    <!-- ✅ CARD BALITA MENDAPATKAN -->
+    <div class="balita-card">
         <h6>🍼 Balita Mendapatkan</h6>
         <div class="row">
             <div class="col-md-6">
@@ -204,9 +235,9 @@
         </div>
     </div>
 
-    <!-- ✅ 2. GEJALA SAKIT SECTION (SIMPLE): -->
-    <div class="mb-4">
-        <h6>Gejala Sakit</h6>
+    <!-- ✅ CARD GEJALA SAKIT -->
+    <div class="balita-card">
+        <h6>🤒 Gejala Sakit</h6>
         <div class="row">
             <div class="col-md-3">
                 <div class="form-check mb-2">
@@ -226,8 +257,8 @@
         </div>
     </div>
 
-    <!-- ✅ 3. EDUKASI/KONSELING SECTION (SIMPLE): -->
-    <div class="mb-4">
+    <!-- ✅ CARD EDUKASI/KONSELING -->
+    <div class="balita-card">
         <h6>📚 Edukasi/Konseling</h6>
         <div class="mb-3">
             <label for="mp_asi_protein_hewani" class="form-label">Jika memberikan MP ASI kaya protein hewani, sebutkan</label>
@@ -237,8 +268,8 @@
         </div>
     </div>
 
-    <!-- ✅ 4. SKRINING TBC SECTION (SIMPLE KAYAK YANG LAIN): -->
-    <div class="mb-4">
+    <!-- ✅ CARD SKRINING TBC -->
+    <div class="balita-card">
         <h6>🔍 Skrining Gejala TBC</h6>
         <div class="row">
             <div class="col-md-6">
@@ -270,32 +301,35 @@
             </div>
         </div>
         
-        <!-- ✅ HASIL TBC SIMPLE: -->
+        <!-- HASIL TBC -->
         <div class="row mt-3">
             <div class="col-md-6">
                 <label class="form-label">Jumlah Gejala TBC</label>
-                <input type="text" class="form-control bg-light" id="jumlah_gejala_tbc" 
+                <input type="text" class="form-control" id="jumlah_gejala_tbc" 
                        name="jumlah_gejala_tbc" readonly>
             </div>
             <div class="col-md-6">
                 <label class="form-label">Status Rujukan</label>
-                <input type="text" class="form-control bg-light" id="rujuk_puskesmas" 
+                <input type="text" class="form-control" id="rujuk_puskesmas" 
                        name="rujuk_puskesmas" readonly>
             </div>
         </div>
     </div>
 
-    <div class="mb-3 d-flex gap-2">
-        <button type="submit" class="btn btn-primary">
-            <i class="bi bi-save"></i> Simpan Data Pemeriksaan
-        </button>
-        <button type="reset" class="btn btn-secondary">
-            <i class="bi bi-arrow-clockwise"></i> Reset Form
-        </button>
+    <!-- ✅ CARD BUTTONS -->
+    <div class="balita-card">
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save"></i> Simpan Data Pemeriksaan
+            </button>
+            <button type="reset" class="btn btn-secondary">
+                <i class="bi bi-arrow-clockwise"></i> Reset Form
+            </button>
+        </div>
     </div>
 </form>
 
-<!-- ✅ TAMBAH STYLE DI BAWAH FORM: -->
+<!-- ✅ STYLE -->
 <link rel="stylesheet" href="{{ asset('css/input-pemeriksaan.css') }}">
 
 {{-- ✅ SCRIPT MINIMAL - CUMA FORM SUBMIT & BALITA HANDLER: --}}
