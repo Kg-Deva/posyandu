@@ -2311,6 +2311,7 @@ class BalitaHandler {
     if (jumlahGejalaField) {
       if (jumlahGejala === 0) {
         jumlahGejalaField.value = 'Tidak ada gejala TBC';
+        jumlahGejalaField.className = 'form-control'; // PUTIH BERSIH
       } else {
         jumlahGejalaField.value = `${jumlahGejala} gejala: ${gejalaList.join(', ')}`;
       }
@@ -2322,9 +2323,13 @@ class BalitaHandler {
       if (jumlahGejala >= 2) {
         rujukField.value = 'RUJUK - Perlu pemeriksaan lebih lanjut di Puskesmas';
         rujukField.className = 'form-control bg-danger text-white font-weight-bold';
-      } else {
+      } else if (jumlahGejala === 1) {
         rujukField.value = 'TIDAK RUJUK - Gejala TBC tidak mencukupi';
         rujukField.className = 'form-control bg-success text-white';
+      } else {
+        // 0 GEJALA - KOSONG DAN PUTIH BERSIH
+        rujukField.value = '';
+        rujukField.className = 'form-control';
       }
     }
 

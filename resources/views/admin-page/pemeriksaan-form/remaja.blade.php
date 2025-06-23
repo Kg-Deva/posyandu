@@ -25,6 +25,24 @@
     border: 1px solid #dee2e6;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
+
+.psycho-item {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-left: 4px solid #6c757d;
+}
+
+.psycho-item.concern {
+    border-left-color: #dc3545;
+    background: #fff5f5;
+}
+
+.psycho-item.safe {
+    border-left-color: #198754;
+    background: #f0fff4;
+}
 </style>
 
 <form id="form-remaja" action="/simpan-pemeriksaan-remaja" method="POST">
@@ -171,7 +189,7 @@
     </div>
 
     <!-- ✅ SKRINING TBC SECTION (4 ITEMS SEPERTI BALITA) -->
-  <div class="remaja-card">
+    <div class="remaja-card">
         <h6>🔍 Skrining Gejala TBC</h6>
         <div class="row">
             <div class="col-md-6">
@@ -218,13 +236,212 @@
         </div>
     </div>
 
+    <!-- ✅ NEW! SKRINING PSIKO-SOSIAL REMAJA -->
+    <div class="remaja-card">
+        <h6>🧠 Skrining Psiko-Sosial Remaja</h6>
+        <p class="text-muted small mb-3">
+            <i class="bi bi-info-circle me-1"></i>
+            Jawab dengan jujur untuk evaluasi kesehatan mental dan sosial yang lebih baik
+        </p>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <!-- 1. Kenyamanan di rumah -->
+                <div class="psycho-item mb-3">
+                    <label class="form-label fw-semibold mb-2">
+                        🏠 Apakah kamu merasa nyaman di rumah?
+                    </label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input psycho-check" type="radio" 
+                                   name="nyaman_dirumah" id="nyaman_ya" value="Ya">
+                            <label class="form-check-label text-success" for="nyaman_ya">
+                                <i class="bi bi-check-circle me-1"></i>Ya
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input psycho-check" type="radio" 
+                                   name="nyaman_dirumah" id="nyaman_tidak" value="Tidak">
+                            <label class="form-check-label text-danger" for="nyaman_tidak">
+                                <i class="bi bi-x-circle me-1"></i>Tidak
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Masalah pendidikan/pekerjaan -->
+                <div class="psycho-item mb-3">
+                    <label class="form-label fw-semibold mb-2">
+                        🎓 Memiliki masalah dengan pendidikan atau pekerjaan?
+                    </label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input psycho-check" type="radio" 
+                                   name="masalah_pendidikan" id="pendidikan_ya" value="Ya">
+                            <label class="form-check-label text-warning" for="pendidikan_ya">
+                                <i class="bi bi-exclamation-triangle me-1"></i>Ya
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input psycho-check" type="radio" 
+                                   name="masalah_pendidikan" id="pendidikan_tidak" value="Tidak">
+                            <label class="form-check-label text-success" for="pendidikan_tidak">
+                                <i class="bi bi-check-circle me-1"></i>Tidak
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Masalah pola makan -->
+                <div class="psycho-item mb-3">
+                    <label class="form-label fw-semibold mb-2">
+                        🍽️ Memiliki masalah dengan pola makan?
+                    </label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input psycho-check" type="radio" 
+                                   name="masalah_pola_makan" id="makan_ya" value="Ya">
+                            <label class="form-check-label text-warning" for="makan_ya">
+                                <i class="bi bi-exclamation-triangle me-1"></i>Ya
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input psycho-check" type="radio" 
+                                   name="masalah_pola_makan" id="makan_tidak" value="Tidak">
+                            <label class="form-check-label text-success" for="makan_tidak">
+                                <i class="bi bi-check-circle me-1"></i>Tidak
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Masalah aktivitas -->
+                <div class="psycho-item mb-3">
+                    <label class="form-label fw-semibold mb-2">
+                        🏃‍♂️ Memiliki masalah dengan aktivitas?
+                    </label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input psycho-check" type="radio" 
+                                   name="masalah_aktivitas" id="aktivitas_ya" value="Ya">
+                            <label class="form-check-label text-warning" for="aktivitas_ya">
+                                <i class="bi bi-exclamation-triangle me-1"></i>Ya
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input psycho-check" type="radio" 
+                                   name="masalah_aktivitas" id="aktivitas_tidak" value="Tidak">
+                            <label class="form-check-label text-success" for="aktivitas_tidak">
+                                <i class="bi bi-check-circle me-1"></i>Tidak
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <!-- 5. Masalah obat-obatan -->
+                <div class="psycho-item mb-3">
+                    <label class="form-label fw-semibold mb-2">
+                        💊 Memiliki masalah dengan obat-obatan?
+                    </label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input psycho-check" type="radio" 
+                                   name="masalah_obat" id="obat_ya" value="Ya">
+                            <label class="form-check-label text-danger" for="obat_ya">
+                                <i class="bi bi-exclamation-circle me-1"></i>Ya
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input psycho-check" type="radio" 
+                                   name="masalah_obat" id="obat_tidak" value="Tidak">
+                            <label class="form-check-label text-success" for="obat_tidak">
+                                <i class="bi bi-check-circle me-1"></i>Tidak
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Masalah kesehatan seksual -->
+                <div class="psycho-item mb-3">
+                    <label class="form-label fw-semibold mb-2">
+                        ❤️ Memiliki masalah dengan kesehatan seksual?
+                    </label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input psycho-check" type="radio" 
+                                   name="masalah_kesehatan_seksual" id="seksual_ya" value="Ya">
+                            <label class="form-check-label text-warning" for="seksual_ya">
+                                <i class="bi bi-exclamation-triangle me-1"></i>Ya
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input psycho-check" type="radio" 
+                                   name="masalah_kesehatan_seksual" id="seksual_tidak" value="Tidak">
+                            <label class="form-check-label text-success" for="seksual_tidak">
+                                <i class="bi bi-check-circle me-1"></i>Tidak
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. Masalah keamanan -->
+                <div class="psycho-item mb-3">
+                    <label class="form-label fw-semibold mb-2">
+                        🛡️ Memiliki masalah dengan keamanan?
+                    </label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input psycho-check" type="radio" 
+                                   name="masalah_keamanan" id="keamanan_ya" value="Ya">
+                            <label class="form-check-label text-danger" for="keamanan_ya">
+                                <i class="bi bi-exclamation-circle me-1"></i>Ya
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input psycho-check" type="radio" 
+                                   name="masalah_keamanan" id="keamanan_tidak" value="Tidak">
+                            <label class="form-check-label text-success" for="keamanan_tidak">
+                                <i class="bi bi-check-circle me-1"></i>Tidak
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="psycho-item mb-3">
+                    <label class="form-label fw-semibold mb-2">
+                        ⚠️ Memiliki keinginan bunuh diri/depresi?
+                    </label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input psycho-check" type="radio" 
+                                   name="masalah_keamanan" id="keamanan_ya" value="Ya">
+                            <label class="form-check-label text-danger" for="keamanan_ya">
+                                <i class="bi bi-exclamation-circle me-1"></i>Ya
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input psycho-check" type="radio" 
+                                   name="masalah_keamanan" id="keamanan_tidak" value="Tidak">
+                            <label class="form-check-label text-success" for="keamanan_tidak">
+                                <i class="bi bi-check-circle me-1"></i>Tidak
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+
     <!-- ✅ CARD CATATAN -->
     <div class="remaja-card">
-        <h6>📝 Catatan Tambahan</h6>
+        <h6>📝 Edukasi / Konseling</h6>
         <div class="mb-3">
-            <label for="catatan" class="form-label">Catatan Pemeriksaan (Opsional)</label>
-            <textarea class="form-control" id="catatan" name="catatan" rows="3" 
-                      placeholder="Tambahkan catatan khusus jika diperlukan..."></textarea>
+            <label for="catatan" class="form-label">Edukasi / Konseling (Opsional)</label>
+            <textarea class="form-control" id="edukasi" name="edukasi" rows="3" 
+                      placeholder="Tambahkan Edukasi atau Konseling jika diperlukan..."></textarea>
         </div>
     </div>
 
@@ -244,14 +461,3 @@
 <!-- ✅ STYLE -->
 <link rel="stylesheet" href="{{ asset('css/input-pemeriksaan.css') }}">
 
-<!-- ✅ REFERENSI STANDAR MEDIS -->
-<div class="card-section">
-    <h6>📚 Referensi Standar Medis:</h6>
-    <ul class="small mb-0">
-        <li><strong>IMT Remaja:</strong> WHO 2007 Growth Reference (10-19 tahun)</li>
-        <li><strong>Lingkar Perut:</strong> IDF 2007 untuk populasi Asia (≥90cm L, ≥80cm P)</li>
-        <li><strong>Tekanan Darah:</strong> AHA 2017 Guidelines yang diadaptasi Kemenkes</li>
-        <li><strong>Hemoglobin:</strong> WHO 2011 (Remaja ♀: ≥12.0 g/dL, ♂: ≥13.0 g/dL)</li>
-        <li><strong>Skrining TBC:</strong> Pedoman Kemenkes 2020 untuk remaja</li>
-    </ul>
-</div>

@@ -38,7 +38,7 @@
 <script src="{{ asset('js/balita-handler.js') }}"></script>
 <script src="{{ asset('js/gejala-sakit-balita.js') }}"></script>
 <script src="{{ asset('js/remaja-handler.js') }}"></script>
-
+<script src="{{ asset('js/bumil-handler.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🔧 Setting up input-pemeriksaan handlers...');
@@ -137,10 +137,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // ✅ DETECT FORM TYPE AND INITIALIZE
             const hasBalitaForm = html.includes('form-balita') || html.includes('Berat Badan Balita');
             const hasRemajaForm = html.includes('form-remaja') || html.includes('Data Remaja') || html.includes('👤 Data Remaja');
+            const hasBumilForm = html.includes('form-bumil') || html.includes('Data Ibu Hamil') || html.includes('🤱 Data Ibu Hamil');
             
             console.log('🔍 Form detection:');
             console.log('  - Balita form:', hasBalitaForm ? '✅ FOUND' : '❌ NOT FOUND');
             console.log('  - Remaja form:', hasRemajaForm ? '✅ FOUND' : '❌ NOT FOUND');
+            console.log('  - Bumil form:', hasBumilForm ? '✅ FOUND' : '❌ NOT FOUND');
             
             // ✅ WAIT FOR HTML INJECTION THEN INITIALIZE
             setTimeout(() => {
@@ -183,6 +185,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     console.log('ℹ️ No remaja form detected, skipping remaja initialization');
                 }
+                if (hasBumilForm) {
+                    console.log('🔄 Initializing ibu hamil components...');
+                    
+                    // ✅ INIT IBU HAMIL HANDLER (KALKULASI BB, LILA, TEKANAN DARAH, TBC)
+                    if (typeof initializeIbuHamilHandler === 'function') {
+                        console.log('📊 Calling initializeIbuHamilHandler...');
+                        const success = initializeIbuHamilHandler();
+                        if (success) {
+                            console.log('✅ Ibu hamil handler initialized successfully');
+                        } else {
+                            console.error('❌ Failed to initialize ibu hamil handler');
+                        }
+                    } else {
+                        console.error('❌ initializeIbuHamilHandler function not found in global scope');
+                        console.log('Available functions:', Object.keys(window).filter(key => key.includes('ibu') || key.includes('hamil') || key.includes('bumil')));
+                    }
+                } else {
+                    console.log('ℹ️ No ibu hamil form detected, skipping ibu hamil initialization');
+                }
+
                 
             }, 200);
         })

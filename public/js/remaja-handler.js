@@ -366,13 +366,15 @@ class RemajaHandler {
     const rujukField = document.getElementById('rujuk_puskesmas');
     if (rujukField) {
       if (jumlahGejala >= 2) {
-        // 2+ GEJALA - MERAH dengan tulisan putih
         rujukField.value = 'RUJUK - Perlu pemeriksaan lebih lanjut di Puskesmas';
         rujukField.className = 'form-control bg-danger text-white font-weight-bold';
-      } else {
-        // 1 GEJALA - HIJAU dengan tulisan putih
+      } else if (jumlahGejala === 1) {
         rujukField.value = 'TIDAK RUJUK - Gejala TBC tidak mencukupi';
         rujukField.className = 'form-control bg-success text-white';
+      } else {
+        // 0 GEJALA - KOSONG DAN PUTIH BERSIH
+        rujukField.value = '';
+        rujukField.className = 'form-control';
       }
     }
 
