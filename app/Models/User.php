@@ -79,4 +79,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(PemeriksaanBalita::class, 'nik', 'nik');
     }
+
+    // ✅ ADD THIS NEW RELATIONSHIP
+    public function pemeriksaanRemaja()
+    {
+        return $this->hasMany(PemeriksaanRemaja::class, 'nik', 'nik');
+    }
 }

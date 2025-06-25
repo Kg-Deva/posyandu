@@ -2310,10 +2310,11 @@ class BalitaHandler {
     const jumlahGejalaField = document.getElementById('jumlah_gejala_tbc');
     if (jumlahGejalaField) {
       if (jumlahGejala === 0) {
-        jumlahGejalaField.value = 'Tidak ada gejala TBC';
+        jumlahGejalaField.value = '';
         jumlahGejalaField.className = 'form-control'; // PUTIH BERSIH
       } else {
         jumlahGejalaField.value = `${jumlahGejala} gejala: ${gejalaList.join(', ')}`;
+        jumlahGejalaField.className = 'form-control'; // TETAP PUTIH
       }
     }
 

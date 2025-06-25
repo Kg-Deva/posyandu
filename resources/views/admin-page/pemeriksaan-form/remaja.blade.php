@@ -180,7 +180,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Kategori Tekanan Darah</label>
+                    <label class="form-label">Status Tekanan Darah</label>
                     <input type="text" class="form-control bg-light" id="kategori_tekanan_darah" name="kategori_tekanan_darah" readonly>
                     <div class="form-text">Kombinasi sistole dan diastole</div>
                 </div>
@@ -249,7 +249,7 @@
                 <!-- 1. Kenyamanan di rumah -->
                 <div class="psycho-item mb-3">
                     <label class="form-label fw-semibold mb-2">
-                        🏠 Apakah kamu merasa nyaman di rumah?
+                         Apakah kamu merasa nyaman di rumah?
                     </label>
                     <div class="d-flex gap-3">
                         <div class="form-check">
@@ -272,13 +272,13 @@
                 <!-- 2. Masalah pendidikan/pekerjaan -->
                 <div class="psycho-item mb-3">
                     <label class="form-label fw-semibold mb-2">
-                        🎓 Memiliki masalah dengan pendidikan atau pekerjaan?
+                         Memiliki masalah dengan pendidikan atau pekerjaan?
                     </label>
                     <div class="d-flex gap-3">
                         <div class="form-check">
                             <input class="form-check-input psycho-check" type="radio" 
                                    name="masalah_pendidikan" id="pendidikan_ya" value="Ya">
-                            <label class="form-check-label text-warning" for="pendidikan_ya">
+                             <label class="form-check-label text-danger" for="pendidikan_ya">
                                 <i class="bi bi-exclamation-triangle me-1"></i>Ya
                             </label>
                         </div>
@@ -295,13 +295,13 @@
                 <!-- 3. Masalah pola makan -->
                 <div class="psycho-item mb-3">
                     <label class="form-label fw-semibold mb-2">
-                        🍽️ Memiliki masalah dengan pola makan?
+                        Memiliki masalah dengan pola makan?
                     </label>
                     <div class="d-flex gap-3">
                         <div class="form-check">
                             <input class="form-check-input psycho-check" type="radio" 
                                    name="masalah_pola_makan" id="makan_ya" value="Ya">
-                            <label class="form-check-label text-warning" for="makan_ya">
+                             <label class="form-check-label text-danger" for="makan_ya">
                                 <i class="bi bi-exclamation-triangle me-1"></i>Ya
                             </label>
                         </div>
@@ -318,13 +318,13 @@
                 <!-- 4. Masalah aktivitas -->
                 <div class="psycho-item mb-3">
                     <label class="form-label fw-semibold mb-2">
-                        🏃‍♂️ Memiliki masalah dengan aktivitas?
+                         Memiliki masalah dengan aktivitas?
                     </label>
                     <div class="d-flex gap-3">
                         <div class="form-check">
                             <input class="form-check-input psycho-check" type="radio" 
                                    name="masalah_aktivitas" id="aktivitas_ya" value="Ya">
-                            <label class="form-check-label text-warning" for="aktivitas_ya">
+                             <label class="form-check-label text-danger" for="aktivitas_ya">
                                 <i class="bi bi-exclamation-triangle me-1"></i>Ya
                             </label>
                         </div>
@@ -343,7 +343,7 @@
                 <!-- 5. Masalah obat-obatan -->
                 <div class="psycho-item mb-3">
                     <label class="form-label fw-semibold mb-2">
-                        💊 Memiliki masalah dengan obat-obatan?
+                         Memiliki masalah dengan obat-obatan?
                     </label>
                     <div class="d-flex gap-3">
                         <div class="form-check">
@@ -366,13 +366,13 @@
                 <!-- 6. Masalah kesehatan seksual -->
                 <div class="psycho-item mb-3">
                     <label class="form-label fw-semibold mb-2">
-                        ❤️ Memiliki masalah dengan kesehatan seksual?
+                        Memiliki masalah dengan kesehatan seksual?
                     </label>
                     <div class="d-flex gap-3">
                         <div class="form-check">
                             <input class="form-check-input psycho-check" type="radio" 
                                    name="masalah_kesehatan_seksual" id="seksual_ya" value="Ya">
-                            <label class="form-check-label text-warning" for="seksual_ya">
+                             <label class="form-check-label text-danger" for="seksual_ya">
                                 <i class="bi bi-exclamation-triangle me-1"></i>Ya
                             </label>
                         </div>
@@ -389,7 +389,7 @@
                 <!-- 7. Masalah keamanan -->
                 <div class="psycho-item mb-3">
                     <label class="form-label fw-semibold mb-2">
-                        🛡️ Memiliki masalah dengan keamanan?
+                         Memiliki masalah dengan keamanan?
                     </label>
                     <div class="d-flex gap-3">
                         <div class="form-check">
@@ -410,20 +410,20 @@
                 </div>
                 <div class="psycho-item mb-3">
                     <label class="form-label fw-semibold mb-2">
-                        ⚠️ Memiliki keinginan bunuh diri/depresi?
+                         Memiliki keinginan bunuh diri/depresi?
                     </label>
                     <div class="d-flex gap-3">
                         <div class="form-check">
                             <input class="form-check-input psycho-check" type="radio" 
-                                   name="masalah_keamanan" id="keamanan_ya" value="Ya">
-                            <label class="form-check-label text-danger" for="keamanan_ya">
+                                   name="masalah_kesehatan_mental" id="mental_ya" value="Ya">
+                            <label class="form-check-label text-danger" for="mental_ya">
                                 <i class="bi bi-exclamation-circle me-1"></i>Ya
                             </label>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input psycho-check" type="radio" 
-                                   name="masalah_keamanan" id="keamanan_tidak" value="Tidak">
-                            <label class="form-check-label text-success" for="keamanan_tidak">
+                                   name="masalah_kesehatan_mental" id="mental_tidak" value="Tidak">
+                            <label class="form-check-label text-success" for="mental_tidak">
                                 <i class="bi bi-check-circle me-1"></i>Tidak
                             </label>
                         </div>

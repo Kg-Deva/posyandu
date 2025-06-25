@@ -50,6 +50,14 @@
                 </a>
             </li>
         @endif
+        @if(auth()->check() && auth()->user()->level == 'remaja')
+        <li class="sidebar-item {{ Request::is('remaja-home') ? 'active' : '' }}">
+                <a href="/remaja-home" class='sidebar-link'>
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+        @endif
         <li class="sidebar-title">Logout</li>
         <li class="sidebar-item">
             <a href="javascript:void(0);" onclick="event.preventDefault(); confirmLogout();" class='sidebar-link'>

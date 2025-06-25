@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\DataPemeriksaanController;
-
+use App\Http\Controllers\PemeriksaanRemajaController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -179,11 +179,18 @@ Route::group(['middleware' => ['auth', 'ceklevel:kader', 'redirectrole:kader']],
 
 
 
-    // TAMBAH ROUTES INI BRO!
+    // Route data pemeriksaan
     Route::get('/data-pemeriksaan', [DataPemeriksaanController::class, 'index']);
     Route::get('/data-pemeriksaan/get-data', [DataPemeriksaanController::class, 'getData']);
     Route::get('/data-pemeriksaan/filter-options', [DataPemeriksaanController::class, 'getFilterOptions']);
     Route::get('/data-pemeriksaan/detail/{id}', [DataPemeriksaanController::class, 'detail']); // ✅ PERBAIKI INI
+
+
+    //route input remaja
+    Route::post('/simpan-pemeriksaan-remaja', [PemeriksaanRemajaController::class, 'simpanPemeriksaanRemaja'])->name('simpan-pemeriksaan-remaja');
+    Route::get('/riwayat-pemeriksaan-remaja/{nik?}', [PemeriksaanRemajaController::class, 'riwayatPemeriksaan'])->name('riwayat-pemeriksaan-remaja');
+    Route::get('/detail-pemeriksaan-remaja/{id}', [PemeriksaanRemajaController::class, 'detailPemeriksaan'])->name('detail-pemeriksaan-remaja');
+    Route::get('/stats-remaja', [PemeriksaanRemajaController::class, 'getStats'])->name('stats-remaja');
 });
 
 Route::group(['middleware' => ['auth', 'ceklevel:balita', 'redirectrole:balita']], function () {
@@ -193,7 +200,7 @@ Route::group(['middleware' => ['auth', 'ceklevel:balita', 'redirectrole:balita']
 });
 
 Route::group(['middleware' => ['auth', 'ceklevel:remaja', 'redirectrole:remaja']], function () {
-    Route::get('/remaja-home', [MenuController::class, 'remajaHome'])->name('remaja-home');
+    Route::get('/remaja-home', [PemeriksaanRemajaController::class, 'remajaHome'])->name('remaja-home');
 });
 
 Route::group(['middleware' => ['auth', 'ceklevel:dewasa', 'redirectrole:dewasa']], function () {
