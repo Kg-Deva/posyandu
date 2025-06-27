@@ -6,6 +6,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\DataPemeriksaanController;
 use App\Http\Controllers\PemeriksaanRemajaController;
+use App\Http\Controllers\PemeriksaanIbuHamilController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -151,6 +152,8 @@ Route::get('/search-anggota', [MenuController::class, 'searchAnggota'])->name('s
 Route::group(['middleware' => ['auth', 'ceklevel:kader', 'redirectrole:kader']], function () {
 
 
+    //   export excel data pemeriksaan
+    Route::get('/data-pemeriksaan/export', [DataPemeriksaanController::class, 'exportExcel'])->name('data-pemeriksaan.export');
 
     // searching akun yang ada di kader
     Route::get('/search-pasien', [MenuController::class, 'searchPasien'])->name('search-pasien');
@@ -172,6 +175,7 @@ Route::group(['middleware' => ['auth', 'ceklevel:kader', 'redirectrole:kader']],
     Route::get('/input-pemeriksaan', [MenuController::class, 'inputPemeriksaan'])->name('input-pemeriksaan');
     Route::post('/cari-pasien', [MenuController::class, 'cariPasien'])->name('cari-pasien');
     Route::post('/simpan-pemeriksaan/{id}', [MenuController::class, 'simpanPemeriksaan'])->name('simpan-pemeriksaan');
+
     // input pemeriksaan balita
     Route::post('/simpan-pemeriksaan-balita', [MenuController::class, 'simpanPemeriksaanBalita'])->name('simpan-pemeriksaan-balita');
     Route::post('/cek-bb-terakhir', [MenuController::class, 'cekBBTerakhir']);
@@ -191,6 +195,18 @@ Route::group(['middleware' => ['auth', 'ceklevel:kader', 'redirectrole:kader']],
     Route::get('/riwayat-pemeriksaan-remaja/{nik?}', [PemeriksaanRemajaController::class, 'riwayatPemeriksaan'])->name('riwayat-pemeriksaan-remaja');
     Route::get('/detail-pemeriksaan-remaja/{id}', [PemeriksaanRemajaController::class, 'detailPemeriksaan'])->name('detail-pemeriksaan-remaja');
     Route::get('/stats-remaja', [PemeriksaanRemajaController::class, 'getStats'])->name('stats-remaja');
+
+
+    // route ibu hamil
+    Route::post('/simpan-pemeriksaan-ibu-hamil', [PemeriksaanIbuHamilController::class, 'simpanPemeriksaanIbuHamil'])->name('simpan-pemeriksaan-ibu-hamil');
+    Route::get('/riwayat-pemeriksaan-ibu-hamil/{nik?}', [PemeriksaanIbuHamilController::class, 'riwayatPemeriksaan'])->name('riwayat-pemeriksaan-ibu-hamil');
+    Route::get('/detail-pemeriksaan-ibu-hamil/{id}', [PemeriksaanIbuHamilController::class, 'detailPemeriksaan'])->name('detail-pemeriksaan-ibu-hamil');
+    Route::get('/stats-ibu-hamil', [PemeriksaanIbuHamilController::class, 'getStats'])->name('stats-ibu-hamil');
+
+    // Route alias untuk konsistensi dengan dashboard ibu hamil
+    Route::get('/ibu-hamil-riwayat/{nik}', [PemeriksaanIbuHamilController::class, 'riwayatPemeriksaan'])->name('ibu-hamil-riwayat');
+    Route::get('/ibu-hamil-detail/{id}', [PemeriksaanIbuHamilController::class, 'detailPemeriksaan'])->name('ibu-hamil-detail');
+    Route::get('/pemeriksaan-form-ibu-hamil', [MenuController::class, 'formPemeriksaanIbuHamil'])->name('pemeriksaan-form-ibu-hamil');
 });
 
 Route::group(['middleware' => ['auth', 'ceklevel:balita', 'redirectrole:balita']], function () {
@@ -208,7 +224,9 @@ Route::group(['middleware' => ['auth', 'ceklevel:dewasa', 'redirectrole:dewasa']
 });
 
 Route::group(['middleware' => ['auth', 'ceklevel:ibu hamil', 'redirectrole:ibu hamil']], function () {
-    Route::get('/ibu-hamil-home', [MenuController::class, 'ibuHamilHome'])->name('ibu-hamil-home');
+    Route::get('/ibu-hamil-home', [PemeriksaanIbuHamilController::class, 'ibuHamilHome'])->name('ibu-hamil-home');
+
+    // Route::get('/ibu-hamil-home', [MenuController::class, 'ibuHamilHome'])->name('ibu-hamil-home');
 });
 
 Route::group(['middleware' => ['auth', 'ceklevel:lansia', 'redirectrole:lansia']], function () {

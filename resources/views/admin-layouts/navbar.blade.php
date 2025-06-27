@@ -1,3 +1,4 @@
+
 <div class="sidebar-menu">
     <ul class="menu">
         <li class="sidebar-title">Menu</li>
@@ -58,6 +59,14 @@
                 </a>
             </li>
         @endif
+         @if(auth()->check() && auth()->user()->level == 'ibu hamil')
+        <li class="sidebar-item {{ Request::is('ibu-hamil-home') ? 'active' : '' }}">
+                <a href="/ibu-hamil-home" class='sidebar-link'>
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+        @endif
         <li class="sidebar-title">Logout</li>
         <li class="sidebar-item">
             <a href="javascript:void(0);" onclick="event.preventDefault(); confirmLogout();" class='sidebar-link'>
@@ -70,3 +79,6 @@
         </form>
     </ul>
 </div>
+
+
+

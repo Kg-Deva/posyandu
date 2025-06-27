@@ -93,6 +93,11 @@
                                         <label class="form-label">Kategori</label>
                                         <select id="filter-role" class="form-select">
                                             <option value="">Semua</option>
+                                            <option value="balita">Balita</option>
+                                            <option value="remaja">Remaja</option>
+                                            <option value="dewasa">Dewasa</option>
+                                            <option value="lansia">Lansia</option>
+                                            <option value="ibuhamil">Ibu Hamil</option>
                                         </select>
                                     </div>
                                     
@@ -197,18 +202,12 @@
                     <div class="row" id="table-hover-row">
                         <div class="col-12">
                             <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h4 class="card-title">Daftar Pemeriksaan</h4>
-                                <div class="d-flex gap-2">
-                                    {{-- ✅ BUTTON EXPORT EXCEL --}}
-                                    <button id="btn-export" class="btn btn-success">
-                                        <i data-feather="download"></i> Export Excel
-                                    </button>
-                                    {{-- <a href="/input-pemeriksaan" class="btn btn-primary">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h4 class="card-title">Daftar Pemeriksaan</h4>
+                                    <a href="/input-pemeriksaan" class="btn btn-primary">
                                         <i data-feather="plus"></i> Input Pemeriksaan
-                                    </a> --}}
+                                    </a>
                                 </div>
-                            </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
                                         <table class="table table-hover mb-0">
@@ -319,8 +318,7 @@
             bulanIni: document.getElementById('bulan-ini'),
             perluRujukan: document.getElementById('perlu-rujukan'),
             detailModal: new bootstrap.Modal(document.getElementById('detailModal')),
-            detailContent: document.getElementById('detail-content'),
-            btnExport: document.getElementById('btn-export'), // ✅ TAMBAH INI
+            detailContent: document.getElementById('detail-content')
         };
         
         // LOAD FILTER OPTIONS
@@ -403,7 +401,6 @@
         }
         
         // RENDER DATA - FIX INI BRO!
-        // ✅ UPDATE RENDER DATA - SUPPORT SEMUA JENIS
         function renderData(data, pagination) {
             if (!data || data.length === 0) {
                 elements.noData.style.display = 'block';
@@ -419,18 +416,12 @@
                 const userData = item.user || {};
                 const nama = userData.nama || '-';
                 const rw = userData.rw || '-';
-                const level = userData.level || item.jenis_pemeriksaan || '-';
+                const level = userData.level || '-';
                 
-                // ✅ JENIS BADGE
-                const jenisBadge = {
-                    'balita': '<span class="badge bg-primary">Balita</span>',
-                    'remaja': '<span class="badge bg-primary">Remaja</span>',
-                    'ibu-hamil': '<span class="badge bg-primary">Ibu Hamil</span>'
-                };
+                // STATUS BADGES
+                const roleBadge = getBadgeClass(level);
                 
-                const roleBadge = jenisBadge[item.jenis_pemeriksaan] || getBadgeClass(level);
-                
-                // ✅ RUJUKAN BADGE UNIVERSAL
+                // ✅ CUMA RUJUKAN BADGE AJA (STATUS KESEHATAN DIHILANGKAN)
                 const rujukanBadge = item.rujuk_puskesmas === 'Perlu Rujukan' ? 
                     '<span class="badge bg-danger">Perlu Rujukan</span>' : 
                     '<span class="badge bg-success">Normal</span>';
@@ -445,9 +436,10 @@
                         <td class="text-center">${roleBadge}</td>
                         <td class="text-center"><strong>${item.bb || '-'}</strong></td>
                         <td class="text-center"><strong>${item.tb || '-'}</strong></td>
+                        <!-- ✅ HILANGKAN STATUS KESEHATAN COLUMN -->
                         <td class="text-center">${rujukanBadge}</td>
                         <td>
-                            <button class="btn btn-sm btn-primary" onclick="showDetail(${item.id}, '${item.model_type}')" title="Detail">
+                            <button class="btn btn-sm btn-primary" onclick="showDetail(${item.id})" title="Detail">
                                 <i data-feather="eye"></i>
                             </button>
                         </td>
@@ -684,44 +676,6 @@
             elements.filterRujukan.value = ''; // ✅ TAMBAH INI
             loadData(1);
         });
-        
-        // ✅ TAMBAH EXPORT FUNCTION
-        function exportToExcel() {
-            console.log('Export button clicked'); // ✅ DEBUG
-            
-            // Show loading state
-            elements.btnExport.disabled = true;
-            elements.btnExport.innerHTML = '<i class="spinner-border spinner-border-sm me-2"></i>Exporting...';
-            
-            // Get current filter parameters
-            const params = new URLSearchParams({
-                search: elements.search.value,
-                bulan: elements.filterBulan.value,
-                tahun: elements.filterTahun.value,
-                role: elements.filterRole.value,
-                rw: elements.filterRw.value,
-                rujukan: elements.filterRujukan.value,
-                export: 'excel'
-            });
-            
-            const downloadUrl = `/data-pemeriksaan/export?${params}`;
-            console.log('Download URL:', downloadUrl); // ✅ DEBUG
-            
-            // ✅ ALTERNATIVE: DIRECT WINDOW OPEN
-            window.open(downloadUrl, '_blank');
-            
-            // Reset button state
-            setTimeout(() => {
-                elements.btnExport.disabled = false;
-                elements.btnExport.innerHTML = '<i data-feather="download"></i> Export Excel';
-                if (typeof feather !== 'undefined') {
-                    feather.replace();
-                }
-            }, 2000); // ✅ INCREASE TIMEOUT
-        }
-
-        // ✅ ADD EVENT LISTENER
-        elements.btnExport.addEventListener('click', exportToExcel);
         
         // INITIALIZE
         loadFilterOptions();

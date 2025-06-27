@@ -39,7 +39,7 @@
 }
 </style>
 
-<form id="form-bumil" action="/simpan-pemeriksaan-bumil" method="POST">
+<form id="form-bumil" action="/simpan-pemeriksaan-ibu-hamil" method="POST">
     @csrf
     
     <input type="hidden" id="nik_bumil" name="nik" value="{{ $user->nik ?? '' }}">
@@ -161,6 +161,7 @@
                     <input type="text" class="form-control" id="status_rujukan" name="status_rujukan" readonly>
                     <div class="form-text">Jika merah = Rujuk ke Puskesmas</div>
                 </div>
+                
             </div>
         </div>
     </div>
@@ -212,80 +213,98 @@
             </div>
         </div>
     </div>
-<div class="bumil-card">
-        <h6>💊 Pemberian Tablet Tambah Darah (TTD)</h6>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="jumlah_tablet_fe" class="form-label">Jumlah Tablet yang Diberikan</label>
-                    <input type="number" class="form-control" id="jumlah_tablet_fe" name="jumlah_tablet_fe" 
-                           placeholder="Contoh: 30" min="0">
-                    <div class="form-text">Isikan 0 jika tidak diberikan tablet</div>
-                </div>
-            </div>
-            
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="konsumsi_tablet_fe" class="form-label">Konsumsi Tablet Tambah Darah</label>
-                    <select class="form-select" id="konsumsi_tablet_fe" name="konsumsi_tablet_fe">
-                        <option value="">-- Pilih Kepatuhan Konsumsi --</option>
-                        <option value="Setiap hari">Setiap hari</option>
-                        <option value="Tidak setiap hari">Tidak setiap hari</option>
-                    </select>
-                </div>
+    <!-- ✅ SUPLEMENTASI DAN MAKANAN TAMBAHAN -->
+    <div class="bumil-card">
+    
+    <!-- TTD Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h6 class="text-primary mb-3">💊 Tablet Tambah Darah (TTD)</h6>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="jumlah_tablet_fe" class="form-label">Jumlah Tablet yang Diberikan</label>
+                <input type="number" class="form-control" id="jumlah_tablet_fe" name="jumlah_tablet_fe" 
+                       placeholder="Contoh: 30" min="0" required>
+                <div class="form-text">Isikan 0 jika tidak diberikan tablet</div>
             </div>
         </div>
-        
-        <!-- EDUKASI TTD OTOMATIS -->
-        <div class="row">
-            <div class="col-md-12">
-                <label class="form-label">Edukasi Tablet Tambah Darah</label>
-                <textarea class="form-control bg-light" id="edukasi_tablet_fe" name="edukasi_tablet_fe" 
-                          rows="2" readonly 
-                          placeholder="Edukasi akan muncul otomatis berdasarkan pilihan konsumsi..."></textarea>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="konsumsi_tablet_fe" class="form-label">Konsumsi Tablet Tambah Darah</label>
+                <select class="form-select" id="konsumsi_tablet_fe" name="konsumsi_tablet_fe" required>
+                    <option value="">-- Pilih Kepatuhan Konsumsi --</option>
+                    <option value="Setiap hari">Setiap hari</option>
+                    <option value="Tidak setiap hari">Tidak setiap hari</option>
+                </select>
             </div>
         </div>
     </div>
 
-    <!-- ✅ NEW! PEMBERIAN MAKANAN TAMBAHAN (MT) BUMIL KEK -->
-    <div class="bumil-card">
-        <h6>🍽️ Pemberian Makanan Tambahan (MT) Bumil KEK</h6>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="komposisi_mt_bumilkek" class="form-label">Komposisi MT Bumil KEK</label>
-                    <textarea class="form-control" id="komposisi_mt_bumilkek" name="komposisi_mt_bumilkek" 
-                              rows="2" placeholder="Contoh: Biskuit tinggi protein, susu formula ibu hamil, bubur kacang hijau"></textarea>
-                    <div class="form-text">Sebutkan jenis makanan tambahan yang diberikan</div>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="jumlah_porsi_mt" class="form-label">Jumlah Porsi yang Diberikan</label>
-                    <input type="number" class="form-control" id="jumlah_porsi_mt" name="jumlah_porsi_mt" 
-                           placeholder="Contoh: 7" min="0">
-                    <div class="form-text">Jumlah porsi/kemasan (isikan 0 jika tidak diberikan)</div>
-                </div>
+    <!-- MT Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h6 class="text-success mb-3">🍽️ Makanan Tambahan (MT) Bumil KEK</h6>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="komposisi_mt_bumilkek" class="form-label">Komposisi MT Bumil KEK</label>
+                <textarea class="form-control bg-light" id="komposisi_mt_bumilkek" name="komposisi_mt_bumilkek" 
+                          rows="2" placeholder="Contoh: Biskuit tinggi protein, susu formula ibu hamil, bubur kacang hijau" disabled></textarea>
+                <div class="form-text text-muted">Sebutkan jenis makanan tambahan yang diberikan (aktif jika porsi ≥1)</div>
             </div>
             
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="konsumsi_mt_bumilkek" class="form-label">Konsumsi MT Bumil KEK</label>
-                    <select class="form-select" id="konsumsi_mt_bumilkek" name="konsumsi_mt_bumilkek">
-                        <option value="">-- Pilih Kepatuhan Konsumsi --</option>
-                        <option value="Setiap hari">Setiap hari</option>
-                        <option value="Tidak setiap hari">Tidak setiap hari</option>
-                    </select>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">Edukasi MT Bumil KEK</label>
-                    <textarea class="form-control bg-light" id="edukasi_mt_bumilkek" name="edukasi_mt_bumilkek" 
-                              rows="2" readonly 
-                              placeholder="Edukasi akan muncul otomatis berdasarkan pilihan konsumsi..."></textarea>
-                </div>
+            <div class="mb-3">
+                <label for="jumlah_porsi_mt" class="form-label">Jumlah Porsi yang Diberikan</label>
+                <input type="number" class="form-control" id="jumlah_porsi_mt" name="jumlah_porsi_mt" 
+                       placeholder="Contoh: 7" min="0" required>
+                <div class="form-text">Jumlah porsi/kemasan (isikan 0 jika tidak diberikan)</div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="konsumsi_mt_bumilkek" class="form-label">Konsumsi MT Bumil KEK</label>
+                <select class="form-select" id="konsumsi_mt_bumilkek" name="konsumsi_mt_bumilkek">
+                    <option value="">-- Pilih Kepatuhan Konsumsi --</option>
+                    <option value="Setiap hari">Setiap hari</option>
+                    <option value="Tidak setiap hari">Tidak setiap hari</option>
+                </select>
             </div>
         </div>
     </div>
+
+    <!-- ✅ KELAS IBU SECTION BARU -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h6 class="text-info mb-3">👩‍🏫 Kelas Ibu</h6>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="mengikuti_kelas_ibu" class="form-label">Mengikuti Kelas Ibu</label>
+                <select class="form-select" id="mengikuti_kelas_ibu" name="mengikuti_kelas_ibu" required>
+                    <option value="">-- Pilih Status --</option>
+                    <option value="Ya">Ya</option>
+                    <option value="Tidak">Tidak</option>
+                </select>
+                <div class="form-text">Apakah ibu mengikuti kelas ibu hamil di Posyandu/Puskesmas?</div>
+            </div>
+        </div>
+        {{-- <div class="col-md-6">
+            <div class="mb-3">
+                <label for="frekuensi_kelas_ibu" class="form-label">Frekuensi Kehadiran</label>
+                <select class="form-select bg-light" id="frekuensi_kelas_ibu" name="frekuensi_kelas_ibu" disabled>
+                    <option value="">-- Pilih Frekuensi --</option>
+                    <option value="Rutin setiap pertemuan">Rutin setiap pertemuan</option>
+                    <option value="Kadang-kadang">Kadang-kadang</option>
+                    <option value="Jarang">Jarang</option>
+                </select>
+                <div class="form-text text-muted">Aktif jika mengikuti kelas ibu</div>
+            </div>
+        </div> --}}
+    </div>
+
+</div>
+
     <!-- ✅ CARD EDUKASI/KONSELING -->
     <div class="bumil-card">
         <h6>📝 Edukasi / Konseling</h6>
@@ -293,6 +312,9 @@
             <label for="edukasi" class="form-label">Edukasi / Konseling (Opsional)</label>
             <textarea class="form-control" id="edukasi" name="edukasi" rows="3" 
                       placeholder="Tambahkan edukasi atau konseling untuk ibu hamil jika diperlukan..."></textarea>
+            <div class="form-text text-muted">
+                <i class="bi bi-info-circle"></i> Field ini akan menjadi wajib jika konsumsi TTD atau MT tidak setiap hari
+            </div>
         </div>
     </div>
 
@@ -313,7 +335,7 @@
 <link rel="stylesheet" href="{{ asset('css/input-pemeriksaan.css') }}">
 
 <!-- ✅ REFERENSI STANDAR MEDIS -->
-<div class="card-section">
+{{-- <div class="card-section">
     <h6>📚 Referensi Standar Medis:</h6>
     <ul class="small mb-0">
         <li><strong>Berat Badan:</strong> Kurva pertambahan BB ibu hamil sesuai Buku KIA Kemenkes</li>
@@ -322,4 +344,4 @@
         <li><strong>Skrining TBC:</strong> Pedoman Kemenkes 2020 untuk ibu hamil</li>
         <li><strong>Rujukan:</strong> Jika ada parameter merah, segera rujuk ke Puskesmas</li>
     </ul>
-</div>
+</div> --}}
