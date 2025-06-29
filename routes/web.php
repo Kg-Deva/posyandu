@@ -1,12 +1,16 @@
 <?php
 
 use App\Http\Controllers\ContoController;
+use App\Http\Controllers\SkriningLansiaController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\DataPemeriksaanController;
 use App\Http\Controllers\PemeriksaanRemajaController;
 use App\Http\Controllers\PemeriksaanIbuHamilController;
+use App\Http\Controllers\PemeriksaanDewasaController;
+use App\Http\Controllers\PemeriksaanLansiaController;
+use App\Http\Controllers\SkriningDewasaController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -162,6 +166,7 @@ Route::group(['middleware' => ['auth', 'ceklevel:kader', 'redirectrole:kader']],
     Route::get('/lengkapi-data/{id}', [MenuController::class, 'formLengkapiData']);
     Route::post('/lengkapi-data/{id}', [MenuController::class, 'simpanLengkapiData']);
 
+    //route kader
     Route::get('/kader-home', [MenuController::class, 'kaderHome'])->name('kader-home');
     Route::get('/tambah-pasien', [MenuController::class, 'tambahpasien'])->name('tambah-pasien');
     Route::post('/simpan-pasien', [MenuController::class, 'simpanpasien'])->name('simpan-pasien');
@@ -170,8 +175,7 @@ Route::group(['middleware' => ['auth', 'ceklevel:kader', 'redirectrole:kader']],
     Route::get('/delete-pasien/{id}', [MenuController::class, 'destroy'])->name('delete-pasien');
 
 
-
-    // input pemeriksaan
+    // route input pemeriksaan
     Route::get('/input-pemeriksaan', [MenuController::class, 'inputPemeriksaan'])->name('input-pemeriksaan');
     Route::post('/cari-pasien', [MenuController::class, 'cariPasien'])->name('cari-pasien');
     Route::post('/simpan-pemeriksaan/{id}', [MenuController::class, 'simpanPemeriksaan'])->name('simpan-pemeriksaan');
@@ -203,16 +207,29 @@ Route::group(['middleware' => ['auth', 'ceklevel:kader', 'redirectrole:kader']],
     Route::get('/detail-pemeriksaan-ibu-hamil/{id}', [PemeriksaanIbuHamilController::class, 'detailPemeriksaan'])->name('detail-pemeriksaan-ibu-hamil');
     Route::get('/stats-ibu-hamil', [PemeriksaanIbuHamilController::class, 'getStats'])->name('stats-ibu-hamil');
 
-    // Route alias untuk konsistensi dengan dashboard ibu hamil
-    Route::get('/ibu-hamil-riwayat/{nik}', [PemeriksaanIbuHamilController::class, 'riwayatPemeriksaan'])->name('ibu-hamil-riwayat');
-    Route::get('/ibu-hamil-detail/{id}', [PemeriksaanIbuHamilController::class, 'detailPemeriksaan'])->name('ibu-hamil-detail');
-    Route::get('/pemeriksaan-form-ibu-hamil', [MenuController::class, 'formPemeriksaanIbuHamil'])->name('pemeriksaan-form-ibu-hamil');
+
+    // route dewasa
+    Route::post('/simpan-pemeriksaan-dewasa', [PemeriksaanDewasaController::class, 'store'])->name('pemeriksaan-dewasa.store');
+    Route::get('/skrining-tahunan-dewasa/{user}', [PemeriksaanDewasaController::class, 'skriningTahunanDewasa']);
+
+
+
+
+    //route lansia
+    Route::post('/simpan-pemeriksaan-lansia', [PemeriksaanLansiaController::class, 'store'])->name('pemeriksaan-lansia.store');
+    Route::get('/skrining-tahunan-lansia/{user}', [PemeriksaanLansiaController::class, 'skriningTahunan']);
+
+
+
+
+    // Route SKrining Lansia
+    Route::post('/simpan-skrining-tahunan-lansia', [SkriningLansiaController::class, 'store'])->name('skrining-lansia.store');
+    // Route Skrining Dewasa
+    Route::post('/simpan-skrining-tahunan-dewasa', [SkriningDewasaController::class, 'store']);
 });
 
 Route::group(['middleware' => ['auth', 'ceklevel:balita', 'redirectrole:balita']], function () {
     Route::get('/balita-home', [MenuController::class, 'balitaHome'])->name('balita-home');
-    // Halaman Balita Home
-    // Route::get('/balita-home', [MenuController::class, 'balitaHome'])->name('balita.home');
 });
 
 Route::group(['middleware' => ['auth', 'ceklevel:remaja', 'redirectrole:remaja']], function () {

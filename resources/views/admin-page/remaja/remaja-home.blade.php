@@ -553,6 +553,7 @@
     </div>
     @endif
 </div>
+
 <style>
 .bg-gradient-primary {
     background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);

@@ -34,11 +34,14 @@
     <div id="form-pemeriksaan"></div>
 </div>
 
+
 {{-- ✅ LOAD EXTERNAL JS FILES --}}
 <script src="{{ asset('js/balita-handler.js') }}"></script>
 <script src="{{ asset('js/gejala-sakit-balita.js') }}"></script>
 <script src="{{ asset('js/remaja-handler.js') }}"></script>
 <script src="{{ asset('js/bumil-handler.js') }}"></script>
+<script src="{{ asset('js/dewasa-handler.js') }}"></script>
+<script src="{{ asset('js/lansia-handler.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🔧 Setting up input-pemeriksaan handlers...');
@@ -138,11 +141,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const hasBalitaForm = html.includes('form-balita') || html.includes('Berat Badan Balita');
             const hasRemajaForm = html.includes('form-remaja') || html.includes('Data Remaja') || html.includes('👤 Data Remaja');
             const hasBumilForm = html.includes('form-bumil') || html.includes('Data Ibu Hamil') || html.includes('🤱 Data Ibu Hamil');
+            const hasDewasaForm = html.includes('form-dewasa') || html.includes('Data Dewasa');
+            const hasLansiaForm = html.includes('form-lansia') || html.includes('Data Lansia') || html.includes('👵 Data Lansia');
             
             console.log('🔍 Form detection:');
             console.log('  - Balita form:', hasBalitaForm ? '✅ FOUND' : '❌ NOT FOUND');
             console.log('  - Remaja form:', hasRemajaForm ? '✅ FOUND' : '❌ NOT FOUND');
             console.log('  - Bumil form:', hasBumilForm ? '✅ FOUND' : '❌ NOT FOUND');
+            console.log('  - Dewasa form:', hasDewasaForm ? '✅ FOUND' : '❌ NOT FOUND');
+            console.log('  - Lansia form:', hasLansiaForm ? '✅ FOUND' : '❌ NOT FOUND');
             
             // ✅ WAIT FOR HTML INJECTION THEN INITIALIZE
             setTimeout(() => {
@@ -204,6 +211,44 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     console.log('ℹ️ No ibu hamil form detected, skipping ibu hamil initialization');
                 }
+                if (hasDewasaForm) {
+                    console.log('🔄 Initializing dewasa components...');
+                    
+                    // ✅ INIT DEWASA HANDLER (KALKULASI IMT, TEKANAN DARAH, dll)
+                    if (typeof initializeDewasaHandler === 'function') {
+                        console.log('📊 Calling initializeDewasaHandler...');
+                        const success = initializeDewasaHandler();
+                        if (success) {
+                            console.log('✅ Dewasa handler initialized successfully');
+                        } else {
+                            console.error('❌ Failed to initialize dewasa handler');
+                        }
+                    } else {
+                        console.error('❌ initializeDewasaHandler function not found in global scope');
+                        console.log('Available functions:', Object.keys(window).filter(key => key.includes('dewasa') || key.includes('Dewasa')));
+                    }
+                } else {
+                    console.log('ℹ️ No dewasa form detected, skipping dewasa initialization');
+                }
+                if (hasLansiaForm) {
+                    console.log('🔄 Initializing lansia components...');
+                    
+                    // ✅ INIT LANSIA HANDLER (KALKULASI IMT, TEKANAN DARAH, dll)
+                    if (typeof initializeLansiaHandler === 'function') {
+                        console.log('📊 Calling initializeLansiaHandler...');
+                        const success = initializeLansiaHandler();
+                        if (success) {
+                            console.log('✅ Lansia handler initialized successfully');
+                        } else {
+                            console.error('❌ Failed to initialize lansia handler');
+                        }
+                    } else {
+                        console.error('❌ initializeLansiaHandler function not found in global scope');
+                        console.log('Available functions:', Object.keys(window).filter(key => key.includes('lansia') || key.includes('Lansia')));
+                    }
+                } else {
+                    console.log('ℹ️ No lansia form detected, skipping lansia initialization');
+                }
 
                 
             }, 200);
@@ -229,4 +274,254 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ Input pemeriksaan handlers attached successfully');
 });
 </script>
+
+<!-- 
+|--------------------------------------------------------------------------
+| Start Modal Skrining Tahunan untuk Lansia
+|--------------------------------------------------------------------------
+-->
+
+
+<div class="modal fade" id="skriningTahunanModal" tabindex="-1" aria-labelledby="skriningTahunanLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content" id="modal-skrining-tahunan-content">
+      <!-- AJAX akan load konten di sini -->
+    </div>
+  </div>
+</div>
+
+{{-- modal skrining tahunan untuk lansia --}}
+<script>
+function hitungSkorSkriningLansia() {
+    let total = 0;
+    let filled = 0;
+    const form = document.getElementById('form-skrining-tahunan-lansia');
+    if (!form) return;
+    const inputs = form.querySelectorAll('.skor-input');
+    inputs.forEach(function (el) {
+        if (el.value !== "") {
+            total += parseInt(el.value) || 0;
+            filled++;
+        }
+    });
+
+    if (filled === inputs.length) {
+        document.getElementById('total-skor').value = total;
+
+        let status = '';
+        if (total === 20) status = 'Mandiri (M)';
+        else if (total >= 15 && total <= 19) status = 'Ringan (R)';
+        else if (total >= 11 && total <= 14) status = 'Sedang (S)';
+        else if (total >= 6 && total <= 10) status = 'Berat (B)';
+        else if (total >= 0 && total <= 5) status = 'Total (T)';
+        document.getElementById('status-kemandirian').value = status;
+
+        document.getElementById('rujuk-field').style.display = (total < 20) ? 'block' : 'none';
+        updateStatusRujukanLansia(); // Tambahkan ini
+    } else {
+        document.getElementById('total-skor').value = '';
+        document.getElementById('status-kemandirian').value = '';
+        document.getElementById('rujuk-field').style.display = 'none';
+    }
+}
+
+// Jalankan setiap kali modal skrining tahunan lansia ditampilkan
+document.addEventListener('shown.bs.modal', function(e) {
+    if (e.target.id === 'skriningTahunanModal') {
+        const form = document.getElementById('form-skrining-tahunan-lansia');
+        if (form) {
+            form.querySelectorAll('.skor-input').forEach(function (el) {
+                el.removeEventListener('change', hitungSkorSkriningLansia);
+                el.addEventListener('change', hitungSkorSkriningLansia);
+            });
+            hitungSkorSkriningLansia();
+        }
+    }
+});
+</script>
+
+{{-- SCRIPT KESEHATAN MENTAL --}}
+<script>
+document.addEventListener('shown.bs.modal', function(e) {
+    if (e.target.id === 'skriningTahunanModal') {
+        const form = document.getElementById('form-skrining-tahunan-lansia');
+        if (form) {
+            const mentalInputs = form.querySelectorAll('.skor-mental');
+            function hitungSkorMental() {
+                let total = 0;
+                let adaPikiranAkhiriHidup = false;
+                mentalInputs.forEach(function(el) {
+                    if (el.value !== "") {
+                        total += parseInt(el.value) || 0;
+                        if (el.name.includes('pikiran_akhiri_hidup') && el.value === "1") {
+                            adaPikiranAkhiriHidup = true;
+                        }
+                    }
+                });
+                document.getElementById('total-skor-mental').value = total;
+                // Tampilkan rujukan jika skor >= 6 atau ada pikiran mengakhiri hidup
+                document.getElementById('rujuk-mental-field').style.display = (total >= 6 || adaPikiranAkhiriHidup) ? 'block' : 'none';
+                updateStatusRujukanLansia(); // Tambahkan ini
+            }
+            mentalInputs.forEach(function(el) {
+                el.removeEventListener('change', hitungSkorMental);
+                el.addEventListener('change', hitungSkorMental);
+            });
+            hitungSkorMental();
+        }
+    }
+});
+</script>
+
+{{-- SCRIPT SKILASSSSSS --}}
+<script>
+document.addEventListener('shown.bs.modal', function(e) {
+    if (e.target.id === 'skriningTahunanModal') {
+        const form = document.getElementById('form-skrining-tahunan-lansia');
+        if (form) {
+            const skilasInputs = form.querySelectorAll('.skor-skilas');
+            function cekRujukSkilas() {
+                let perluRujuk = false;
+                skilasInputs.forEach(function(el) {
+                    if (el.value === "1") {
+                        perluRujuk = true;
+                    }
+                });
+                document.getElementById('rujuk-skilas-field').style.display = perluRujuk ? 'block' : 'none';
+                updateStatusRujukanLansia(); // Tambahkan ini
+            }
+            skilasInputs.forEach(function(el) {
+                el.removeEventListener('change', cekRujukSkilas);
+                el.addEventListener('change', cekRujukSkilas);
+            });
+            cekRujukSkilas();
+        }
+    }
+});
+
+function updateStatusRujukanLansia() {
+    const rujukAks = document.getElementById('rujuk-field')?.style.display === 'block';
+    const rujukMental = document.getElementById('rujuk-mental-field')?.style.display === 'block';
+    const rujukSkilas = document.getElementById('rujuk-skilas-field')?.style.display === 'block';
+    const status = (rujukAks || rujukMental || rujukSkilas) ? 'Dirujuk' : 'Tidak Dirujuk';
+    document.getElementById('status-rujukan').value = status;
+}
+</script>
+
+{{-- /*
+|--------------------------------------------------------------------------
+|   End Modal Skrining Tahunan untuk Lansia
+|--------------------------------------------------------------------------
+*/ --}}
+
+
+{{-- <script>
+    function hitungSkorSkriningDewasa() {
+    let total = 0;
+    let filled = 0;
+    const form = document.getElementById('form-skrining-tahunan-dewasa');
+    if (!form) return;
+    const inputs = form.querySelectorAll('.skor-input');
+    inputs.forEach(function (el) {
+        if (el.value !== "") {
+            total += parseInt(el.value) || 0;
+            filled++;
+        }
+    });
+
+    if (filled === inputs.length) {
+        document.getElementById('total-skor').value = total;
+
+        let status = '';
+        if (total === 23) status = 'Mandiri (M)';
+        else if (total >= 15 && total <= 22) status = 'Ringan (R)';
+        else if (total >= 11 && total <= 14) status = 'Sedang (S)';
+        else if (total >= 6 && total <= 10) status = 'Berat (B)';
+        else if (total >= 0 && total <= 5) status = 'Total (T)';
+        document.getElementById('status-kemandirian').value = status;
+
+        document.getElementById('rujuk-field').style.display = (total < 23) ? 'block' : 'none';
+    } else {
+        document.getElementById('total-skor').value = '';
+        document.getElementById('status-kemandirian').value = '';
+        document.getElementById('rujuk-field').style.display = 'none';
+    }
+}
+// Jalankan setiap kali modal skrining tahunan dewasa ditampilkan
+document.addEventListener('shown.bs.modal', function(e) {
+    if (e.target.id === 'skriningTahunanModalDewasa') {
+        const form = document.getElementById('form-skrining-tahunan-dewasa');
+        if (form) {
+            form.querySelectorAll('.skor-input').forEach(function (el) {
+                el.removeEventListener('change', hitungSkorSkriningDewasa);
+                el.addEventListener('change', hitungSkorSkriningDewasa);
+            });
+            hitungSkorSkriningDewasa();
+        }
+    }
+});
+</script> --}}
+
+
+{{-- /*
+|--------------------------------------------------------------------------
+|   Start Modal Skrining Tahunan untuk Dewasa
+|--------------------------------------------------------------------------
+*/ --}}
+
+{{-- SCRIPT KESEHATAN MENTAL --}}
+<script>
+document.addEventListener('shown.bs.modal', function(e) {
+    if (e.target.id === 'skriningTahunanModalDewasa') { // Pastikan id modal sesuai
+        const form = document.getElementById('form-skrining-tahunan-dewasa');
+        if (form) {
+            const mentalInputs = form.querySelectorAll('.skor-mental');
+            function hitungSkorMental() {
+                let total = 0;
+                let adaPikiranAkhiriHidup = false;
+                mentalInputs.forEach(function(el) {
+                    if (el.value !== "") {
+                        total += parseInt(el.value) || 0;
+                        if (el.name.includes('pikiran_akhiri_hidup') && el.value === "1") {
+                            adaPikiranAkhiriHidup = true;
+                        }
+                    }
+                });
+                document.getElementById('total-skor-mental').value = total;
+                // Tampilkan rujukan jika skor >= 6 atau ada pikiran mengakhiri hidup
+                document.getElementById('rujuk-mental-field').style.display = (total >= 6 || adaPikiranAkhiriHidup) ? 'block' : 'none';
+                // Isi input hidden status rujukan (buat dulu di form)
+                let statusInput = document.getElementById('status-rujukan');
+                if (!statusInput) {
+                    statusInput = document.createElement('input');
+                    statusInput.type = 'hidden';
+                    statusInput.name = 'status_rujukan';
+                    statusInput.id = 'status-rujukan';
+                    form.appendChild(statusInput);
+                }
+                statusInput.value = (total >= 6 || adaPikiranAkhiriHidup) ? 'Dirujuk' : 'Tidak Dirujuk';
+            }
+            mentalInputs.forEach(function(el) {
+                el.removeEventListener('change', hitungSkorMental);
+                el.addEventListener('change', hitungSkorMental);
+            });
+            hitungSkorMental();
+        }
+    }
+});
+</script>
+
+{{-- modal skrining dewasa --}}
+<div class="modal fade" id="skriningTahunanModalDewasa" tabindex="-1" aria-labelledby="skriningTahunanLabelDewasa" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content" id="modal-skrining-tahunan-content-dewasa">
+      <!-- AJAX akan load konten di sini -->
+    </div>
+  </div>
+</div>
+
+
+
+
 @endsection
+

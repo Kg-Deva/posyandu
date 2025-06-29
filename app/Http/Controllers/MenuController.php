@@ -24,6 +24,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Symfony\Contracts\Service\Attribute\Required;
+use Illuminate\Support\Facades\Hash;
+use App\Models\PemeriksaanIbuHamil;
+use App\Models\PemeriksaanLansia;
+use App\Models\SkriningLansia;
+use App\Models\SkriningDewasa;
 
 
 class MenuController extends Controller
@@ -1578,12 +1583,18 @@ class MenuController extends Controller
                 return view('admin-page.pemeriksaan-form.balita', compact('user'))->render();
             } elseif ($user->level === 'remaja') {
                 return view('admin-page.pemeriksaan-form.remaja', compact('user'))->render();
-            } elseif ($user->level === 'dewasa') {
-                return view('admin-page.pemeriksaan-form.dewasa', compact('user'))->render();
             } elseif ($user->level === 'ibu hamil') {
                 return view('admin-page.pemeriksaan-form.ibu-hamil', compact('user'))->render();
+            } elseif ($user->level === 'dewasa') {
+                $skriningTerakhir = SkriningDewasa::where('user_id', $user->id)
+                    ->orderByDesc('tanggal_pemeriksaan')
+                    ->first();
+                return view('admin-page.pemeriksaan-form.dewasa', compact('user', 'skriningTerakhir'))->render();
             } elseif ($user->level === 'lansia') {
-                return view('admin-page.pemeriksaan-form.lansia', compact('user'))->render();
+                $skriningTerakhir = SkriningLansia::where('user_id', $user->id)
+                    ->orderByDesc('tanggal_pemeriksaan')
+                    ->first();
+                return view('admin-page.pemeriksaan-form.lansia', compact('user', 'skriningTerakhir'))->render();
             } else {
                 return response()->json(['error' => 'Level user tidak dikenali'], 400);
             }
