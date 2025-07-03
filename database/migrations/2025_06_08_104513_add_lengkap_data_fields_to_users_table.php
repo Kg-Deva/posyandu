@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             // Data umum
-              $table->boolean('data_lengkap')->default(false); // <-- tambahkan ini
+            $table->boolean('data_lengkap')->default(false); // <-- tambahkan ini
             $table->string('nama')->nullable();
             $table->string('jenis_kelamin')->nullable();
-            $table->string('nik')->nullable();
-            $table->date('tanggal_lahir')->nullable();
+            $table->string('nik')->nullable()->unique(); // ✅ NULLABLE tapi UNIQUE           
+            $table->date('tanggal_lahir')->nullable(); // ✅ TAMBAH INI
             $table->string('umur')->nullable();
             $table->string('alamat')->nullable();
             $table->string('no_hp')->nullable();
@@ -58,11 +58,33 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn([
-                  'data_lengkap','nama', 'jenis_kelamin', 'nik', 'tanggal_lahir', 'umur', 'alamat', 'no_hp', 'dusun', 'rt', 'rw', 'kecamatan', 'wilayah',
-                'berat_badan_lahir', 'panjang_badan_lahir', 'nama_ayah', 'nama_ibu',
-                'status_perkawinan', 'pekerjaan',
-                'riwayat_keluarga', 'riwayat_diri', 'perilaku_beresiko',
-                'jarak_kehamilan_tahun', 'jarak_kehamilan_bulan', 'berat_badan_ibu', 'hamil_ke', 'tinggi_badan_ibu'
+                'data_lengkap',
+                'nama',
+                'jenis_kelamin',
+                'nik',
+                'tanggal_lahir', // ✅ TAMBAH INI JUGA
+                'umur',
+                'alamat',
+                'no_hp',
+                'dusun',
+                'rt',
+                'rw',
+                'kecamatan',
+                'wilayah',
+                'berat_badan_lahir',
+                'panjang_badan_lahir',
+                'nama_ayah',
+                'nama_ibu',
+                'status_perkawinan',
+                'pekerjaan',
+                'riwayat_keluarga',
+                'riwayat_diri',
+                'perilaku_beresiko',
+                'jarak_kehamilan_tahun',
+                'jarak_kehamilan_bulan',
+                'berat_badan_ibu',
+                'hamil_ke',
+                'tinggi_badan_ibu'
             ]);
         });
     }

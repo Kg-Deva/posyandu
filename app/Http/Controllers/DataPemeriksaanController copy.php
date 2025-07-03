@@ -31,7 +31,7 @@ class DataPemeriksaanController extends Controller
             $role = $request->get('role', '');
             $allData = collect();
 
-            // ✅ BALITA DATA
+            // ✅ BALITA DATA - LOGIC SEDERHANA
             if (empty($role) || $role === 'balita') {
                 $balitaQuery = PemeriksaanBalita::with(['user' => function ($q) {
                     $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
@@ -42,6 +42,11 @@ class DataPemeriksaanController extends Controller
                 $balitaData = $balitaQuery->get()->map(function ($item) {
                     $rujukanStatus = 'Normal';
 
+                    // 1. Cek field rujuk_puskesmas
+                    // if (
+                    //     isset($item->rujuk_puskesmas) &&
+                    //     (str_contains($item->rujuk_puskesmas, 'RUJUK') || $item->rujuk_puskesmas === 'Perlu Rujukan')
+                    // ) {
                     if (
                         isset($item->rujuk_puskesmas) &&
                         (strpos($item->rujuk_puskesmas, 'RUJUK') !== false || $item->rujuk_puskesmas === 'Perlu Rujukan')
@@ -49,6 +54,7 @@ class DataPemeriksaanController extends Controller
                         $rujukanStatus = 'Perlu Rujukan';
                     }
 
+                    // 2. Cek TBC ≥ 2 gejala
                     $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
                     if (is_string($jumlahGejala) && preg_match('/(\d+)/', $jumlahGejala, $matches)) {
                         $jumlahGejala = (int)$matches[1];
@@ -57,6 +63,7 @@ class DataPemeriksaanController extends Controller
                         $rujukanStatus = 'Perlu Rujukan';
                     }
 
+                    // 3. Cek LILA hanya jika umur ≥ 6 bulan DAN < 11.5 cm
                     $umur = $item->umur ?? 0;
                     if ($umur >= 6 && $item->lila && floatval($item->lila) < 11.5) {
                         $rujukanStatus = 'Perlu Rujukan';
@@ -82,7 +89,7 @@ class DataPemeriksaanController extends Controller
                 $allData = $allData->merge($balitaData);
             }
 
-            // ✅ REMAJA DATA
+            // REMAJA DATA
             if (empty($role) || $role === 'remaja') {
                 $remajaQuery = PemeriksaanRemaja::with(['user' => function ($q) {
                     $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
@@ -104,6 +111,7 @@ class DataPemeriksaanController extends Controller
                         'umur' => $item->umur,
                         'rujuk_puskesmas' => ($healthStatus['category'] === 'urgent' ||
                             $item->rujuk_puskesmas === 'Perlu Rujukan') ? 'Perlu Rujukan' : 'Normal',
+                        // 'rujuk_puskesmas' => ($item->rujuk_puskesmas === 'Perlu Rujukan') ? 'Perlu Rujukan' : 'Normal',
                         'health_status' => $healthStatus,
                         'pemeriksa' => $item->pemeriksa,
                         'user' => $item->user,
@@ -115,7 +123,7 @@ class DataPemeriksaanController extends Controller
                 $allData = $allData->merge($remajaData);
             }
 
-            // ✅ IBU HAMIL DATA
+            // IBU HAMIL DATA
             if (empty($role) || $role === 'ibu-hamil') {
                 $ibuHamilQuery = PemeriksaanIbuHamil::with(['user' => function ($q) {
                     $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
@@ -136,6 +144,8 @@ class DataPemeriksaanController extends Controller
                         'lila' => $item->lila,
                         'umur' => $item->umur,
                         'perlu_rujukan' => $item->perlu_rujukan,
+                        // 'rujuk_puskesmas' => ($healthStatus['category'] === 'urgent' ||
+                        //     $item->perlu_rujukan) ? 'Perlu Rujukan' : 'Normal',
                         'rujuk_puskesmas' => ($item->perlu_rujukan) ? 'Perlu Rujukan' : 'Normal',
                         'health_status' => $healthStatus,
                         'pemeriksa' => $item->pemeriksa,
@@ -148,7 +158,7 @@ class DataPemeriksaanController extends Controller
                 $allData = $allData->merge($ibuHamilData);
             }
 
-            // ✅ DEWASA DATA
+            // DEWASA DATA
             if (empty($role) || $role === 'dewasa') {
                 $dewasaQuery = PemeriksaanDewasa::with(['user' => function ($q) {
                     $q->select('id', 'nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
@@ -160,6 +170,7 @@ class DataPemeriksaanController extends Controller
                     $rujukanStatus = 'Normal';
                     $umur = $item->user ? Carbon::parse($item->user->tanggal_lahir)->age : 0;
 
+                    // 1. Cek status_tbc (hanya jika persis "Rujuk ke Puskesmas" atau "Perlu Rujukan")
                     if (!empty($item->status_tbc) && (
                         $item->status_tbc === 'Rujuk ke Puskesmas' ||
                         $item->status_tbc === 'Perlu Rujukan'
@@ -167,6 +178,7 @@ class DataPemeriksaanController extends Controller
                         $rujukanStatus = 'Perlu Rujukan';
                     }
 
+                    // 2. Cek status_puma
                     if (!empty($item->status_puma) && (
                         $item->status_puma === 'Rujuk ke Puskesmas' ||
                         $item->status_puma === 'Perlu Rujukan'
@@ -174,10 +186,11 @@ class DataPemeriksaanController extends Controller
                         $rujukanStatus = 'Perlu Rujukan';
                     }
 
+                    // 3. Cek kesimpulan_td
                     if (!empty($item->kesimpulan_td) && $item->kesimpulan_td === 'Hipertensi') {
                         $rujukanStatus = 'Perlu Rujukan';
                     }
-
+                    // 4. Cek kesimpulan_gula_darah
                     if (!empty($item->kesimpulan_gula_darah) && $item->kesimpulan_gula_darah === 'Diabetes') {
                         $rujukanStatus = 'Perlu Rujukan';
                     }
@@ -185,7 +198,7 @@ class DataPemeriksaanController extends Controller
                     return [
                         'id' => $item->id,
                         'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
-                        'nik' => $item->nik,
+                        'nik' => $item->user->nik ?? null,
                         'bb' => $item->bb,
                         'tb' => $item->tb,
                         'sistole' => $item->sistole ?? null,
@@ -204,7 +217,7 @@ class DataPemeriksaanController extends Controller
                 $allData = $allData->merge($dewasaData);
             }
 
-            // ✅ LANSIA DATA
+            // LANSIA DATA
             if (empty($role) || $role === 'lansia') {
                 $lansiaQuery = PemeriksaanLansia::with(['user' => function ($q) {
                     $q->select('id', 'nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
@@ -212,9 +225,11 @@ class DataPemeriksaanController extends Controller
 
                 $this->applyFilters($lansiaQuery, $request);
 
+
                 $lansiaData = $lansiaQuery->get()->map(function ($item) {
                     $rujukanStatus = 'Normal';
 
+                    // 1. Cek status_tbc
                     if (!empty($item->status_tbc) && (
                         $item->status_tbc === 'Rujuk ke Puskesmas' ||
                         $item->status_tbc === 'Perlu Rujukan'
@@ -222,6 +237,7 @@ class DataPemeriksaanController extends Controller
                         $rujukanStatus = 'Perlu Rujukan';
                     }
 
+                    // 2. Cek status_puma
                     if (!empty($item->status_puma) && (
                         $item->status_puma === 'Rujuk ke Puskesmas' ||
                         $item->status_puma === 'Perlu Rujukan'
@@ -229,14 +245,16 @@ class DataPemeriksaanController extends Controller
                         $rujukanStatus = 'Perlu Rujukan';
                     }
 
+                    // 3. Cek skor_puma (kalau diisi dan > 6, langsung rujuk)
                     if (!is_null($item->skor_puma) && is_numeric($item->skor_puma) && $item->skor_puma > 6) {
                         $rujukanStatus = 'Perlu Rujukan';
                     }
 
+                    // 4. Cek kesimpulan_td
                     if (!empty($item->kesimpulan_td) && $item->kesimpulan_td === 'Hipertensi') {
                         $rujukanStatus = 'Perlu Rujukan';
                     }
-
+                    // 5. Cek kesimpulan_gula_darah
                     if (!empty($item->kesimpulan_gula_darah) && $item->kesimpulan_gula_darah === 'Diabetes') {
                         $rujukanStatus = 'Perlu Rujukan';
                     }
@@ -246,7 +264,7 @@ class DataPemeriksaanController extends Controller
                     return [
                         'id' => $item->id,
                         'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
-                        'nik' => $item->nik,
+                        'nik' => $item->user->nik ?? null,
                         'bb' => $item->bb,
                         'tb' => $item->tb,
                         'imt' => $item->imt ?? null,
@@ -265,17 +283,8 @@ class DataPemeriksaanController extends Controller
                 $allData = $allData->merge($lansiaData);
             }
 
-            // ✅ FILTER RUJUKAN SETELAH MERGE (INI YANG PENTING!)
-            if ($request->filled('rujukan')) {
-                $allData = $allData->filter(function ($item) use ($request) {
-                    return $item['rujuk_puskesmas'] === $request->rujukan;
-                })->values();
-            }
-
-            // ✅ SORT DATA
             $allData = $allData->sortByDesc('tanggal_pemeriksaan')->values();
 
-            // ✅ PAGINATION
             $page = $request->get('page', 1);
             $perPage = 10;
             $total = $allData->count();
@@ -643,8 +652,76 @@ class DataPemeriksaanController extends Controller
             });
         }
 
+        if ($request->filled('rujukan')) {
+            $modelClass = get_class($query->getModel());
 
-
+            if ($request->rujukan === 'Perlu Rujukan') {
+                if (strpos($modelClass, 'PemeriksaanIbuHamil') !== false) {
+                    $query->where('perlu_rujukan', true);
+                } elseif (strpos($modelClass, 'PemeriksaanDewasa') !== false || strpos($modelClass, 'PemeriksaanLansia') !== false) {
+                    $query->where(function ($q) {
+                        $q->where('kesimpulan_td', 'Hipertensi')
+                            ->orWhere('kesimpulan_gula_darah', 'Diabetes')
+                            ->orWhere('rujuk_puskesmas', 'Perlu Rujukan')
+                            ->orWhere('sistole', '>=', 140)
+                            ->orWhere('diastole', '>=', 90)
+                            ->orWhere('gula_darah', '>=', 200);
+                    });
+                } else {
+                    $query->where(function ($q) {
+                        $q->where('rujuk_puskesmas', 'LIKE', '%RUJUK%')
+                            ->orWhere('rujuk_puskesmas', 'Perlu Rujukan')
+                            ->orWhere('jumlah_gejala_tbc', 'LIKE', '2 gejala%')
+                            ->orWhere('jumlah_gejala_tbc', 'LIKE', '3 gejala%')
+                            ->orWhere('jumlah_gejala_tbc', 'LIKE', '4 gejala%')
+                            ->orWhere(function ($subQ) {
+                                $subQ->where('lila', '<', 11.5)->whereNotNull('lila');
+                            });
+                    });
+                }
+            } elseif ($request->rujukan === 'Tidak Perlu Rujukan') {
+                if (strpos($modelClass, 'PemeriksaanIbuHamil') !== false) {
+                    $query->where(function ($q) {
+                        $q->where('perlu_rujukan', false)->orWhereNull('perlu_rujukan');
+                    });
+                } elseif (strpos($modelClass, 'PemeriksaanDewasa') !== false || strpos($modelClass, 'PemeriksaanLansia') !== false) {
+                    $query->where(function ($q) {
+                        $q->where('kesimpulan_td', '!=', 'Hipertensi')
+                            ->where('kesimpulan_gula_darah', '!=', 'Diabetes')
+                            ->where(function ($subQ) {
+                                $subQ->where('rujuk_puskesmas', '!=', 'Perlu Rujukan')
+                                    ->orWhereNull('rujuk_puskesmas');
+                            })
+                            ->where(function ($subQ) {
+                                $subQ->where('sistole', '<', 140)->orWhereNull('sistole');
+                            })
+                            ->where(function ($subQ) {
+                                $subQ->where('diastole', '<', 90)->orWhereNull('diastole');
+                            })
+                            ->where(function ($subQ) {
+                                $subQ->where('gula_darah', '<', 200)->orWhereNull('gula_darah');
+                            });
+                    });
+                } else {
+                    $query->where(function ($q) {
+                        $q->where('rujuk_puskesmas', 'NOT LIKE', '%RUJUK%')
+                            ->orWhereNull('rujuk_puskesmas')
+                            ->orWhere('rujuk_puskesmas', 'Normal')
+                            ->orWhere('rujuk_puskesmas', 'TIDAK RUJUK%');
+                    })->where(function ($q) {
+                        $q->where('jumlah_gejala_tbc', 'NOT LIKE', '2 gejala%')
+                            ->where('jumlah_gejala_tbc', 'NOT LIKE', '3 gejala%')
+                            ->where('jumlah_gejala_tbc', 'NOT LIKE', '4 gejala%')
+                            ->orWhereNull('jumlah_gejala_tbc')
+                            ->orWhere('jumlah_gejala_tbc', '')
+                            ->orWhere('jumlah_gejala_tbc', 'LIKE', '0 gejala%')
+                            ->orWhere('jumlah_gejala_tbc', 'LIKE', '1 gejala%');
+                    })->where(function ($q) {
+                        $q->where('lila', '>=', 11.5)->orWhereNull('lila');
+                    });
+                }
+            }
+        }
 
         if ($request->filled('search')) {
             $search = $request->search;

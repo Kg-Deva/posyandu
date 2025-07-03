@@ -54,7 +54,6 @@ class User extends Authenticatable
         'tinggi_badan_ibu',
     ];
 
-
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -80,9 +79,32 @@ class User extends Authenticatable
         return $this->hasMany(PemeriksaanBalita::class, 'nik', 'nik');
     }
 
-    // ✅ ADD THIS NEW RELATIONSHIP
     public function pemeriksaanRemaja()
     {
         return $this->hasMany(PemeriksaanRemaja::class, 'nik', 'nik');
+    }
+
+    // ✅ TAMBAH RELASI UNTUK IBU HAMIL
+    public function pemeriksaanIbuHamil()
+    {
+        return $this->hasMany(PemeriksaanIbuHamil::class, 'nik', 'nik');
+    }
+
+    // ✅ TAMBAH RELASI UNTUK DEWASA
+    public function pemeriksaanDewasa()
+    {
+
+
+        // return $this->hasMany(PemeriksaanDewasa::class, 'user_id', 'id');
+
+        return $this->belongsTo(User::class, 'nik', 'nik');
+    }
+
+    // ✅ TAMBAH RELASI UNTUK LANSIA
+    public function pemeriksaanLansia()
+    {
+        // return $this->hasMany(PemeriksaanLansia::class, 'user_id', 'id');
+
+        return $this->belongsTo(User::class, 'nik', 'nik');
     }
 }

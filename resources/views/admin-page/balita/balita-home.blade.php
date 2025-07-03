@@ -907,7 +907,7 @@
                     </p>
                     
                     <div class="bg-light rounded-4 p-4 mb-4">
-                        <h5 class="fw-bold text-dark mb-3">📋 Yang Akan Diperiksa:</h5>
+                        <h5 class="text-muted">📋 Yang Akan Diperiksa:</h5>
                         <div class="row g-3">
                             <div class="col-md-3">
                                 <div class="text-center">
@@ -936,10 +936,7 @@
                         </div>
                     </div>
                     
-                    <a href="/input-pemeriksaan" class="btn btn-primary btn-lg rounded-pill px-5 py-3">
-                        <i class="bi bi-plus-circle me-2"></i>
-                        Mulai Pemeriksaan Pertama
-                    </a>
+                   
                 </div>
             </div>
         </div>

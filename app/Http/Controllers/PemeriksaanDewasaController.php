@@ -13,7 +13,8 @@ class PemeriksaanDewasaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
+            // 'user_id' => 'required|exists:users,id',
+            'nik' => 'required|exists:users,nik', // ✅ Ganti user_id jadi nik
             'tanggal_pemeriksaan' => 'required|date',
             'bb' => 'required|numeric',
             'tb' => 'required|numeric',

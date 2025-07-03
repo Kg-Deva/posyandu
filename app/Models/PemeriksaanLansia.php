@@ -12,7 +12,7 @@ class PemeriksaanLansia extends Model
     protected $table = 'pemeriksaan_lansia';
 
     protected $fillable = [
-        'user_id',
+        'nik', // ✅ TAMBAH ini
         'tanggal_pemeriksaan',
         'bb',
         'tb',
@@ -48,4 +48,11 @@ class PemeriksaanLansia extends Model
         'edukasi',
         'created_by',
     ];
+
+    // ✅ TAMBAH RELASI INI - INI YANG MISSING!
+    public function user()
+    {
+        // return $this->belongsTo(User::class, 'user_id', 'id');
+        return $this->belongsTo(User::class, 'nik', 'nik'); // ✅ GANTI iniFIX ini
+    }
 }

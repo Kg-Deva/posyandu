@@ -156,9 +156,9 @@ Route::get('/search-anggota', [MenuController::class, 'searchAnggota'])->name('s
 Route::group(['middleware' => ['auth', 'ceklevel:kader', 'redirectrole:kader']], function () {
 
 
-    //   export excel data pemeriksaan
+    //   export excel dan rekap data pemeriksaan
     Route::get('/data-pemeriksaan/export', [DataPemeriksaanController::class, 'exportExcel'])->name('data-pemeriksaan.export');
-
+    Route::get('/data-pemeriksaan/export-rekap', [DataPemeriksaanController::class, 'exportRekap']);
     // searching akun yang ada di kader
     Route::get('/search-pasien', [MenuController::class, 'searchPasien'])->name('search-pasien');
 
@@ -193,6 +193,7 @@ Route::group(['middleware' => ['auth', 'ceklevel:kader', 'redirectrole:kader']],
     Route::get('/data-pemeriksaan/filter-options', [DataPemeriksaanController::class, 'getFilterOptions']);
     Route::get('/data-pemeriksaan/detail/{id}', [DataPemeriksaanController::class, 'detail']); // ✅ PERBAIKI INI
 
+    Route::get('/test-health-status/{id}/{type?}', [DataPemeriksaanController::class, 'testHealthStatus']);
 
     //route input remaja
     Route::post('/simpan-pemeriksaan-remaja', [PemeriksaanRemajaController::class, 'simpanPemeriksaanRemaja'])->name('simpan-pemeriksaan-remaja');

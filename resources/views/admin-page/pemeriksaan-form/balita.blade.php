@@ -257,16 +257,7 @@
         </div>
     </div>
 
-    <!-- ✅ CARD EDUKASI/KONSELING -->
-    <div class="balita-card">
-        <h6>📚 Edukasi/Konseling</h6>
-        <div class="mb-3">
-            <label for="mp_asi_protein_hewani" class="form-label">Jika memberikan MP ASI kaya protein hewani, sebutkan</label>
-            <textarea class="form-control" id="mp_asi_protein_hewani" name="mp_asi_protein_hewani" rows="2" 
-                      placeholder="Contoh: telur, ikan, daging ayam, hati ayam, dll..."></textarea>
-            <div class="form-text">Kosongkan jika tidak memberikan MP ASI protein hewani</div>
-        </div>
-    </div>
+   
 
     <!-- ✅ CARD SKRINING TBC -->
     <div class="balita-card">
@@ -315,7 +306,16 @@
             </div>
         </div>
     </div>
-
+ <!-- ✅ CARD EDUKASI/KONSELING -->
+    <div class="balita-card">
+        <h6>📚 Edukasi/Konseling</h6>
+        <div class="mb-3">
+            <label for="mp_asi_protein_hewani" class="form-label">Jika memberikan MP ASI kaya protein hewani, sebutkan</label>
+            <textarea class="form-control" id="mp_asi_protein_hewani" name="mp_asi_protein_hewani" rows="2" 
+                      placeholder="Contoh: telur, ikan, daging ayam, hati ayam, dll..."></textarea>
+            {{-- <div class="form-text">Kosongkan jika tidak memberikan MP ASI protein hewani</div> --}}
+        </div>
+    </div>
     <!-- ✅ CARD BUTTONS -->
     <div class="balita-card">
         <div class="d-flex gap-2">

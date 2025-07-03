@@ -219,7 +219,7 @@
     <!-- TTD Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <h6 class="text-primary mb-3">💊 Tablet Tambah Darah (TTD)</h6>
+            <h6>💊 Tablet Tambah Darah (TTD)</h6>
         </div>
         <div class="col-md-6">
             <div class="mb-3">
@@ -244,7 +244,7 @@
     <!-- MT Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <h6 class="text-success mb-3">🍽️ Makanan Tambahan (MT) Bumil KEK</h6>
+            <h6>🍽️ Makanan Tambahan (MT) Bumil KEK</h6>
         </div>
         <div class="col-md-6">
             <div class="mb-3">
@@ -276,7 +276,7 @@
     <!-- ✅ KELAS IBU SECTION BARU -->
     <div class="row mb-4">
         <div class="col-12">
-            <h6 class="text-info mb-3">👩‍🏫 Kelas Ibu</h6>
+            <h6>👩‍🏫 Kelas Ibu</h6>
         </div>
         <div class="col-md-6">
             <div class="mb-3">

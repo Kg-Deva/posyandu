@@ -110,7 +110,7 @@
                                         <select id="filter-rujukan" class="form-select">
                                             <option value="">Semua</option>
                                             <option value="Perlu Rujukan">Perlu Rujukan</option>
-                                            <option value="Tidak Perlu Rujukan">Normal</option>
+                                            <option value="Normal">Normal</option>
                                         </select>
                                     </div>
                                     
@@ -203,6 +203,10 @@
                                     {{-- ✅ BUTTON EXPORT EXCEL --}}
                                     <button id="btn-export" class="btn btn-success">
                                         <i data-feather="download"></i> Export Excel
+                                    </button>
+                                    {{-- ✅ TAMBAH BUTTON EXPORT REKAP --}}
+                                    <button id="btn-export-rekap" class="btn btn-warning d-none">
+                                        <i data-feather="bar-chart-2"></i> Export Rekap
                                     </button>
                                     {{-- <a href="/input-pemeriksaan" class="btn btn-primary">
                                         <i data-feather="plus"></i> Input Pemeriksaan
@@ -321,6 +325,7 @@
             detailModal: new bootstrap.Modal(document.getElementById('detailModal')),
             detailContent: document.getElementById('detail-content'),
             btnExport: document.getElementById('btn-export'), // ✅ TAMBAH INI
+            btnExportRekap: document.getElementById('btn-export-rekap'), // ✅ TAMBAH INI
         };
         
         // LOAD FILTER OPTIONS
@@ -337,11 +342,16 @@
                             elements.filterTahun.appendChild(option);
                         });
                         
-                        // POPULATE ROLE
+                        // ✅ FIX POPULATE ROLE - SUPPORT OBJECT FORMAT
                         data.role_list.forEach(role => {
                             const option = document.createElement('option');
-                            option.value = role;
-                            option.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+                            if (typeof role === 'object') {
+                                option.value = role.value;
+                                option.textContent = role.label;
+                            } else {
+                                option.value = role;
+                                option.textContent = role.charAt(0).toUpperCase() + role.slice(1).replace('-', ' ');
+                            }
                             elements.filterRole.appendChild(option);
                         });
                         
@@ -419,16 +429,9 @@
                 const userData = item.user || {};
                 const nama = userData.nama || '-';
                 const rw = userData.rw || '-';
-                const level = userData.level || item.jenis_pemeriksaan || '-';
                 
-                // ✅ JENIS BADGE
-                const jenisBadge = {
-                    'balita': '<span class="badge bg-primary">Balita</span>',
-                    'remaja': '<span class="badge bg-primary">Remaja</span>',
-                    'ibu-hamil': '<span class="badge bg-primary">Ibu Hamil</span>'
-                };
-                
-                const roleBadge = jenisBadge[item.jenis_pemeriksaan] || getBadgeClass(level);
+                // ✅ USE jenis_pemeriksaan FOR BADGE
+                const roleBadge = getBadgeClass(item.jenis_pemeriksaan);
                 
                 // ✅ RUJUKAN BADGE UNIVERSAL
                 const rujukanBadge = item.rujuk_puskesmas === 'Perlu Rujukan' ? 
@@ -439,7 +442,7 @@
                     <tr>
                         <td>${no}</td>
                         <td>${tanggal}</td>
-                        <td class="text-bold-500">${item.nik}</td>
+                        <td class="text-bold-500">${item.nik || '-'}</td>
                         <td class="text-bold-500">${nama}</td>
                         <td class="text-center"><span class="badge bg-secondary">RW ${rw}</span></td>
                         <td class="text-center">${roleBadge}</td>
@@ -470,8 +473,9 @@
             const badges = {
                 'balita': '<span class="badge bg-primary">Balita</span>',
                 'remaja': '<span class="badge bg-info">Remaja</span>',
-                'dewasa': '<span class="badge bg-success">Dewasa</span>',
-                'lansia': '<span class="badge bg-warning">Lansia</span>',
+                'dewasa': '<span class="badge bg-success">Dewasa</span>',        // ✅ TAMBAH INI
+                'lansia': '<span class="badge bg-warning">Lansia</span>',        // ✅ TAMBAH INI
+                'ibu-hamil': '<span class="badge bg-danger">Ibu Hamil</span>',
                 'ibuhamil': '<span class="badge bg-danger">Ibu Hamil</span>'
             };
             return badges[role] || `<span class="badge bg-secondary">${role}</span>`;
@@ -681,7 +685,8 @@
             elements.filterTahun.value = '';
             elements.filterRole.value = '';
             elements.filterRw.value = '';
-            elements.filterRujukan.value = ''; // ✅ TAMBAH INI
+            elements.filterRujukan.value = '';
+            elements.btnExportRekap.classList.add('d-none'); // <-- Tambahkan ini
             loadData(1);
         });
         
@@ -728,6 +733,28 @@
         loadData(1);
         
         console.log('Data Pemeriksaan initialized successfully');
+        
+        elements.btnExportRekap = document.getElementById('btn-export-rekap');
+        elements.filterRole.addEventListener('change', function() {
+            if (this.value) {
+                elements.btnExportRekap.classList.remove('d-none');
+            } else {
+                elements.btnExportRekap.classList.add('d-none');
+            }
+        });
+        
+        elements.btnExportRekap.addEventListener('click', function() {
+            const params = new URLSearchParams({
+                search: elements.search.value,
+                bulan: elements.filterBulan.value,
+                tahun: elements.filterTahun.value,
+                role: elements.filterRole.value,
+                rw: elements.filterRw.value,
+                rujukan: elements.filterRujukan.value,
+                export: 'rekap'
+            });
+            window.open(`/data-pemeriksaan/export-rekap?${params}`, '_blank');
+        });
     });
     </script>
 </body>

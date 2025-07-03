@@ -12,7 +12,7 @@ class PemeriksaanDewasa extends Model
     protected $table = 'pemeriksaan_dewasa';
 
     protected $fillable = [
-        'user_id',
+        'nik', // ✅ TAMBAH ini
         'tanggal_pemeriksaan',
         'bb',
         'tb',
@@ -48,4 +48,11 @@ class PemeriksaanDewasa extends Model
         'edukasi',
         'created_by',
     ];
+
+    // ✅ TAMBAH RELASI INI
+    public function user()
+    {
+        // return $this->belongsTo(User::class, 'user_id', 'id');
+        return $this->belongsTo(User::class, 'nik', 'nik'); // ✅ BENAR
+    }
 }

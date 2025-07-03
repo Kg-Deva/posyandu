@@ -120,10 +120,7 @@
                 <label class="form-label text-danger">Status Rujukan</label>
                 <input type="text" class="form-control" value="Dirujuk" readonly>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Edukasi/Konseling</label>
-                <textarea class="form-control" name="edukasi" rows="2" placeholder="Isi edukasi/konseling yang diberikan..."></textarea>
-            </div>
+            
         </div>
     </div>
 
@@ -298,6 +295,10 @@
             <label class="form-label text-danger">Status Rujukan</label>
             <input type="text" class="form-control" value="Rujuk ke Puskesmas" readonly>
         </div>
+        <div class="mb-3">
+                <label class="form-label">Edukasi/Konseling</label>
+                <textarea class="form-control" name="edukasi" rows="2" placeholder="Isi edukasi/konseling yang diberikan..."></textarea>
+            </div>
     </div>
 </div>
 

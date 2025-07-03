@@ -1475,6 +1475,89 @@ class MenuController extends Controller
 
 
 
+    // public function simpanLengkapiData(Request $request, $id)
+    // {
+    //     try {
+    //         $request->validate([
+    //             'nama' => 'required|string|max:255',
+    //             'nik' => [
+    //                 'required',
+    //                 'digits:16',
+    //                 'numeric',
+    //                 Rule::unique('users', 'nik')->ignore($id)
+    //             ],
+    //             'tanggal_lahir' => 'required|date|before_or_equal:today',
+    //             'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
+    //             'alamat' => 'required|string',
+    //             'no_hp' => 'required|string|max:15',
+    //             // ... field lainnya tetap sama
+    //         ], [
+    //             'nik.required' => 'NIK wajib diisi.',
+    //             'nik.digits' => 'NIK harus terdiri dari 16 digit.',
+    //             'nik.numeric' => 'NIK hanya boleh berisi angka.',
+    //             'nik.unique' => 'NIK sudah terdaftar, gunakan NIK lain.',
+    //             'nama.required' => 'Nama wajib diisi.',
+    //             'tanggal_lahir.required' => 'Tanggal lahir wajib diisi.',
+    //             'jenis_kelamin.required' => 'Jenis kelamin wajib dipilih.',
+    //             'alamat.required' => 'Alamat wajib diisi.',
+    //             'no_hp.required' => 'No HP wajib diisi.',
+    //         ]);
+
+    //         $user = User::findOrFail($id);
+    //         $tanggal_lahir = Carbon::parse($request->tanggal_lahir);
+    //         $sekarang = Carbon::now();
+
+    //         $diff = $tanggal_lahir->diff($sekarang);
+    //         $umur_string = $diff->y . ' tahun ' . $diff->m . ' bulan ' . $diff->d . ' hari';
+
+    //         $userData = [
+    //             'nama' => $request->nama,
+    //             'nik' => $request->nik,
+    //             'tanggal_lahir' => $request->tanggal_lahir,
+    //             'jenis_kelamin' => $request->jenis_kelamin,
+    //             'alamat' => $request->alamat,
+    //             'no_hp' => $request->no_hp,
+    //             'dusun' => $request->dusun,
+    //             'rt' => $request->rt,
+    //             'rw' => $request->rw,
+    //             'kecamatan' => $request->kecamatan,
+    //             'wilayah' => $request->wilayah,
+    //             'berat_badan_lahir' => $request->berat_badan_lahir,
+    //             'panjang_badan_lahir' => $request->panjang_badan_lahir,
+    //             'nama_ayah' => $request->nama_ayah,
+    //             'nama_ibu' => $request->nama_ibu,
+    //             'status_perkawinan' => $request->status_perkawinan,
+    //             'pekerjaan' => $request->pekerjaan,
+    //             'riwayat_keluarga' => is_array($request->riwayat_keluarga) ? implode(',', $request->riwayat_keluarga) : $request->riwayat_keluarga,
+    //             'riwayat_diri' => is_array($request->riwayat_diri) ? implode(',', $request->riwayat_diri) : $request->riwayat_diri,
+    //             'perilaku_beresiko' => is_array($request->perilaku_beresiko) ? implode(',', $request->perilaku_beresiko) : $request->perilaku_beresiko,
+    //             'jarak_kehamilan_tahun' => $request->jarak_kehamilan_tahun,
+    //             'jarak_kehamilan_bulan' => $request->jarak_kehamilan_bulan,
+    //             'berat_badan_ibu' => $request->berat_badan_ibu,
+    //             'hamil_ke' => $request->hamil_ke,
+    //             'tinggi_badan_ibu' => $request->tinggi_badan_ibu,
+    //             'data_lengkap' => true,
+    //             'umur' => $umur_string,
+    //         ];
+
+    //         $user->update($userData);
+
+    //         // ✅ SUCCESS - REDIRECT KE DASHBOARD DENGAN SUCCESS MESSAGE
+    //         return redirect()->route('kader-home')->with('success', ' Data berhasil disimpan!');
+    //     } catch (\Illuminate\Validation\ValidationException $e) {
+    //         // ✅ ERROR - REDIRECT KE DASHBOARD DENGAN ERROR MESSAGE
+    //         $errorMessages = [];
+    //         foreach ($e->errors() as $field => $errors) {
+    //             foreach ($errors as $error) {
+    //                 $errorMessages[] = $error;
+    //             }
+    //         }
+
+    //         return redirect()->route('kader-home')->with('error', ' Gagal menyimpan data: ' . implode(', ', $errorMessages));
+    //     }
+    // }
+
+
     public function simpanLengkapiData(Request $request, $id)
     {
         try {
@@ -1490,7 +1573,6 @@ class MenuController extends Controller
                 'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
                 'alamat' => 'required|string',
                 'no_hp' => 'required|string|max:15',
-                // ... field lainnya tetap sama
             ], [
                 'nik.required' => 'NIK wajib diisi.',
                 'nik.digits' => 'NIK harus terdiri dari 16 digit.',
@@ -1510,6 +1592,7 @@ class MenuController extends Controller
             $diff = $tanggal_lahir->diff($sekarang);
             $umur_string = $diff->y . ' tahun ' . $diff->m . ' bulan ' . $diff->d . ' hari';
 
+            // ✅ BASE DATA YANG SEMUA LEVEL BUTUH
             $userData = [
                 'nama' => $request->nama,
                 'nik' => $request->nik,
@@ -1522,30 +1605,58 @@ class MenuController extends Controller
                 'rw' => $request->rw,
                 'kecamatan' => $request->kecamatan,
                 'wilayah' => $request->wilayah,
-                'berat_badan_lahir' => $request->berat_badan_lahir,
-                'panjang_badan_lahir' => $request->panjang_badan_lahir,
-                'nama_ayah' => $request->nama_ayah,
-                'nama_ibu' => $request->nama_ibu,
-                'status_perkawinan' => $request->status_perkawinan,
-                'pekerjaan' => $request->pekerjaan,
-                'riwayat_keluarga' => is_array($request->riwayat_keluarga) ? implode(',', $request->riwayat_keluarga) : $request->riwayat_keluarga,
-                'riwayat_diri' => is_array($request->riwayat_diri) ? implode(',', $request->riwayat_diri) : $request->riwayat_diri,
-                'perilaku_beresiko' => is_array($request->perilaku_beresiko) ? implode(',', $request->perilaku_beresiko) : $request->perilaku_beresiko,
-                'jarak_kehamilan_tahun' => $request->jarak_kehamilan_tahun,
-                'jarak_kehamilan_bulan' => $request->jarak_kehamilan_bulan,
-                'berat_badan_ibu' => $request->berat_badan_ibu,
-                'hamil_ke' => $request->hamil_ke,
-                'tinggi_badan_ibu' => $request->tinggi_badan_ibu,
                 'data_lengkap' => true,
                 'umur' => $umur_string,
             ];
 
+            // ✅ ASSIGN FIELD OPSIONAL HANYA JIKA ADA VALUE
+            if ($request->filled('berat_badan_lahir')) {
+                $userData['berat_badan_lahir'] = $request->berat_badan_lahir;
+            }
+            if ($request->filled('panjang_badan_lahir')) {
+                $userData['panjang_badan_lahir'] = $request->panjang_badan_lahir;
+            }
+            if ($request->filled('nama_ayah')) {
+                $userData['nama_ayah'] = $request->nama_ayah;
+            }
+            if ($request->filled('nama_ibu')) {
+                $userData['nama_ibu'] = $request->nama_ibu;
+            }
+            if ($request->filled('status_perkawinan')) {
+                $userData['status_perkawinan'] = $request->status_perkawinan;
+            }
+            if ($request->filled('pekerjaan')) {
+                $userData['pekerjaan'] = $request->pekerjaan;
+            }
+            if ($request->filled('riwayat_keluarga')) {
+                $userData['riwayat_keluarga'] = is_array($request->riwayat_keluarga) ? implode(',', $request->riwayat_keluarga) : $request->riwayat_keluarga;
+            }
+            if ($request->filled('riwayat_diri')) {
+                $userData['riwayat_diri'] = is_array($request->riwayat_diri) ? implode(',', $request->riwayat_diri) : $request->riwayat_diri;
+            }
+            if ($request->filled('perilaku_beresiko')) {
+                $userData['perilaku_beresiko'] = is_array($request->perilaku_beresiko) ? implode(',', $request->perilaku_beresiko) : $request->perilaku_beresiko;
+            }
+            if ($request->filled('jarak_kehamilan_tahun')) {
+                $userData['jarak_kehamilan_tahun'] = $request->jarak_kehamilan_tahun;
+            }
+            if ($request->filled('jarak_kehamilan_bulan')) {
+                $userData['jarak_kehamilan_bulan'] = $request->jarak_kehamilan_bulan;
+            }
+            if ($request->filled('berat_badan_ibu')) {
+                $userData['berat_badan_ibu'] = $request->berat_badan_ibu;
+            }
+            if ($request->filled('hamil_ke')) {
+                $userData['hamil_ke'] = $request->hamil_ke;
+            }
+            if ($request->filled('tinggi_badan_ibu')) {
+                $userData['tinggi_badan_ibu'] = $request->tinggi_badan_ibu;
+            }
+
             $user->update($userData);
 
-            // ✅ SUCCESS - REDIRECT KE DASHBOARD DENGAN SUCCESS MESSAGE
-            return redirect()->route('kader-home')->with('success', ' Data berhasil disimpan!');
+            return redirect()->route('kader-home')->with('success', 'Data berhasil disimpan!');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // ✅ ERROR - REDIRECT KE DASHBOARD DENGAN ERROR MESSAGE
             $errorMessages = [];
             foreach ($e->errors() as $field => $errors) {
                 foreach ($errors as $error) {
@@ -1553,7 +1664,7 @@ class MenuController extends Controller
                 }
             }
 
-            return redirect()->route('kader-home')->with('error', ' Gagal menyimpan data: ' . implode(', ', $errorMessages));
+            return redirect()->route('kader-home')->with('error', 'Gagal menyimpan data: ' . implode(', ', $errorMessages));
         }
     }
 

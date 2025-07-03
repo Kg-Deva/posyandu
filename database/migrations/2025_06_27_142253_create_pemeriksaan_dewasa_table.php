@@ -10,7 +10,8 @@ class CreatePemeriksaanDewasaTable extends Migration
     {
         Schema::create('pemeriksaan_dewasa', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            // $table->unsignedBigInteger('user_id');
+            $table->string('nik'); // ✅ Tambah ini
             $table->date('tanggal_pemeriksaan');
             $table->float('bb');
             $table->float('tb');
@@ -50,7 +51,8 @@ class CreatePemeriksaanDewasaTable extends Migration
             $table->unsignedBigInteger('created_by')->nullable();
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            // $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('nik')->references('nik')->on('users')->onDelete('cascade');
         });
     }
 

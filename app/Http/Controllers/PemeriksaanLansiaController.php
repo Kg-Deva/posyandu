@@ -16,7 +16,7 @@ class PemeriksaanLansiaController extends Controller
         // dd($request->all());
 
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'nik' => 'required|exists:users,nik', // ✅ GANTI dari user_id
             'tanggal_pemeriksaan' => 'required|date',
             'bb' => 'required|numeric',
             'tb' => 'required|numeric',
