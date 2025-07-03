@@ -1,12 +1,10 @@
-{{-- filepath: c:\laragon\www\posyandu\resources\views\admin-page\remaja\remaja-home.blade.php --}}
-
 @extends('admin-layouts.main')
 @section('title', 'Dashboard Kesehatan - ' . $user->nama)
 <link rel="stylesheet" href="{{ asset('css/input-pemeriksaan.css') }}">
 
 @section('content')
 <div class="container-fluid px-4">
-    <!-- ✅ HEADER UNTUK REMAJA -->
+    <!-- ✅ HEADER UNTUK LANSIA -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="position-relative overflow-hidden rounded-4 shadow-lg bg-gradient-primary text-white">
@@ -18,9 +16,15 @@
                                     <h1 class="mb-1 fw-bold">Dashboard Kesehatan {{ $user->nama }}</h1>
                                     <div class="mb-0 opacity-90 fs-5">
                                         <div class="d-flex flex-column flex-md-row gap-2 gap-md-4">
-                                            <div class="d-flex align-items-center">
-                                                <span class="text-white-50 me-2 fw-normal">🧑‍🎓 Umur:</span>
-                                                <span class="fw-semibold">{{ $pemeriksaanTerakhir ? $pemeriksaanTerakhir->umur . ' tahun' : $user->umur }}</span>
+                                           <div class="d-flex align-items-center">
+                                                <span class="text-white-50 me-2 fw-normal">👤 Umur:</span>
+                                                <span class="fw-semibold">
+                                                    @if($user->tanggal_lahir)
+                                                        {{ \Carbon\Carbon::parse($user->tanggal_lahir)->age }} tahun
+                                                    @else
+                                                        {{ $user->umur ?? 'Belum diisi' }} tahun
+                                                    @endif
+                                                </span>
                                             </div>
                                             <div class="d-flex align-items-center">
                                                 <span class="text-white-50 me-2 fw-normal">📅 Periksa Terakhir:</span>
@@ -37,16 +41,16 @@
                                 </div>
                             </div>
                             <div class="bg-white bg-opacity-10 rounded-3 p-3 mb-3">
-                                 <p class="mb-0">
+                                <p class="mb-0">
                                     <i class="bi bi-info-circle me-2"></i>
-                                    <strong>Hai {{ $user->nama }}!</strong> Monitor kesehatanmu di sini. 
-                                    Jaga pola makan, olahraga teratur, dan jangan lupa cek kesehatan rutin ya! 💪
+                                    <strong>Hai {{ $user->nama }}!</strong> Monitor kesehatan Anda di sini. 
+                                    Jaga pola hidup sehat, kontrol rutin, dan nikmati masa emas dengan sehat! 💪
                                 </p>
                             </div>
                         </div>
                         <div class="col-md-4 text-center d-none d-md-block">
                             <div class="bg-white bg-opacity-10 rounded-circle p-4 d-inline-block">
-                                <i class="bi bi-person-standing fs-1"></i>
+                                <i class="bi bi-person-hearts fs-1"></i>
                             </div>
                         </div>
                     </div>
@@ -55,7 +59,7 @@
         </div>
     </div>
 
-    <!-- ✅ RINGKASAN KESEHATAN REMAJA -->
+    <!-- ✅ RINGKASAN KESEHATAN LANSIA -->
     <div class="row g-3 g-lg-4 mb-4">
         <!-- Total Pemeriksaan -->
         <div class="col-6 col-lg-3">
@@ -71,63 +75,43 @@
             </div>
         </div>
 
-        <!-- Progress Berat Badan -->
-        <div class="col-6 col-lg-3">
-            <div class="card border-0 shadow-sm h-100 bg-light">
-                <div class="card-body text-center p-3 p-lg-4">
-                    <div class="bg-{{ $progressBB > 0 ? 'success' : ($progressBB < 0 ? 'warning' : 'info') }} rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-3">
-                        <i class="bi bi-{{ $progressBB > 0 ? 'arrow-up' : ($progressBB < 0 ? 'arrow-down' : 'dash-lg') }} text-white fs-4"></i>
-                    </div>
-                    <h2 class="fw-bold mb-1">
-                        @if($progressBB > 0)
-                            <span class="text-success">+{{ $progressBB }} kg</span>
-                        @elseif($progressBB < 0)
-                            <span class="text-warning">{{ $progressBB }} kg</span>
-                        @elseif($pemeriksaanTerakhir && $pemeriksaanTerakhir->bb)
-                            <span class="text-info">{{ $pemeriksaanTerakhir->bb }} kg</span>
-                        @else
-                            <span class="text-muted">Belum Ada</span>
-                        @endif
-                    </h2>
-                    <p class="mb-1 text-dark fw-semibold">Berat Badan</p>
-                    <small class="text-muted">
-                        @if($progressBB > 0) 
-                            Bertambah baik! 
-                        @elseif($progressBB < 0) 
-                            Turun, perhatikan pola makan 
-                        @elseif($pemeriksaanTerakhir && $pemeriksaanTerakhir->bb)
-                            Stabil
-                        @else 
-                            Data pertama 
-                        @endif
-                    </small>
-                </div>
-            </div>
-        </div>
-
         <!-- IMT Status -->
-        <div class="col-6 col-lg-3">
+       <div class="col-6 col-lg-3">
             <div class="card border-0 shadow-sm h-100 bg-light">
                 <div class="card-body text-center p-3 p-lg-4">
                     @php
                         $imtClass = 'info';
-                        $imtIcon = 'calculator';
+                        $imtIcon = 'speedometer2';
                         $imtText = 'Belum Ada';
+                        $imtValue = '';
                         
-                        if ($pemeriksaanTerakhir && $pemeriksaanTerakhir->kesimpulan_imt) {
-                            $imt = $pemeriksaanTerakhir->kesimpulan_imt;
-                            if ($imt === 'Normal') {
+                        if ($pemeriksaanTerakhir && $pemeriksaanTerakhir->bb) {
+                            $bb = $pemeriksaanTerakhir->bb;
+                            $imtValue = $bb . ' kg';
+                            
+                            // Ambil kesimpulan IMT untuk menentukan status
+                            $kesimpulanIMT = $pemeriksaanTerakhir->kesimpulan_imt ?? '';
+                            
+                            if ($kesimpulanIMT === 'Normal') {
                                 $imtClass = 'success';
                                 $imtIcon = 'check-circle';
                                 $imtText = 'Normal';
-                            } elseif (in_array($imt, ['Kurus', 'Gemuk'])) {
+                            } elseif (in_array($kesimpulanIMT, ['Kurus', 'Kurang Berat Badan'])) {
                                 $imtClass = 'warning';
-                                $imtIcon = 'exclamation-triangle';
-                                $imtText = $imt;
-                            } else {
+                                $imtIcon = 'arrow-down-circle';
+                                $imtText = 'Kurang';
+                            } elseif (in_array($kesimpulanIMT, ['Gemuk', 'Berlebihan'])) {
+                                $imtClass = 'warning';
+                                $imtIcon = 'arrow-up-circle';
+                                $imtText = 'Berlebih';
+                            } elseif (strpos($kesimpulanIMT, 'Obesitas') !== false) {
                                 $imtClass = 'danger';
                                 $imtIcon = 'exclamation-circle';
-                                $imtText = $imt;
+                                $imtText = 'Obesitas';
+                            } else {
+                                $imtClass = 'info';
+                                $imtIcon = 'speedometer2';
+                                $imtText = 'Perlu Cek';
                             }
                         }
                     @endphp
@@ -136,10 +120,59 @@
                         <i class="bi bi-{{ $imtIcon }} text-white fs-4"></i>
                     </div>
                     <h2 class="fw-bold text-{{ $imtClass }} mb-1">{{ $imtText }}</h2>
-                    <p class="mb-1 text-dark fw-semibold">Status IMT</p>
+                    <p class="mb-1 text-dark fw-semibold">Status Berat Badan</p>
                     <small class="text-muted">
-                        @if($pemeriksaanTerakhir && $pemeriksaanTerakhir->nilai_imt)
-                            {{ $pemeriksaanTerakhir->nilai_imt }} kg/m²
+                        @if($imtValue)
+                            {{ $imtValue }} 
+                            @if($pemeriksaanTerakhir && $pemeriksaanTerakhir->kesimpulan_imt)
+                                <span class="d-block d-sm-inline">({{ $pemeriksaanTerakhir->kesimpulan_imt }})</span>
+                            @endif
+                        @else
+                            Belum ada data
+                        @endif
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tekanan Darah -->
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100 bg-light">
+                <div class="card-body text-center p-3 p-lg-4">
+                    @php
+                        $tdClass = 'info';
+                        $tdIcon = 'heart';
+                        $tdText = 'Belum Ada';
+                        $tdValue = '';
+                        
+                        if ($pemeriksaanTerakhir && $pemeriksaanTerakhir->sistole && $pemeriksaanTerakhir->diastole) {
+                            $tdValue = $pemeriksaanTerakhir->sistole . '/' . $pemeriksaanTerakhir->diastole;
+                            $kesimpulanTd = $pemeriksaanTerakhir->kesimpulan_td ?? '';
+                            
+                            if (strpos(strtolower($kesimpulanTd), 'normal') !== false) {
+                                $tdClass = 'success';
+                                $tdIcon = 'heart-fill';
+                                $tdText = 'Normal';
+                            } elseif (strpos(strtolower($kesimpulanTd), 'hipertensi') !== false) {
+                                $tdClass = 'danger';
+                                $tdIcon = 'exclamation-triangle';
+                                $tdText = 'Hipertensi';
+                            } else {
+                                $tdClass = 'warning';
+                                $tdIcon = 'exclamation-circle';
+                                $tdText = 'Perhatian';
+                            }
+                        }
+                    @endphp
+                    
+                    <div class="bg-{{ $tdClass }} rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-3">
+                        <i class="bi bi-{{ $tdIcon }} text-white fs-4"></i>
+                    </div>
+                    <h2 class="fw-bold text-{{ $tdClass }} mb-1">{{ $tdText }}</h2>
+                    <p class="mb-1 text-dark fw-semibold">Tekanan Darah</p>
+                    <small class="text-muted">
+                        @if($tdValue)
+                            {{ $tdValue }} mmHg
                         @else
                             Belum diukur
                         @endif
@@ -161,7 +194,7 @@
                         };
                         
                         $statusIcon = match($statusKesehatan['status']) {
-                            'Sehat' => 'heart-fill',
+                            'Sehat' => 'shield-check',
                             'Perlu Perhatian' => 'exclamation-triangle',
                             'Belum Ada Data' => 'question-circle',
                             default => 'exclamation-triangle-fill'
@@ -202,21 +235,21 @@
     </div>
 
     <div class="row g-4 mb-4">
-        <!-- GRAFIK KESEHATAN REMAJA -->
+        <!-- GRAFIK KESEHATAN LANSIA -->
         <div class="col-12 col-xl-8">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-light border-0">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <h4 class="card-title fw-bold text-dark mb-1 d-flex align-items-center">
-                                <p class="text-muted">📊 Grafik Kesehatan Remaja</p>
+                                <p class="text-muted">📊 Grafik Kesehatan Lansia</p>
                             </h4>
-                            <p class="text-muted mb-0">Pantau perkembangan BB, TB, dan IMT dari waktu ke waktu</p>
+                            <p class="text-muted mb-0">Pantau perkembangan BB, TD, dan Gula Darah dari waktu ke waktu</p>
                         </div>
                         <div class="text-end">
                             <small class="badge bg-info text-white px-3 py-2">
                                 <i class="bi bi-lightbulb me-1"></i>
-                                Tips: Konsisten = Sehat!
+                                Tips: Kontrol Rutin = Sehat!
                             </small>
                         </div>
                     </div>
@@ -226,73 +259,57 @@
                         <div class="d-flex">
                             <i class="bi bi-info-circle-fill me-2 mt-1"></i>
                             <div>
-                                <strong>Grafik ini menunjukkan:</strong> Perkembangan berat badan dan tinggi badan dari setiap pemeriksaan. 
-                                Hover di titik grafik untuk melihat perubahan dari pemeriksaan sebelumnya!
+                                <strong>Grafik ini menunjukkan:</strong> Trend berat badan, tekanan darah, dan gula darah dari setiap pemeriksaan. 
+                                Hover di titik grafik untuk melihat nilai detail dan perubahan!
                                 <div class="mt-2">
                                     <span class="badge bg-primary ms-0">Biru = Berat Badan</span>
-                                    <span class="badge bg-success ms-2">Hijau = Tinggi Badan</span>
+                                    <span class="badge bg-danger ms-2">Merah = Tekanan Darah</span>
+                                    <span class="badge bg-warning ms-2">Kuning = Gula Darah</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- TAMBAH SUMMARY CARDS DI ATAS GRAFIK -->
+                    <!-- SUMMARY CARDS DI ATAS GRAFIK -->
                     @if($pemeriksaanTerakhir)
-                    <!-- SUMMARY CARDS DENGAN TREND ANALYSIS -->
                     <div class="row g-3 mb-4">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="bg-primary bg-opacity-10 rounded p-3">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <h5 class="fw-bold text-primary mb-1">{{ $pemeriksaanTerakhir->bb }} kg</h5>
-                                        <small class="text-muted">Berat Badan Saat Ini</small>
+                                        <h6 class="fw-bold text-primary mb-1">{{ $pemeriksaanTerakhir->bb }} kg</h6>
+                                        <small class="text-muted">Berat Badan</small>
                                     </div>
-                                    <div class="text-end">
-                                        @if($progressBB > 0)
-                                            <div class="badge bg-success px-3 py-2">
-                                                <i class="bi bi-arrow-up me-1"></i>+{{ $progressBB }} kg
-                                            </div>
-                                            <div><small class="text-success">Naik dari pemeriksaan lalu</small></div>
-                                        @elseif($progressBB < 0)
-                                            <div class="badge bg-warning px-3 py-2">
-                                                <i class="bi bi-arrow-down me-1"></i>{{ $progressBB }} kg
-                                            </div>
-                                            <div><small class="text-warning">Turun dari pemeriksaan lalu</small></div>
-                                        @else
-                                            <div class="badge bg-info px-3 py-2">
-                                                <i class="bi bi-dash me-1"></i>Stabil
-                                            </div>
-                                            <div><small class="text-info">Sama seperti pemeriksaan lalu</small></div>
-                                        @endif
+                                    <div class="text-primary">
+                                        <i class="bi bi-speedometer2 fs-4"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="col-md-6">
-                            <div class="bg-success bg-opacity-10 rounded p-3">
+                        <div class="col-md-4">
+                            <div class="bg-danger bg-opacity-10 rounded p-3">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <h5 class="fw-bold text-success mb-1">{{ $pemeriksaanTerakhir->tb }} cm</h5>
-                                        <small class="text-muted">Tinggi Badan Saat Ini</small>
+                                        <h6 class="fw-bold text-danger mb-1">{{ $pemeriksaanTerakhir->sistole }}/{{ $pemeriksaanTerakhir->diastole }}</h6>
+                                        <small class="text-muted">Tekanan Darah</small>
                                     </div>
-                                    <div class="text-end">
-                                        @if($progressTB > 0)
-                                            <div class="badge bg-success px-3 py-2">
-                                                <i class="bi bi-arrow-up me-1"></i>+{{ $progressTB }} cm
-                                            </div>
-                                            <div><small class="text-success">Tumbuh dari pemeriksaan lalu</small></div>
-                                        @elseif($progressTB < 0)
-                                            <div class="badge bg-warning px-3 py-2">
-                                                <i class="bi bi-arrow-down me-1"></i>{{ $progressTB }} cm
-                                            </div>
-                                            <div><small class="text-warning">Turun dari pemeriksaan lalu</small></div>
-                                        @else
-                                            <div class="badge bg-info px-3 py-2">
-                                                <i class="bi bi-dash me-1"></i>Stabil
-                                            </div>
-                                            <div><small class="text-info">Sama seperti pemeriksaan lalu</small></div>
-                                        @endif
+                                    <div class="text-danger">
+                                        <i class="bi bi-heart-pulse fs-4"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="bg-warning bg-opacity-10 rounded p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="fw-bold text-warning mb-1">{{ $pemeriksaanTerakhir->gula_darah ?? 'N/A' }}</h6>
+                                        <small class="text-muted">Gula Darah (mg/dL)</small>
+                                    </div>
+                                    <div class="text-warning">
+                                        <i class="bi bi-droplet fs-4"></i>
                                     </div>
                                 </div>
                             </div>
@@ -301,7 +318,7 @@
                     @endif
                     
                     <div class="chart-container position-relative bg-white rounded-3 p-3" style="height: 400px;">
-                        <canvas id="remajaChart"></canvas>
+                        <canvas id="lansiaChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -311,22 +328,44 @@
         <div class="col-12 col-xl-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-light border-0">
-                    <h6 class="mb-0 fw-semibold">
+                    <h6 class="text-muted">
                         <i class="bi bi-clipboard-heart me-2"></i>
                         Status Kesehatan Detail
                     </h6>
                 </div>
                 <div class="card-body p-4">
                     @if($pemeriksaanTerakhir)
-                        <!-- Tekanan Darah -->
+                        <!-- IMT Detail -->
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-semibold">🩺 Tekanan Darah</span>
+                                <span class="fw-semibold">📏 Indeks Massa Tubuh</span>
+                                @php
+                                    $imtClass = 'success';
+                                    if (strpos($pemeriksaanTerakhir->kesimpulan_imt ?? '', 'Gemuk') !== false) {
+                                        $imtClass = 'warning';
+                                    } elseif (strpos($pemeriksaanTerakhir->kesimpulan_imt ?? '', 'Obesitas') !== false) {
+                                        $imtClass = 'danger';
+                                    }
+                                @endphp
+                                <span class="badge bg-{{ $imtClass }}">
+                                    {{ $pemeriksaanTerakhir->kesimpulan_imt ?? 'Normal' }}
+                                </span>
+                            </div>
+                            <small class="text-muted">
+                                IMT: {{ $pemeriksaanTerakhir->imt ? number_format($pemeriksaanTerakhir->imt, 1) : '-' }} kg/m²
+                                (TB: {{ $pemeriksaanTerakhir->tb }}cm, BB: {{ $pemeriksaanTerakhir->bb }}kg)
+                            </small>
+                        </div>
+
+                        <!-- Tekanan Darah Detail -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-semibold">💓 Tekanan Darah</span>
                                 @php
                                     $tdClass = 'success';
-                                    if (strpos($pemeriksaanTerakhir->kategori_tekanan_darah ?? '', 'Hipertensi') !== false) {
+                                    if (strpos($pemeriksaanTerakhir->kesimpulan_td ?? '', 'Hipertensi') !== false) {
                                         $tdClass = 'danger';
-                                    } elseif (strpos($pemeriksaanTerakhir->kategori_tekanan_darah ?? '', 'Hipotensi') !== false) {
+                                    } elseif (strpos($pemeriksaanTerakhir->kesimpulan_td ?? '', 'Tinggi') !== false) {
                                         $tdClass = 'warning';
                                     }
                                 @endphp
@@ -335,39 +374,30 @@
                                 </span>
                             </div>
                             <small class="text-muted">
-                                {{ $pemeriksaanTerakhir->kategori_tekanan_darah ?? 'Normal' }}
+                                Status: {{ $pemeriksaanTerakhir->kesimpulan_td ?? 'Normal' }}
+                                <br>Sistole: {{ $pemeriksaanTerakhir->kesimpulan_sistole ?? '-' }}
+                                <br>Diastole: {{ $pemeriksaanTerakhir->kesimpulan_diastole ?? '-' }}
                             </small>
                         </div>
 
-                        <!-- Anemia -->
+                        <!-- Gula Darah -->
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-semibold">🩸 Status Anemia</span>
-                                <span class="badge bg-{{ $pemeriksaanTerakhir->status_anemia === 'Ya' ? 'danger' : 'success' }}">
-                                    {{ $pemeriksaanTerakhir->status_anemia === 'Ya' ? 'Anemia' : 'Normal' }}
+                                <span class="fw-semibold">🩸 Gula Darah</span>
+                                @php
+                                    $gdClass = 'success';
+                                    if (strpos($pemeriksaanTerakhir->kesimpulan_gula_darah ?? '', 'Diabetes') !== false) {
+                                        $gdClass = 'danger';
+                                    } elseif (strpos($pemeriksaanTerakhir->kesimpulan_gula_darah ?? '', 'Tinggi') !== false) {
+                                        $gdClass = 'warning';
+                                    }
+                                @endphp
+                                <span class="badge bg-{{ $gdClass }}">
+                                    {{ $pemeriksaanTerakhir->gula_darah ?? '-' }} mg/dL
                                 </span>
                             </div>
                             <small class="text-muted">
-                                Hb: {{ $pemeriksaanTerakhir->hb }} mg/dl
-                            </small>
-                        </div>
-
-                        <!-- Masalah Psikososial -->
-                        <div class="mb-4">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-semibold">🧠 Psikososial</span>
-                                <span class="badge bg-{{ $masalahPsikososial == 0 ? 'success' : ($masalahPsikososial >= 3 ? 'danger' : 'warning') }}">
-                                    {{ $masalahPsikososial }} masalah
-                                </span>
-                            </div>
-                            <small class="text-muted">
-                                @if($masalahPsikososial == 0)
-                                    Kondisi psikososial baik
-                                @elseif($masalahPsikososial < 3)
-                                    Ada beberapa hal yang perlu diperhatikan
-                                @else
-                                    Perlu konsultasi lebih lanjut
-                                @endif
+                                Status: {{ $pemeriksaanTerakhir->kesimpulan_gula_darah ?? 'Normal' }}
                             </small>
                         </div>
 
@@ -375,17 +405,82 @@
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="fw-semibold">🫁 Skrining TBC</span>
+                                @php
+                                    $gejalaTBC = 0;
+                                    if ($pemeriksaanTerakhir->tbc_batuk ?? false) $gejalaTBC++;
+                                    if ($pemeriksaanTerakhir->tbc_demam ?? false) $gejalaTBC++;
+                                    if ($pemeriksaanTerakhir->tbc_bb_turun ?? false) $gejalaTBC++;
+                                    if ($pemeriksaanTerakhir->tbc_kontak ?? false) $gejalaTBC++;
+                                @endphp
                                 <span class="badge bg-{{ $gejalaTBC == 0 ? 'success' : ($gejalaTBC >= 2 ? 'danger' : 'warning') }}">
                                     {{ $gejalaTBC }} gejala
                                 </span>
                             </div>
                             <small class="text-muted">
-                                @if($gejalaTBC == 0)
-                                    Tidak ada gejala TBC
-                                @elseif($gejalaTBC >= 2)
-                                    Perlu pemeriksaan lebih lanjut
+                                Status: {{ $pemeriksaanTerakhir->status_tbc ?? 'Normal' }}
+                                @if($gejalaTBC > 0)
+                                    <br>
+                                    @if($pemeriksaanTerakhir->tbc_batuk) • Batuk >2 minggu @endif
+                                    @if($pemeriksaanTerakhir->tbc_demam) • Demam lama @endif
+                                    @if($pemeriksaanTerakhir->tbc_bb_turun) • BB turun @endif
+                                    @if($pemeriksaanTerakhir->tbc_kontak) • Kontak TBC @endif
+                                @endif
+                            </small>
+                        </div>
+
+                        <!-- PUMA (Penyakit Paru Obstruktif Menahun) -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-semibold">💨 Screening PUMA</span>
+                                <span class="badge bg-{{ ($pemeriksaanTerakhir->skor_puma ?? 0) <= 6 ? 'success' : 'warning' }}">
+                                    Skor: {{ $pemeriksaanTerakhir->skor_puma ?? 0 }}
+                                </span>
+                            </div>
+                            <small class="text-muted">
+                                Status: {{ $pemeriksaanTerakhir->status_puma ?? 'Normal' }}
+                                @if($pemeriksaanTerakhir->skor_puma > 6)
+                                    <br><span class="text-warning">⚠️ Perlu pemeriksaan lebih lanjut</span>
+                                @endif
+                            </small>
+                        </div>
+
+                        <!-- Tes Pendengaran -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-semibold">👂 Tes Pendengaran</span>
+                                @php
+                                    $pendengaranOK = (
+                                        $pemeriksaanTerakhir->tes_jari_kanan === 'Normal' &&
+                                        $pemeriksaanTerakhir->tes_jari_kiri === 'Normal' &&
+                                        $pemeriksaanTerakhir->tes_berbisik_kanan === 'Normal' &&
+                                        $pemeriksaanTerakhir->tes_berbisik_kiri === 'Normal'
+                                    );
+                                @endphp
+                                <span class="badge bg-{{ $pendengaranOK ? 'success' : 'warning' }}">
+                                    {{ $pendengaranOK ? 'Normal' : 'Perlu Perhatian' }}
+                                </span>
+                            </div>
+                            <small class="text-muted">
+                                Jari Kanan: {{ $pemeriksaanTerakhir->tes_jari_kanan ?? '-' }}<br>
+                                Jari Kiri: {{ $pemeriksaanTerakhir->tes_jari_kiri ?? '-' }}<br>
+                                Berbisik Kanan: {{ $pemeriksaanTerakhir->tes_berbisik_kanan ?? '-' }}<br>
+                                Berbisik Kiri: {{ $pemeriksaanTerakhir->tes_berbisik_kiri ?? '-' }}
+                            </small>
+                        </div>
+
+                        <!-- Kontrasepsi -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-semibold">💊 Kontrasepsi</span>
+                                <span class="badge bg-{{ $pemeriksaanTerakhir->alat_kontrasepsi ? 'success' : 'secondary' }}">
+                                    {{ $pemeriksaanTerakhir->alat_kontrasepsi ? 'Menggunakan' : 'Tidak Menggunakan' }}
+                                </span>
+                            </div>
+                            <small class="text-muted">
+                                @if($pemeriksaanTerakhir->alat_kontrasepsi)
+                                    ✅ Sudah menggunakan alat kontrasepsi
                                 @else
-                                    Ada gejala ringan, perlu dipantau
+                                    ℹ️ Belum menggunakan alat kontrasepsi
                                 @endif
                             </small>
                         </div>
@@ -404,13 +499,13 @@
                             </div>
                             <small class="text-muted mt-1">
                                 <i class="bi bi-person-check me-1"></i>
-                                Oleh: {{ $pemeriksaanTerakhir->pemeriksa }}
+                                Oleh: {{ $pemeriksaanTerakhir->pemeriksa ?? $pemeriksaanTerakhir->created_by }}
                             </small>
                         </div>
                         @endif
 
-                        <!-- Tanggal Pemeriksaan Terakhir -->
-                        <div class="mt-3">
+                        <!-- Kontrol Berikutnya -->
+                         <div class="mt-3">
                             <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-3">
                                 <div class="d-flex align-items-center">
                                     <i class="bi bi-calendar3 me-2 text-primary"></i>
@@ -438,6 +533,7 @@
                                 </span>
                             </div>
                         </div>
+                        
                     @else
                         <div class="text-center py-5">
                             <i class="bi bi-clipboard-x text-muted mb-3" style="font-size: 3rem;"></i>
@@ -452,14 +548,14 @@
         </div>
     </div>
 
-    <!-- Tips Kesehatan Remaja -->
+    <!-- Tips Kesehatan Lansia -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-gradient-primary text-white border-0">
                     <h6 class="mb-0 fw-semibold">
                         <i class="bi bi-lightbulb me-2"></i>
-                        Tips Kesehatan Remaja
+                        Tips Kesehatan Lansia
                     </h6>
                 </div>
                 <div class="card-body">
@@ -469,35 +565,35 @@
                                 <div class="bg-success bg-opacity-10 rounded-circle p-3 d-inline-block mb-2">
                                     <i class="bi bi-apple text-success fs-4"></i>
                                 </div>
-                                <h6 class="fw-semibold">Pola Makan Sehat</h6>
-                                <small class="text-muted">3x makan utama + 2x snack sehat. Perbanyak sayur & buah!</small>
+                                <h6 class="fw-semibold">Gizi Seimbang</h6>
+                                <small class="text-muted">Konsumsi makanan bergizi, kurangi garam, gula, dan lemak berlebih!</small>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="text-center p-3">
                                 <div class="bg-primary bg-opacity-10 rounded-circle p-3 d-inline-block mb-2">
-                                    <i class="bi bi-bicycle text-primary fs-4"></i>
+                                    <i class="bi bi-person-walking text-primary fs-4"></i>
                                 </div>
-                                <h6 class="fw-semibold">Olahraga Rutin</h6>
-                                <small class="text-muted">30 menit/hari, 5x seminggu. Bisa jalan kaki, berenang, atau bersepeda!</small>
+                                <h6 class="fw-semibold">Aktivitas Fisik</h6>
+                                <small class="text-muted">Olahraga ringan teratur, senam lansia, atau jalan santai setiap hari!</small>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="text-center p-3">
                                 <div class="bg-info bg-opacity-10 rounded-circle p-3 d-inline-block mb-2">
-                                    <i class="bi bi-moon-stars text-info fs-4"></i>
+                                    <i class="bi bi-shield-check text-info fs-4"></i>
                                 </div>
-                                <h6 class="fw-semibold">Tidur Cukup</h6>
-                                <small class="text-muted">8-9 jam per malam. Tidur cukup = pikiran fresh & tubuh sehat!</small>
+                                <h6 class="fw-semibold">Kontrol Rutin</h6>
+                                <small class="text-muted">Periksa TD, gula darah, dan kolesterol secara berkala!</small>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="text-center p-3">
                                 <div class="bg-warning bg-opacity-10 rounded-circle p-3 d-inline-block mb-2">
-                                    <i class="bi bi-shield-check text-warning fs-4"></i>
+                                    <i class="bi bi-people-fill text-warning fs-4"></i>
                                 </div>
-                                <h6 class="fw-semibold">Hindari Rokok & Narkoba</h6>
-                                <small class="text-muted">Jaga masa depanmu! Rokok & narkoba merusak kesehatan.</small>
+                                <h6 class="fw-semibold">Sosialisasi</h6>
+                                <small class="text-muted">Tetap aktif bersosialisasi, ikut kegiatan posyandu lansia!</small>
                             </div>
                         </div>
                     </div>
@@ -506,19 +602,19 @@
         </div>
     </div>
 
-    <!-- TREND ANALYSIS YANG LEBIH DETAIL -->
+    <!-- TREND ANALYSIS -->
     @if($dataPemeriksaan->count() >= 2)
     {{-- <div class="row g-2 mt-4">
         <div class="col-12">
             <div class="bg-light rounded p-4">
                 <h6 class="fw-semibold mb-3">
                     <i class="bi bi-graph-up-arrow me-2 text-primary"></i>
-                    Analisis Perkembangan Dibanding Bulan Sebelumnya
+                    Analisis Perkembangan Dibanding Pemeriksaan Sebelumnya
                 </h6>
                 
                 <div class="row g-3">
                     <!-- Progress BB -->
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="d-flex align-items-center">
                             <div class="bg-primary rounded-circle p-2 me-3">
                                 <i class="bi bi-{{ $progressBB > 0 ? 'arrow-up' : ($progressBB < 0 ? 'arrow-down' : 'dash') }} text-white"></i>
@@ -527,9 +623,9 @@
                                 <div class="fw-semibold">Berat Badan</div>
                                 <small class="text-muted">
                                     @if($progressBB > 0)
-                                        Naik <strong>{{ $progressBB }} kg</strong> - Bagus! Terus jaga pola makan sehat
+                                        Naik {{ $progressBB }} kg - Pantau pola makan
                                     @elseif($progressBB < 0)
-                                        Turun <strong>{{ abs($progressBB) }} kg</strong> - Perhatikan asupan nutrisi ya
+                                        Turun {{ abs($progressBB) }} kg - Perhatikan nutrisi
                                     @else
                                         Stabil - Pertahankan pola hidup sehat
                                     @endif
@@ -538,21 +634,42 @@
                         </div>
                     </div>
                     
-                    <!-- Progress TB -->
-                    <div class="col-md-6">
+                    <!-- Progress TD -->
+                    <div class="col-md-4">
                         <div class="d-flex align-items-center">
-                            <div class="bg-success rounded-circle p-2 me-3">
-                                <i class="bi bi-{{ $progressTB > 0 ? 'arrow-up' : ($progressTB < 0 ? 'arrow-down' : 'dash') }} text-white"></i>
+                            <div class="bg-danger rounded-circle p-2 me-3">
+                                <i class="bi bi-heart-pulse text-white"></i>
                             </div>
                             <div>
-                                <div class="fw-semibold">Tinggi Badan</div>
+                                <div class="fw-semibold">Tekanan Darah</div>
                                 <small class="text-muted">
-                                    @if($progressTB > 0)
-                                        Tumbuh <strong>{{ $progressTB }} cm</strong> - Excellent! Masih dalam masa pertumbuhan
-                                    @elseif($progressTB < 0)
-                                        Berkurang <strong>{{ abs($progressTB) }} cm</strong> - Kemungkinan kesalahan pengukuran
+                                    @if($pemeriksaanTerakhir && $pemeriksaanTerakhir->sistole <= 130)
+                                        Normal - Terus jaga pola hidup sehat
+                                    @elseif($pemeriksaanTerakhir && $pemeriksaanTerakhir->sistole <= 140)
+                                        Sedikit tinggi - Kurangi garam & stress
                                     @else
-                                        Stabil - Normal untuk usia remaja akhir
+                                        Tinggi - Segera konsultasi dokter
+                                    @endif
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress GD -->
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning rounded-circle p-2 me-3">
+                                <i class="bi bi-droplet text-white"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Gula Darah</div>
+                                <small class="text-muted">
+                                    @if($pemeriksaanTerakhir && $pemeriksaanTerakhir->gula_darah <= 140)
+                                        Normal - Jaga pola makan
+                                    @elseif($pemeriksaanTerakhir && $pemeriksaanTerakhir->gula_darah <= 200)
+                                        Sedikit tinggi - Kurangi gula
+                                    @else
+                                        Tinggi - Perlu kontrol ketat
                                     @endif
                                 </small>
                             </div>
@@ -566,12 +683,16 @@
                         <i class="bi bi-lightbulb me-1"></i>Rekomendasi:
                     </div>
                     <small class="text-muted">
-                        @if($progressBB > 2)
-                            Kenaikan BB signifikan sejak bulan lalu. Pastikan kenaikan dari massa otot, bukan lemak. Perbanyak olahraga!
-                        @elseif($progressBB < -2)
-                            Penurunan BB perlu diperhatikan. Konsultasikan dengan dokter dan perbaiki pola makan.
+                        @if($pemeriksaanTerakhir)
+                            @if($pemeriksaanTerakhir->sistole > 140 || $pemeriksaanTerakhir->gula_darah > 200)
+                                PENTING: Ada indikasi penyakit tidak menular. Segera konsultasi dokter untuk penanganan lebih lanjut.
+                            @elseif($pemeriksaanTerakhir->sistole > 130 || $pemeriksaanTerakhir->gula_darah > 140)
+                                Perlu perhatian khusus: Kurangi konsumsi garam dan gula, perbanyak olahraga ringan, kelola stress dengan baik.
+                            @else
+                                Kondisi baik! Pertahankan pola hidup sehat dengan olahraga ringan, makan bergizi, dan kontrol kesehatan berkala.
+                            @endif
                         @else
-                            Pertumbuhan dalam batas normal. Terus jaga pola hidup sehat dengan makan bergizi dan olahraga teratur.
+                            Lakukan pemeriksaan kesehatan rutin untuk deteksi dini penyakit tidak menular.
                         @endif
                     </small>
                 </div>
@@ -581,6 +702,7 @@
     @endif
 </div>
 
+<!-- ✅ MODERN STYLES -->
 <style>
 .bg-gradient-primary {
     background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
@@ -609,11 +731,12 @@
     .chart-container { height: 300px; }
 }
 </style>
-<!-- ✅ CHART SCRIPT UNTUK REMAJA - FOKUS BB & TB -->
+
+<!-- ✅ CHART SCRIPT UNTUK LANSIA - FOKUS BB, TD, GD -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('remajaChart');
+    const ctx = document.getElementById('lansiaChart');
     if (ctx) {
         // Data dari Laravel
         const chartData = @json($dataPemeriksaan->reverse()->values());
@@ -624,7 +747,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         const bbData = chartData.map(item => item.bb);
-        const tbData = chartData.map(item => item.tb);
+        const sistoleData = chartData.map(item => item.sistole || 120);
+        const gulaData = chartData.map(item => item.gula_darah || 100);
 
         new Chart(ctx, {
             type: 'line',
@@ -638,28 +762,43 @@ document.addEventListener('DOMContentLoaded', function() {
                         backgroundColor: 'rgba(13, 110, 253, 0.1)',
                         tension: 0.3,
                         fill: false,
-                        pointRadius: 8,
-                        pointHoverRadius: 12,
+                        pointRadius: 6,
+                        pointHoverRadius: 10,
                         pointBackgroundColor: '#0d6efd',
                         pointBorderColor: '#ffffff',
-                        pointBorderWidth: 3,
+                        pointBorderWidth: 2,
                         borderWidth: 3,
                         yAxisID: 'y'
                     },
                     {
-                        label: 'Tinggi Badan (cm)',
-                        data: tbData,
-                        borderColor: '#198754',
-                        backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                        label: 'Tekanan Darah Sistole (mmHg)',
+                        data: sistoleData,
+                        borderColor: '#dc3545',
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
                         tension: 0.3,
                         fill: false,
-                        pointRadius: 8,
-                        pointHoverRadius: 12,
-                        pointBackgroundColor: '#198754',
+                        pointRadius: 6,
+                        pointHoverRadius: 10,
+                        pointBackgroundColor: '#dc3545',
                         pointBorderColor: '#ffffff',
-                        pointBorderWidth: 3,
+                        pointBorderWidth: 2,
                         borderWidth: 3,
                         yAxisID: 'y1'
+                    },
+                    {
+                        label: 'Gula Darah (mg/dL)',
+                        data: gulaData,
+                        borderColor: '#ffc107',
+                        backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                        tension: 0.3,
+                        fill: false,
+                        pointRadius: 6,
+                        pointHoverRadius: 10,
+                        pointBackgroundColor: '#ffc107',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        borderWidth: 3,
+                        yAxisID: 'y2'
                     }
                 ]
             },
@@ -678,7 +817,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             pointStyle: 'circle',
                             padding: 20,
                             font: {
-                                size: 14,
+                                size: 13,
                                 weight: 'bold'
                             }
                         }
@@ -704,38 +843,18 @@ document.addEventListener('DOMContentLoaded', function() {
                                     label += context.parsed.y;
                                     if (context.dataset.label.includes('Berat')) {
                                         label += ' kg';
-                                        
-                                        // Tambah trend info
-                                        const dataIndex = context.dataIndex;
-                                        if (dataIndex > 0) {
-                                            const currentValue = context.parsed.y;
-                                            const previousValue = bbData[dataIndex - 1];
-                                            const diff = (currentValue - previousValue).toFixed(1);
-                                            if (diff > 0) {
-                                                label += ` (↗️ +${diff} kg)`;
-                                            } else if (diff < 0) {
-                                                label += ` (↘️ ${diff} kg)`;
-                                            } else {
-                                                label += ` (→ stabil)`;
-                                            }
-                                        }
-                                    } else if (context.dataset.label.includes('Tinggi')) {
-                                        label += ' cm';
-                                        
-                                        // Tambah trend info
-                                        const dataIndex = context.dataIndex;
-                                        if (dataIndex > 0) {
-                                            const currentValue = context.parsed.y;
-                                            const previousValue = tbData[dataIndex - 1];
-                                            const diff = (currentValue - previousValue).toFixed(1);
-                                            if (diff > 0) {
-                                                label += ` (↗️ +${diff} cm)`;
-                                            } else if (diff < 0) {
-                                                label += ` (↘️ ${diff} cm)`;
-                                            } else {
-                                                label += ` (→ stabil)`;
-                                            }
-                                        }
+                                    } else if (context.dataset.label.includes('Tekanan')) {
+                                        label += ' mmHg';
+                                        // Status TD
+                                        if (context.parsed.y >= 140) label += ' (Tinggi)';
+                                        else if (context.parsed.y >= 130) label += ' (Sedikit Tinggi)';
+                                        else label += ' (Normal)';
+                                    } else if (context.dataset.label.includes('Gula')) {
+                                        label += ' mg/dL';
+                                        // Status GD
+                                        if (context.parsed.y >= 200) label += ' (Tinggi)';
+                                        else if (context.parsed.y >= 140) label += ' (Sedikit Tinggi)';
+                                        else label += ' (Normal)';
                                     }
                                 }
                                 return label;
@@ -773,7 +892,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             text: 'Berat Badan (kg)',
                             color: '#0d6efd',
                             font: {
-                                size: 14,
+                                size: 12,
                                 weight: 'bold'
                             }
                         },
@@ -784,10 +903,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         ticks: {
                             color: '#0d6efd',
                             font: {
-                                size: 12,
+                                size: 11,
                                 weight: 'bold'
                             }
-                        }
+                        },
+                        min: 40,
+                        max: 100
                     },
                     y1: {
                         type: 'linear',
@@ -795,10 +916,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         position: 'right',
                         title: {
                             display: true,
-                            text: 'Tinggi Badan (cm)',
-                            color: '#198754',
+                            text: 'TD Sistole (mmHg)',
+                            color: '#dc3545',
                             font: {
-                                size: 14,
+                                size: 12,
                                 weight: 'bold'
                             }
                         },
@@ -806,12 +927,21 @@ document.addEventListener('DOMContentLoaded', function() {
                             drawOnChartArea: false,
                         },
                         ticks: {
-                            color: '#198754',
+                            color: '#dc3545',
                             font: {
-                                size: 12,
+                                size: 11,
                                 weight: 'bold'
                             }
-                        }
+                        },
+                        min: 80,
+                        max: 180
+                    },
+                    y2: {
+                        type: 'linear',
+                        display: false, // Hidden untuk tidak terlalu ramai
+                        position: 'right',
+                        min: 70,
+                        max: 300
                     }
                 }
             }

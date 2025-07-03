@@ -13,7 +13,7 @@
                         <div class="col-md-8">
                             <div class="d-flex align-items-center mb-3">
                                 <div>
-                                    <h1 class="mb-1 fw-bold">🤱 Dashboard Kesehatan {{ $user->nama }}</h1>
+                                    <h1 class="mb-1 fw-bold">Dashboard Kesehatan {{ $user->nama }}</h1>
                                     <div class="mb-0 opacity-90 fs-5">
                                         <div class="d-flex flex-column flex-md-row gap-2 gap-md-4">
                                             <div class="d-flex align-items-center">
@@ -35,7 +35,7 @@
                             <div class="bg-white bg-opacity-10 rounded-3 p-3 mb-3">
                                 <p class="mb-0">
                                     <i class="bi bi-info-circle me-2"></i>
-                                    <strong>Dashboard Kehamilan:</strong> Pantau kesehatan ibu dan janin selama masa kehamilan dengan pemeriksaan ANC rutin.
+                                    <strong>Dashboard Kehamilan:</strong> Pantau kesehatan ibu selama masa kehamilan dengan pemeriksaan rutin.
                                 </p>
                             </div>
                         </div>
@@ -219,7 +219,7 @@
                         <div class="d-flex">
                             <i class="bi bi-info-circle-fill me-2 mt-1"></i>
                             <div>
-                                <strong>Grafik ini menunjukkan:</strong> Perkembangan berat badan dan tekanan darah dari setiap pemeriksaan ANC. 
+                                <strong>Grafik ini menunjukkan:</strong> Perkembangan berat badan dan tekanan darah dari setiap pemeriksaan. 
                                 Hover di titik grafik untuk melihat perubahan dari pemeriksaan sebelumnya!
                                 <div class="mt-2">
                                     <small class="text-muted">

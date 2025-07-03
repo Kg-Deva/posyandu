@@ -25,6 +25,7 @@ class PemeriksaanLansiaController extends Controller
             'diastole' => 'required|integer',
             'gula_darah' => 'required|numeric',
             'imt' => 'nullable|numeric',
+            'pemeriksa' => 'required|string|max:255',
             'kesimpulan_imt' => 'nullable|string',
             'kesimpulan_sistole' => 'nullable|string',
             'kesimpulan_diastole' => 'nullable|string',
@@ -69,5 +70,186 @@ class PemeriksaanLansiaController extends Controller
         $user = User::findOrFail($userId);
         // Jika ingin kirim data lain, tambahkan di sini
         return view('admin-page.pemeriksaan-form.skrining-tahunan-lansia', compact('user'));
+    }
+
+    // ✅ TAMBAH METHOD LANSIA HOME
+    public function lansiaHome()
+    {
+        $user = Auth::user();
+
+        // Ambil data pemeriksaan lansia untuk user ini
+        $dataPemeriksaan = PemeriksaanLansia::where('nik', $user->nik)
+            ->orderBy('tanggal_pemeriksaan', 'desc')
+            ->get();
+
+        // Pemeriksaan terakhir
+        $pemeriksaanTerakhir = $dataPemeriksaan->first();
+
+        // Total pemeriksaan
+        $totalPemeriksaan = $dataPemeriksaan->count();
+
+        // Hitung status kesehatan
+        $statusKesehatan = $this->calculateHealthStatus($pemeriksaanTerakhir, $user);
+
+        // Progress BB (bandingkan dengan pemeriksaan sebelumnya)
+        $progressBB = 0;
+        if ($dataPemeriksaan->count() >= 2) {
+            $pemeriksaanSebelumnya = $dataPemeriksaan->get(1);
+            $progressBB = $pemeriksaanTerakhir->bb - $pemeriksaanSebelumnya->bb;
+        }
+
+        return view('admin-page.lansia.lansia-home', compact(
+            'user',
+            'dataPemeriksaan',
+            'pemeriksaanTerakhir',
+            'totalPemeriksaan',
+            'statusKesehatan',
+            'progressBB'
+        ));
+    }
+
+    // ✅ HITUNG STATUS KESEHATAN LANSIA
+    private function calculateHealthStatus($pemeriksaan, $user)
+    {
+        if (!$pemeriksaan) {
+            return [
+                'status' => 'Belum Ada Data',
+                'category' => 'info',
+                'score' => 0,
+                'badge' => 'bg-secondary',
+                'icon' => 'question-circle',
+                'description' => 'Belum ada pemeriksaan'
+            ];
+        }
+
+        $riskFactors = 0;
+        $criticalConditions = 0;
+        $ageFactors = 0;
+
+        // ✅ EVALUASI KONDISI KRITIS LANSIA
+        // Hipertensi Stage 2 (lebih toleran untuk lansia)
+        if ($pemeriksaan->sistole >= 150 || $pemeriksaan->diastole >= 95) {
+            $criticalConditions++;
+        }
+
+        // Diabetes
+        if ($pemeriksaan->gula_darah >= 200) {
+            $criticalConditions++;
+        }
+
+        // Obesitas (IMT > 30)
+        if ($pemeriksaan->imt >= 30) {
+            $criticalConditions++;
+        }
+
+        // TBC Suspek (2+ gejala)
+        $gejalaTBC = 0;
+        if ($pemeriksaan->tbc_batuk) $gejalaTBC++;
+        if ($pemeriksaan->tbc_demam) $gejalaTBC++;
+        if ($pemeriksaan->tbc_bb_turun) $gejalaTBC++;
+        if ($pemeriksaan->tbc_kontak) $gejalaTBC++;
+
+        if ($gejalaTBC >= 2) {
+            $criticalConditions++;
+        }
+
+        // PUMA Positif (skor > 6)
+        if ($pemeriksaan->skor_puma > 6) {
+            $criticalConditions++;
+        }
+
+        // ✅ EVALUASI FAKTOR RISIKO LANSIA
+        // Hipertensi Grade 1 (lebih toleran untuk lansia)
+        if ($pemeriksaan->sistole >= 140 && $pemeriksaan->sistole < 150) {
+            $riskFactors++;
+        }
+
+        // Pre-diabetes
+        if ($pemeriksaan->gula_darah >= 140 && $pemeriksaan->gula_darah < 200) {
+            $riskFactors++;
+        }
+
+        // Overweight (toleran untuk lansia)
+        if ($pemeriksaan->imt >= 25 && $pemeriksaan->imt < 30) {
+            $riskFactors++;
+        }
+
+        // Masalah pendengaran (umum pada lansia)
+        $masalahPendengaran = 0;
+        if ($pemeriksaan->tes_jari_kanan !== 'Normal') $masalahPendengaran++;
+        if ($pemeriksaan->tes_jari_kiri !== 'Normal') $masalahPendengaran++;
+        if ($pemeriksaan->tes_berbisik_kanan !== 'Normal') $masalahPendengaran++;
+        if ($pemeriksaan->tes_berbisik_kiri !== 'Normal') $masalahPendengaran++;
+
+        if ($masalahPendengaran >= 2) {
+            $riskFactors++;
+        }
+
+        // ✅ FAKTOR USIA LANSIA
+        $umur = Carbon::parse($user->tanggal_lahir)->age;
+
+        // Risiko tinggi umur > 70
+        if ($umur > 70) {
+            $ageFactors++;
+        }
+
+        // Risiko sangat tinggi umur > 80
+        if ($umur > 80) {
+            $ageFactors++;
+        }
+
+        // ✅ TENTUKAN STATUS BERDASARKAN KONDISI LANSIA
+        if ($criticalConditions >= 2) {
+            return [
+                'status' => 'Perlu Rujukan Segera',
+                'category' => 'danger',
+                'score' => 85 + ($criticalConditions * 5),
+                'badge' => 'bg-danger',
+                'icon' => 'exclamation-triangle-fill',
+                'description' => 'Ada beberapa kondisi serius yang memerlukan penanganan medis segera'
+            ];
+        }
+
+        if ($criticalConditions >= 1) {
+            return [
+                'status' => 'Perlu Rujukan',
+                'category' => 'warning',
+                'score' => 65 + ($criticalConditions * 10),
+                'badge' => 'bg-warning',
+                'icon' => 'exclamation-triangle',
+                'description' => 'Ada kondisi yang memerlukan perhatian medis'
+            ];
+        }
+
+        if ($riskFactors >= 3 || ($riskFactors >= 2 && $ageFactors >= 1)) {
+            return [
+                'status' => 'Perlu Perhatian',
+                'category' => 'warning',
+                'score' => 45 + ($riskFactors * 5) + ($ageFactors * 3),
+                'badge' => 'bg-warning',
+                'icon' => 'exclamation-circle',
+                'description' => 'Beberapa faktor risiko perlu diperhatikan mengingat usia lanjut'
+            ];
+        }
+
+        if ($riskFactors >= 1 || $ageFactors >= 1) {
+            return [
+                'status' => 'Perlu Perhatian',
+                'category' => 'info',
+                'score' => 30 + ($riskFactors * 8) + ($ageFactors * 5),
+                'badge' => 'bg-info',
+                'icon' => 'info-circle',
+                'description' => 'Ada faktor risiko yang perlu dipantau secara berkala'
+            ];
+        }
+
+        return [
+            'status' => 'Sehat',
+            'category' => 'success',
+            'score' => 95 - ($ageFactors * 5), // Skor dikurangi sesuai usia
+            'badge' => 'bg-success',
+            'icon' => 'shield-check',
+            'description' => 'Kondisi kesehatan baik untuk usia lanjut, pertahankan pola hidup sehat'
+        ];
     }
 }

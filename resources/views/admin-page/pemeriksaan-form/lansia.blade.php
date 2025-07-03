@@ -49,7 +49,7 @@
         @endif
         <input type="hidden" id="jenis_kelamin" name="jenis_kelamin" value="{{ $user->jenis_kelamin ?? '' }}">
         <input type="hidden" name="nik" value="{{ $user->nik }}"> <!-- ✅ TAMBAH ini -->
-        {{-- <input type="hidden" name="user_id" value="{{ $user->id }}"> --}}
+        <input type="hidden" name="pemeriksa" value="{{ auth()->user()->name ?? 'System' }}">
         <div class="lansia-card">
             <h6>🩺 Pemeriksaan Fisik lansia</h6>
             <div class="row">

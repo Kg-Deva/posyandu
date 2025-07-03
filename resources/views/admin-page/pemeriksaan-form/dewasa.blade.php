@@ -48,7 +48,7 @@
         </div>
         @endif
         <input type="hidden" id="jenis_kelamin" name="jenis_kelamin" value="{{ $user->jenis_kelamin ?? '' }}">
-        {{-- <input type="hidden" name="user_id" value="{{ $user->id }}"> --}}
+        <input type="hidden" name="pemeriksa" value="{{ auth()->user()->name ?? 'System' }}">
         <input type="hidden" name="nik" value="{{ $user->nik }}">
 
         <div class="dewasa-card">

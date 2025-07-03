@@ -49,6 +49,8 @@ class CreatePemeriksaanDewasaTable extends Migration
             $table->tinyInteger('alat_kontrasepsi');
             $table->text('edukasi')->nullable();
             $table->unsignedBigInteger('created_by')->nullable();
+            $table->string('pemeriksa'); // Nama kader/petugas
+
             $table->timestamps();
 
             // $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

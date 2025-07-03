@@ -48,6 +48,8 @@ class CreatePemeriksaanLansiaTable extends Migration
             // Kontrasepsi & Edukasi
             $table->tinyInteger('alat_kontrasepsi');
             $table->text('edukasi')->nullable();
+            $table->string('pemeriksa'); // Nama kader/petugas
+
             $table->unsignedBigInteger('created_by')->nullable();
             $table->timestamps();
 

@@ -11,6 +11,8 @@ use App\Http\Controllers\PemeriksaanIbuHamilController;
 use App\Http\Controllers\PemeriksaanDewasaController;
 use App\Http\Controllers\PemeriksaanLansiaController;
 use App\Http\Controllers\SkriningDewasaController;
+use App\Models\PemeriksaanDewasa;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -238,7 +240,7 @@ Route::group(['middleware' => ['auth', 'ceklevel:remaja', 'redirectrole:remaja']
 });
 
 Route::group(['middleware' => ['auth', 'ceklevel:dewasa', 'redirectrole:dewasa']], function () {
-    Route::get('/dewasa-home', [MenuController::class, 'dewasaHome'])->name('dewasa-home');
+    Route::get('/dewasa-home', [PemeriksaanDewasaController::class, 'dewasaHome'])->name('dewasa-home');
 });
 
 Route::group(['middleware' => ['auth', 'ceklevel:ibu hamil', 'redirectrole:ibu hamil']], function () {
@@ -248,7 +250,7 @@ Route::group(['middleware' => ['auth', 'ceklevel:ibu hamil', 'redirectrole:ibu h
 });
 
 Route::group(['middleware' => ['auth', 'ceklevel:lansia', 'redirectrole:lansia']], function () {
-    Route::get('/lansia-home', [MenuController::class, 'lansiaHome'])->name('lansia-home');
+    Route::get('/lansia-home', [PemeriksaanLansiaController::class, 'lansiaHome'])->name('lansia-home');
 });
 
 Route::fallback(function () {

@@ -657,6 +657,7 @@ class DataPemeriksaanController extends Controller
         }
     }
 
+
     private function calculateUniversalStats($request)
     {
         $stats = [
@@ -670,130 +671,213 @@ class DataPemeriksaanController extends Controller
         $currentMonth = now()->month;
         $currentYear = now()->year;
 
+        // ✅ GUNAKAN LOGIKA YANG SAMA DENGAN getData()
+        $allData = collect();
+
+        // ✅ BALITA DATA
         if (empty($role) || $role === 'balita') {
-            $balitaCount = PemeriksaanBalita::count();
-            $stats['total_pemeriksaan'] += $balitaCount;
+            $balitaQuery = PemeriksaanBalita::with(['user' => function ($q) {
+                $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
+            }]);
+            $this->applyFilters($balitaQuery, $request);
 
-            $balitaNonWarga = PemeriksaanBalita::whereDoesntHave('user', function ($q) {
-                $q->whereNotNull('rw');
-            })->count();
-            $stats['non_warga'] += $balitaNonWarga;
+            $balitaData = $balitaQuery->get()->map(function ($item) {
+                $rujukanStatus = 'Normal';
 
-            $balitaBulanIni = PemeriksaanBalita::whereMonth('tanggal_pemeriksaan', $currentMonth)
-                ->whereYear('tanggal_pemeriksaan', $currentYear)->count();
-            $stats['bulan_ini'] += $balitaBulanIni;
+                if (
+                    isset($item->rujuk_puskesmas) &&
+                    (strpos($item->rujuk_puskesmas, 'RUJUK') !== false || $item->rujuk_puskesmas === 'Perlu Rujukan')
+                ) {
+                    $rujukanStatus = 'Perlu Rujukan';
+                }
 
-            $balitaRujukan = PemeriksaanBalita::where(function ($q) {
-                $q->where('rujuk_puskesmas', 'LIKE', '%RUJUK%')
-                    ->orWhere('rujuk_puskesmas', 'Perlu Rujukan')
-                    ->orWhere('jumlah_gejala_tbc', 'LIKE', '2 gejala%')
-                    ->orWhere('jumlah_gejala_tbc', 'LIKE', '3 gejala%')
-                    ->orWhere('jumlah_gejala_tbc', 'LIKE', '4 gejala%')
-                    ->orWhere(function ($subQ) {
-                        $subQ->where('lila', '<', 11.5)->whereNotNull('lila');
-                    });
-            })->count();
+                $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
+                if (is_string($jumlahGejala) && preg_match('/(\d+)/', $jumlahGejala, $matches)) {
+                    $jumlahGejala = (int)$matches[1];
+                }
+                if ($jumlahGejala >= 2) {
+                    $rujukanStatus = 'Perlu Rujukan';
+                }
 
-            $stats['perlu_rujukan'] += $balitaRujukan;
+                $umur = $item->umur ?? 0;
+                if ($umur >= 6 && $item->lila && floatval($item->lila) < 11.5) {
+                    $rujukanStatus = 'Perlu Rujukan';
+                }
+
+                return [
+                    'id' => $item->id,
+                    'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
+                    'nik' => $item->nik,
+                    'rujuk_puskesmas' => $rujukanStatus,
+                    'user' => $item->user,
+                    'jenis_pemeriksaan' => 'balita'
+                ];
+            });
+            $allData = $allData->merge($balitaData);
         }
 
+        // ✅ REMAJA DATA
         if (empty($role) || $role === 'remaja') {
-            $remajaCount = PemeriksaanRemaja::count();
-            $stats['total_pemeriksaan'] += $remajaCount;
+            $remajaQuery = PemeriksaanRemaja::with(['user' => function ($q) {
+                $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
+            }]);
+            $this->applyFilters($remajaQuery, $request);
 
-            $remajaNonWarga = PemeriksaanRemaja::whereDoesntHave('user', function ($q) {
-                $q->whereNotNull('rw');
-            })->count();
-            $stats['non_warga'] += $remajaNonWarga;
-
-            $remajaBulanIni = PemeriksaanRemaja::whereMonth('tanggal_pemeriksaan', $currentMonth)
-                ->whereYear('tanggal_pemeriksaan', $currentYear)->count();
-            $stats['bulan_ini'] += $remajaBulanIni;
-
-            $remajaData = PemeriksaanRemaja::with('user')->get();
-            foreach ($remajaData as $item) {
+            $remajaData = $remajaQuery->get()->map(function ($item) {
                 $healthStatus = $this->calculateHealthStatus($item, $item->user);
-                if ($healthStatus['category'] === 'urgent' || $item->rujuk_puskesmas === 'Perlu Rujukan') {
-                    $stats['perlu_rujukan']++;
-                }
-            }
+
+                return [
+                    'id' => $item->id,
+                    'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
+                    'nik' => $item->nik,
+                    'rujuk_puskesmas' => ($healthStatus['category'] === 'urgent' ||
+                        $item->rujuk_puskesmas === 'Perlu Rujukan') ? 'Perlu Rujukan' : 'Normal',
+                    'user' => $item->user,
+                    'jenis_pemeriksaan' => 'remaja'
+                ];
+            });
+            $allData = $allData->merge($remajaData);
         }
 
+        // ✅ IBU HAMIL DATA
         if (empty($role) || $role === 'ibu-hamil') {
-            $ibuHamilCount = PemeriksaanIbuHamil::count();
-            $stats['total_pemeriksaan'] += $ibuHamilCount;
+            $ibuHamilQuery = PemeriksaanIbuHamil::with(['user' => function ($q) {
+                $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
+            }]);
+            $this->applyFilters($ibuHamilQuery, $request);
 
-            $ibuHamilNonWarga = PemeriksaanIbuHamil::whereDoesntHave('user', function ($q) {
-                $q->whereNotNull('rw');
-            })->count();
-            $stats['non_warga'] += $ibuHamilNonWarga;
-
-            $ibuHamilBulanIni = PemeriksaanIbuHamil::whereMonth('tanggal_pemeriksaan', $currentMonth)
-                ->whereYear('tanggal_pemeriksaan', $currentYear)->count();
-            $stats['bulan_ini'] += $ibuHamilBulanIni;
-
-            $ibuHamilData = PemeriksaanIbuHamil::with('user')->get();
-            foreach ($ibuHamilData as $item) {
+            $ibuHamilData = $ibuHamilQuery->get()->map(function ($item) {
                 $healthStatus = $this->calculateHealthStatus($item, $item->user);
-                if ($healthStatus['category'] === 'urgent' || $item->perlu_rujukan) {
-                    $stats['perlu_rujukan']++;
-                }
-            }
+
+                return [
+                    'id' => $item->id,
+                    'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
+                    'nik' => $item->nik,
+                    'rujuk_puskesmas' => ($item->perlu_rujukan) ? 'Perlu Rujukan' : 'Normal',
+                    'user' => $item->user,
+                    'jenis_pemeriksaan' => 'ibu-hamil'
+                ];
+            });
+            $allData = $allData->merge($ibuHamilData);
         }
 
+        // ✅ DEWASA DATA
         if (empty($role) || $role === 'dewasa') {
-            $dewasaCount = PemeriksaanDewasa::count();
-            $stats['total_pemeriksaan'] += $dewasaCount;
+            $dewasaQuery = PemeriksaanDewasa::with(['user' => function ($q) {
+                $q->select('id', 'nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
+            }]);
+            $this->applyFilters($dewasaQuery, $request);
 
-            $dewasaNonWarga = PemeriksaanDewasa::whereDoesntHave('user', function ($q) {
-                $q->whereNotNull('rw');
-            })->count();
-            $stats['non_warga'] += $dewasaNonWarga;
+            $dewasaData = $dewasaQuery->get()->map(function ($item) {
+                $rujukanStatus = 'Normal';
 
-            $dewasaBulanIni = PemeriksaanDewasa::whereMonth('tanggal_pemeriksaan', $currentMonth)
-                ->whereYear('tanggal_pemeriksaan', $currentYear)->count();
-            $stats['bulan_ini'] += $dewasaBulanIni;
-
-            $dewasaData = PemeriksaanDewasa::with('user')->get();
-            foreach ($dewasaData as $item) {
-                $healthStatus = $this->calculateHealthStatus($item, $item->user);
-                if (
-                    $healthStatus['category'] === 'urgent' ||
-                    $item->kesimpulan_td === 'Hipertensi' ||
-                    $item->kesimpulan_gula_darah === 'Diabetes' ||
-                    (isset($item->rujuk_puskesmas) && $item->rujuk_puskesmas === 'Perlu Rujukan')
-                ) {
-                    $stats['perlu_rujukan']++;
+                if (!empty($item->status_tbc) && (
+                    $item->status_tbc === 'Rujuk ke Puskesmas' ||
+                    $item->status_tbc === 'Perlu Rujukan'
+                )) {
+                    $rujukanStatus = 'Perlu Rujukan';
                 }
-            }
+
+                if (!empty($item->status_puma) && (
+                    $item->status_puma === 'Rujuk ke Puskesmas' ||
+                    $item->status_puma === 'Perlu Rujukan'
+                )) {
+                    $rujukanStatus = 'Perlu Rujukan';
+                }
+
+                if (!empty($item->kesimpulan_td) && $item->kesimpulan_td === 'Hipertensi') {
+                    $rujukanStatus = 'Perlu Rujukan';
+                }
+
+                if (!empty($item->kesimpulan_gula_darah) && $item->kesimpulan_gula_darah === 'Diabetes') {
+                    $rujukanStatus = 'Perlu Rujukan';
+                }
+
+                return [
+                    'id' => $item->id,
+                    'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
+                    'nik' => $item->nik,
+                    'rujuk_puskesmas' => $rujukanStatus,
+                    'user' => $item->user,
+                    'jenis_pemeriksaan' => 'dewasa'
+                ];
+            });
+            $allData = $allData->merge($dewasaData);
         }
 
+        // ✅ LANSIA DATA
         if (empty($role) || $role === 'lansia') {
-            $lansiaCount = PemeriksaanLansia::count();
-            $stats['total_pemeriksaan'] += $lansiaCount;
+            $lansiaQuery = PemeriksaanLansia::with(['user' => function ($q) {
+                $q->select('id', 'nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
+            }]);
+            $this->applyFilters($lansiaQuery, $request);
 
-            $lansiaNonWarga = PemeriksaanLansia::whereDoesntHave('user', function ($q) {
-                $q->whereNotNull('rw');
-            })->count();
-            $stats['non_warga'] += $lansiaNonWarga;
+            $lansiaData = $lansiaQuery->get()->map(function ($item) {
+                $rujukanStatus = 'Normal';
 
-            $lansiaBulanIni = PemeriksaanLansia::whereMonth('tanggal_pemeriksaan', $currentMonth)
-                ->whereYear('tanggal_pemeriksaan', $currentYear)->count();
-            $stats['bulan_ini'] += $lansiaBulanIni;
-
-            $lansiaData = PemeriksaanLansia::with('user')->get();
-            foreach ($lansiaData as $item) {
-                $healthStatus = $this->calculateHealthStatus($item, $item->user);
-                if (
-                    $healthStatus['category'] === 'urgent' ||
-                    $item->kesimpulan_td === 'Hipertensi' ||
-                    $item->kesimpulan_gula_darah === 'Diabetes' ||
-                    (isset($item->rujuk_puskesmas) && $item->rujuk_puskesmas === 'Perlu Rujukan')
-                ) {
-                    $stats['perlu_rujukan']++;
+                if (!empty($item->status_tbc) && (
+                    $item->status_tbc === 'Rujuk ke Puskesmas' ||
+                    $item->status_tbc === 'Perlu Rujukan'
+                )) {
+                    $rujukanStatus = 'Perlu Rujukan';
                 }
-            }
+
+                if (!empty($item->status_puma) && (
+                    $item->status_puma === 'Rujuk ke Puskesmas' ||
+                    $item->status_puma === 'Perlu Rujukan'
+                )) {
+                    $rujukanStatus = 'Perlu Rujukan';
+                }
+
+                if (!is_null($item->skor_puma) && is_numeric($item->skor_puma) && $item->skor_puma > 6) {
+                    $rujukanStatus = 'Perlu Rujukan';
+                }
+
+                if (!empty($item->kesimpulan_td) && $item->kesimpulan_td === 'Hipertensi') {
+                    $rujukanStatus = 'Perlu Rujukan';
+                }
+
+                if (!empty($item->kesimpulan_gula_darah) && $item->kesimpulan_gula_darah === 'Diabetes') {
+                    $rujukanStatus = 'Perlu Rujukan';
+                }
+
+                return [
+                    'id' => $item->id,
+                    'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
+                    'nik' => $item->nik,
+                    'rujuk_puskesmas' => $rujukanStatus,
+                    'user' => $item->user,
+                    'jenis_pemeriksaan' => 'lansia'
+                ];
+            });
+            $allData = $allData->merge($lansiaData);
         }
+
+        // ✅ FILTER RUJUKAN JIKA ADA
+        if ($request->filled('rujukan')) {
+            $allData = $allData->filter(function ($item) use ($request) {
+                return $item['rujuk_puskesmas'] === $request->rujukan;
+            })->values();
+        }
+
+        // ✅ HITUNG STATS DARI DATA YANG SUDAH DIFILTER
+        $stats['total_pemeriksaan'] = $allData->count();
+
+        // Non Warga (RW kosong/null)
+        $stats['non_warga'] = $allData->filter(function ($item) {
+            return empty($item['user']['rw']);
+        })->count();
+
+        // Bulan ini
+        $stats['bulan_ini'] = $allData->filter(function ($item) use ($currentMonth, $currentYear) {
+            $tanggal = Carbon::parse($item['tanggal_pemeriksaan']);
+            return $tanggal->month == $currentMonth && $tanggal->year == $currentYear;
+        })->count();
+
+        // Perlu rujukan
+        $stats['perlu_rujukan'] = $allData->filter(function ($item) {
+            return $item['rujuk_puskesmas'] === 'Perlu Rujukan';
+        })->count();
 
         return $stats;
     }

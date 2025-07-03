@@ -220,7 +220,7 @@
     <!-- Hamil Anak Ke -->
     <div class="mb-3">
         <label for="hamil_ke">Hamil Anak Ke</label>
-        <input type="number" min="1" name="hamil_ke" id="hamil_ke" class="form-control" value="{{ $user->hamil_ke ?? '' }}" placeholder="Contoh: 2" required>
+        <input type="number" min="0" name="hamil_ke" id="hamil_ke" class="form-control" value="{{ $user->hamil_ke ?? '' }}" placeholder="Contoh: 2" required>
     </div>
     <!-- Tinggi Badan (cm) -->
     <div class="mb-3">

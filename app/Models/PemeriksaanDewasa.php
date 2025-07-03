@@ -46,6 +46,7 @@ class PemeriksaanDewasa extends Model
         'status_tbc',
         'alat_kontrasepsi',
         'edukasi',
+        'pemeriksa',
         'created_by',
     ];
 

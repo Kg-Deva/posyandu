@@ -126,6 +126,7 @@
                                                     <i id="password-icon" class="bi bi-eye"></i>
                                                 </div>
                                             </div>
+                                            <small class="text-muted">Password minimal 6 karakter</small>
                                         </div>
                                     </div>
                                     <script>

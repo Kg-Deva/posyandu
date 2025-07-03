@@ -67,6 +67,22 @@
                 </a>
             </li>
         @endif
+        @if(auth()->check() && auth()->user()->level == 'dewasa')
+        <li class="sidebar-item {{ Request::is('dewasa-home') ? 'active' : '' }}">
+                <a href="/ibu-hamil-home" class='sidebar-link'>
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+        @endif
+         @if(auth()->check() && auth()->user()->level == 'lansia')
+        <li class="sidebar-item {{ Request::is('lansia-home') ? 'active' : '' }}">
+                <a href="/lansia-home" class='sidebar-link'>
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+        @endif
         <li class="sidebar-title">Logout</li>
         <li class="sidebar-item">
             <a href="javascript:void(0);" onclick="event.preventDefault(); confirmLogout();" class='sidebar-link'>

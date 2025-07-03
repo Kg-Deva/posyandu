@@ -12,20 +12,21 @@
                     <div class="row align-items-center">
                         <div class="col-md-8">
                             <div class="d-flex align-items-center mb-3">
-                                {{-- <div class="bg-white bg-opacity-20 rounded-circle p-3 me-3 shadow-sm">
-                                    <i class="bi bi-info-circle me-2"></i>
-                                </div> --}}
                                 <div>
-                                    <h1 class="mb-1 fw-bold">Catatan Kesehatan {{ $user->nama }}</h1>
+                                    <h1 class="mb-1 fw-bold">Dashboard Kesehatan {{ $user->nama }}</h1>
                                     <div class="mb-0 opacity-90 fs-5">
                                         <div class="d-flex flex-column flex-md-row gap-2 gap-md-4">
                                             <div class="d-flex align-items-center">
                                                 <span class="text-white-50 me-2 fw-normal">👶 Umur:</span>
                                                 <span class="fw-semibold">{{ $pemeriksaanTerakhir ? $pemeriksaanTerakhir->umur  . ' bulan' : $user->umur }}</span>
                                             </div>
-                                            <div class="d-flex align-items-center">
+                                            {{-- <div class="d-flex align-items-center">
                                                 <span class="text-white-50 me-2 fw-normal">📋 NIK:</span>
                                                 <span class="fw-semibold">{{ $user->nik }}</span>
+                                            </div> --}}
+                                            <div class="d-flex align-items-center">
+                                                <span class="text-white-50 me-2 fw-normal">📅 Periksa Terakhir:</span>
+                                                <span class="fw-semibold">{{ $pemeriksaanTerakhir->tanggal_pemeriksaan->format('d M Y') }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -673,17 +674,16 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-gradient-light border-0">
                     <div class="d-flex align-items-center justify-content-between flex-wrap">
-                        <div>
+                        {{-- <div>
                             <h4 class="card-title fw-bold text-dark mb-1 d-flex align-items-center">
-                                {{-- <i class="bi bi-calendar-check text-primary me-2 fs-4"></i> --}}
                                 <p class="text-muted mb-0"> Hasil Pemeriksaan Terakhir</p>
                             </h4>
                             <p class="text-muted mb-0">
                                 <i class="bi bi-calendar-event me-1"></i>
                                 {{ \Carbon\Carbon::parse($pemeriksaanTerakhir->tanggal_pemeriksaan)->translatedFormat('l, d F Y') }}
                             </p>
-                        </div>
-                        <div class="text-end">
+                        </div> --}}
+                        {{-- <div class="text-end">
                             <span class="badge bg-primary px-3 py-2">
                                 <i class="bi bi-clock me-1"></i>
                                 @if(\Carbon\Carbon::parse($pemeriksaanTerakhir->tanggal_pemeriksaan)->isToday())
@@ -694,7 +694,7 @@
                                     {{ \Carbon\Carbon::parse($pemeriksaanTerakhir->tanggal_pemeriksaan)->diffForHumans() }}
                                 @endif
                             </span>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
                 <div class="card-body p-4">
@@ -877,11 +877,21 @@
                                 </div>
                                 @endif
                                 
+                                {{-- <div class="bg-white rounded-3 p-3 shadow-sm mt-3 border border-{{ $correctClass }} border-2">
+                                    <div class="text-center">
+                                        <i class="bi bi-telephone text-{{ $correctClass }} fs-4 mb-2"></i>
+                                        <div class="text-muted">Butuh Bantuan?</div>
+                                        <small class="text-muted">Hubungi Kader Posyandu</small>
+                                    </div>
+                                </div> --}}
                                 <div class="bg-white rounded-3 p-3 shadow-sm mt-3 border border-{{ $correctClass }} border-2">
                                     <div class="text-center">
                                         <i class="bi bi-telephone text-{{ $correctClass }} fs-4 mb-2"></i>
                                         <div class="text-muted">Butuh Bantuan?</div>
                                         <small class="text-muted">Hubungi Kader Posyandu</small>
+                                        <div class="fw-bold text-{{ $correctClass }} mt-2">
+                                            📞 024 8445809
+                                        </div>
                                     </div>
                                 </div>
                             </div>

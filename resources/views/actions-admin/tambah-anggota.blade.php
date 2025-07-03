@@ -135,6 +135,7 @@
                                                     <i id="password-icon" class="bi bi-eye"></i>
                                                 </div>
                                             </div>
+                                            <small class="text-muted">Password minimal 6 karakter</small>
                                         </div>
                                     </div>
                                     <div class="d-flex flex-column mt-4">

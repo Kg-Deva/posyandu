@@ -472,11 +472,11 @@
         function getBadgeClass(role) {
             const badges = {
                 'balita': '<span class="badge bg-primary">Balita</span>',
-                'remaja': '<span class="badge bg-info">Remaja</span>',
-                'dewasa': '<span class="badge bg-success">Dewasa</span>',        // ✅ TAMBAH INI
-                'lansia': '<span class="badge bg-warning">Lansia</span>',        // ✅ TAMBAH INI
-                'ibu-hamil': '<span class="badge bg-danger">Ibu Hamil</span>',
-                'ibuhamil': '<span class="badge bg-danger">Ibu Hamil</span>'
+                'remaja': '<span class="badge bg-primary">Remaja</span>',
+                'dewasa': '<span class="badge bg-primary">Dewasa</span>',        // ✅ TAMBAH INI
+                'lansia': '<span class="badge bg-primary">Lansia</span>',        // ✅ TAMBAH INI
+                'ibu-hamil': '<span class="badge bg-primary">Ibu Hamil</span>',
+                'ibuhamil': '<span class="badge bg-primary">Ibu Hamil</span>'
             };
             return badges[role] || `<span class="badge bg-secondary">${role}</span>`;
         }
