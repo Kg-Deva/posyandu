@@ -1622,6 +1622,10 @@ class MenuController extends Controller
             if ($request->filled('nama_ibu')) {
                 $userData['nama_ibu'] = $request->nama_ibu;
             }
+            // ✅ TAMBAH NAMA SUAMI (KHUSUS IBU HAMIL)
+            if ($request->filled('nama_suami')) {
+                $userData['nama_suami'] = $request->nama_suami;
+            }
             if ($request->filled('status_perkawinan')) {
                 $userData['status_perkawinan'] = $request->status_perkawinan;
             }

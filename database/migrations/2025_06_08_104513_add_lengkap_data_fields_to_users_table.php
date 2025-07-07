@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('rw')->nullable();
             $table->string('kecamatan')->nullable();
             $table->string('wilayah')->nullable();
+            $table->string('nama_suami')->nullable();
 
             // Balita & Remaja
             $table->float('berat_badan_lahir')->nullable();
@@ -66,6 +67,7 @@ return new class extends Migration
                 'umur',
                 'alamat',
                 'no_hp',
+                'nama_suami', // ✅ TAMBAH INI
                 'dusun',
                 'rt',
                 'rw',

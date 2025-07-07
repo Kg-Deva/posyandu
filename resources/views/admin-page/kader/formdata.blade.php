@@ -91,7 +91,7 @@
         <!-- No HP -->
         <div class="mb-3">
             <label>No. HP</label>
-            <input type="number" name="no_hp" class="form-control" value="{{ $user->no_hp ?? '' }}" min="0" oninput="this.value=this.value.replace(/[^0-9]/g,'');" required>
+            <input type="tel" name="no_hp" class="form-control" value="{{ $user->no_hp ?? '' }}" min="0" oninput="this.value=this.value.replace(/[^0-9]/g,'');" required>
         </div>
          {{-- Status Perkawinan & Pekerjaan: hanya untuk lansia & dewasa --}}
         @if(isset($user->level) && ($user->level === 'lansia' || $user->level === 'dewasa'))
@@ -198,6 +198,14 @@
         @endif
 
         @if(isset($user->level) && $user->level === 'ibu hamil')
+    <div class="mb-3">
+        <label for="nama_suami">Nama Suami</label>
+        <input type="text" name="nama_suami" id="nama_suami" class="form-control" 
+               value="{{ $user->nama_suami ?? '' }}" 
+               placeholder="Masukkan nama suami" 
+               required>
+        <small class="text-muted">Nama lengkap suami</small>
+    </div> 
     <!-- Jarak Anak Sebelumnya dengan Kehamilan Saat Ini -->
     <div class="mb-3">
         <label for="jarak_kehamilan">Jarak Anak Sebelumnya dengan Kehamilan Saat Ini</label>

@@ -42,6 +42,7 @@ class User extends Authenticatable
         'panjang_badan_lahir',
         'nama_ayah',
         'nama_ibu',
+        'nama_suami',
         'status_perkawinan',
         'pekerjaan',
         'riwayat_keluarga',
@@ -95,16 +96,14 @@ class User extends Authenticatable
     {
 
 
-        // return $this->hasMany(PemeriksaanDewasa::class, 'user_id', 'id');
-
-        return $this->belongsTo(User::class, 'nik', 'nik');
+        return $this->hasMany(PemeriksaanDewasa::class, 'nik', 'nik');
+        // return $this->belongsTo(User::class, 'nik', 'nik');
     }
 
     // ✅ TAMBAH RELASI UNTUK LANSIA
     public function pemeriksaanLansia()
     {
-        // return $this->hasMany(PemeriksaanLansia::class, 'user_id', 'id');
-
-        return $this->belongsTo(User::class, 'nik', 'nik');
+        return $this->hasMany(PemeriksaanLansia::class, 'nik', 'nik');
+        // return $this->belongsTo(User::class, 'nik', 'nik');
     }
 }

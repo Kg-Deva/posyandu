@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use  App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -19,7 +18,6 @@ use App\Exports\RemajaExport;
 use App\Exports\IbuHamilExport;
 use App\Exports\DewasaExport;
 use App\Exports\LansiaExport;
-use App\Exports\RekapDewasaExport;
 use App\Exports\RekapBalitaExport;
 use App\Exports\RekapRemajaExport;
 
@@ -634,52 +632,24 @@ class DataPemeriksaanController extends Controller
 
     private function applyFilters($query, $request)
     {
-        // if ($request->filled('bulan')) {
-        //     $query->whereMonth('tanggal_pemeriksaan', $request->bulan);
-        // }
-
-        // if ($request->filled('tahun')) {
-        //     $query->whereYear('tanggal_pemeriksaan', $request->tahun);
-        // }
-
-        // if ($request->filled('rw')) {
-        //     $query->whereHas('user', function ($q) use ($request) {
-        //         $q->where('rw', $request->rw);
-        //     });
-        // }
-
-
-
-
-        // if ($request->filled('search')) {
-        //     $search = $request->search;
-        //     $query->where(function ($q) use ($search) {
-        //         $q->where('nik', 'LIKE', "%{$search}%")
-        //             ->orWhereHas('user', function ($subQ) use ($search) {
-        //                 $subQ->where('nama', 'LIKE', "%{$search}%");
-        //             });
-        //     });
-        // }
-        if ($request->filled('bulan') && $request->bulan !== '') {
+        if ($request->filled('bulan')) {
             $query->whereMonth('tanggal_pemeriksaan', $request->bulan);
         }
 
-        if ($request->filled('tahun') && $request->tahun !== '') {
+        if ($request->filled('tahun')) {
             $query->whereYear('tanggal_pemeriksaan', $request->tahun);
         }
 
-        if ($request->filled('rw') && $request->rw !== '') {
+        if ($request->filled('rw')) {
             $query->whereHas('user', function ($q) use ($request) {
                 $q->where('rw', $request->rw);
             });
         }
 
-        if ($request->filled('rujukan') && $request->rujukan !== '') {
-            // ✅ RUJUKAN FILTER DIHANDLE DI GETDATA() SETELAH MERGE
-            // Jangan apply di sini karena beda-beda field per model
-        }
 
-        if ($request->filled('search') && $request->search !== '') {
+
+
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('nik', 'LIKE', "%{$search}%")
@@ -1105,127 +1075,11 @@ class DataPemeriksaanController extends Controller
         }
     }
 
-    // private function getExportData(Request $request)
-    // {
-    //     $role = $request->get('role', '');
-    //     $allData = collect();
-
-    //     if (empty($role) || $role === 'balita') {
-    //         $balitaQuery = PemeriksaanBalita::with(['user' => function ($q) {
-    //             $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
-    //         }]);
-    //         $this->applyFilters($balitaQuery, $request);
-    //         $balitaData = $balitaQuery->get()->map(function ($item) {
-    //             $rujukanStatus = 'Normal';
-
-    //             // 1. Cek field rujuk_puskesmas
-    //             if (
-    //                 isset($item->rujuk_puskesmas) &&
-    //                 (str_contains($item->rujuk_puskesmas, 'RUJUK') || $item->rujuk_puskesmas === 'Perlu Rujukan')
-    //             ) {
-    //                 $rujukanStatus = 'Perlu Rujukan';
-    //             }
-
-    //             // 2. Cek TBC ≥ 2 gejala
-    //             $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
-    //             if (is_string($jumlahGejala) && preg_match('/(\d+)/', $jumlahGejala, $matches)) {
-    //                 $jumlahGejala = (int)$matches[1];
-    //             }
-    //             if ($jumlahGejala >= 2) {
-    //                 $rujukanStatus = 'Perlu Rujukan';
-    //             }
-
-    //             // 3. Cek LILA hanya jika umur ≥ 6 bulan DAN < 11.5 cm
-    //             $umur = $item->umur ?? 0;
-    //             if ($umur >= 6 && $item->lila && floatval($item->lila) < 11.5) {
-    //                 $rujukanStatus = 'Perlu Rujukan';
-    //             }
-
-    //             return [
-    //                 'id' => $item->id,
-    //                 'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
-    //                 'nik' => $item->nik,
-    //                 'bb' => $item->bb,
-    //                 'tb' => $item->tb,
-    //                 'lingkar_kepala' => $item->lingkar_kepala,
-    //                 'lila' => $item->lila,
-    //                 'umur' => $item->umur,
-    //                 'rujuk_puskesmas' => $rujukanStatus,
-    //                 'pemeriksa' => $item->pemeriksa,
-    //                 'user' => $item->user,
-    //                 'jenis_pemeriksaan' => 'balita',
-    //                 'model_type' => 'balita'
-    //             ];
-    //         });
-    //         $allData = $allData->merge($balitaData);
-    //     }
-
-    //     if (empty($role) || $role === 'remaja') {
-    //         $remajaQuery = PemeriksaanRemaja::with(['user' => function ($q) {
-    //             $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
-    //         }]);
-    //         $this->applyFilters($remajaQuery, $request);
-    //         $remajaData = $remajaQuery->get()->map(function ($item) {
-    //             $healthStatus = $this->calculateHealthStatus($item, $item->user);
-
-    //             return [
-    //                 'id' => $item->id,
-    //                 'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
-    //                 'nik' => $item->nik,
-    //                 'bb' => $item->bb,
-    //                 'tb' => $item->tb,
-    //                 'imt' => $item->imt,
-    //                 'lila' => $item->lila,
-    //                 'umur' => $item->umur,
-    //                 'rujuk_puskesmas' => ($healthStatus['category'] === 'urgent' ||
-    //                     $item->rujuk_puskesmas === 'Perlu Rujukan') ? 'Perlu Rujukan' : 'Normal',
-    //                 'health_status' => $healthStatus,
-    //                 'pemeriksa' => $item->pemeriksa,
-    //                 'user' => $item->user,
-    //                 'jenis_pemeriksaan' => 'remaja',
-    //                 'model_type' => 'remaja'
-    //             ];
-    //         });
-    //         $allData = $allData->merge($remajaData);
-    //     }
-
-    //     if (empty($role) || $role === 'ibu-hamil') {
-    //         $ibuHamilQuery = PemeriksaanIbuHamil::with(['user' => function ($q) {
-    //             $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
-    //         }]);
-    //         $this->applyFilters($ibuHamilQuery, $request);
-    //         $ibuHamilData = $ibuHamilQuery->get()->map(function ($item) {
-    //             $healthStatus = $this->calculateHealthStatus($item, $item->user);
-    //             return [
-    //                 'id' => $item->id,
-    //                 'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
-    //                 'nik' => $item->nik,
-    //                 'bb' => $item->bb,
-    //                 'tb' => $item->tb,
-    //                 'usia_kehamilan' => $item->usia_kehamilan,
-    //                 'lila' => $item->lila,
-    //                 'umur' => $item->umur,
-    //                 'perlu_rujukan' => $item->perlu_rujukan,
-    //                 'rujuk_puskesmas' => ($healthStatus['category'] === 'urgent' ||
-    //                     $item->perlu_rujukan) ? 'Perlu Rujukan' : 'Normal',
-    //                 'pemeriksa' => $item->pemeriksa,
-    //                 'user' => $item->user,
-    //                 'jenis_pemeriksaan' => 'ibu-hamil',
-    //                 'model_type' => 'ibu-hamil'
-    //             ];
-    //         });
-    //         $allData = $allData->merge($ibuHamilData);
-    //     }
-
-    //     return $allData->sortByDesc('tanggal_pemeriksaan')->values()->toArray();
-    // }
-
     private function getExportData(Request $request)
     {
         $role = $request->get('role', '');
         $allData = collect();
 
-        // ✅ BALITA DATA
         if (empty($role) || $role === 'balita') {
             $balitaQuery = PemeriksaanBalita::with(['user' => function ($q) {
                 $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
@@ -1276,7 +1130,6 @@ class DataPemeriksaanController extends Controller
             $allData = $allData->merge($balitaData);
         }
 
-        // ✅ REMAJA DATA
         if (empty($role) || $role === 'remaja') {
             $remajaQuery = PemeriksaanRemaja::with(['user' => function ($q) {
                 $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
@@ -1306,7 +1159,6 @@ class DataPemeriksaanController extends Controller
             $allData = $allData->merge($remajaData);
         }
 
-        // ✅ IBU HAMIL DATA
         if (empty($role) || $role === 'ibu-hamil') {
             $ibuHamilQuery = PemeriksaanIbuHamil::with(['user' => function ($q) {
                 $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
@@ -1333,126 +1185,6 @@ class DataPemeriksaanController extends Controller
                 ];
             });
             $allData = $allData->merge($ibuHamilData);
-        }
-
-        // ✅ TAMBAH DEWASA DATA (YANG HILANG!)
-        if (empty($role) || $role === 'dewasa') {
-            $dewasaQuery = PemeriksaanDewasa::with(['user' => function ($q) {
-                $q->select('id', 'nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
-            }]);
-            $this->applyFilters($dewasaQuery, $request);
-            $dewasaData = $dewasaQuery->get()->map(function ($item) {
-                $rujukanStatus = 'Normal';
-                $umur = $item->user ? Carbon::parse($item->user->tanggal_lahir)->age : 0;
-
-                if (!empty($item->status_tbc) && (
-                    $item->status_tbc === 'Rujuk ke Puskesmas' ||
-                    $item->status_tbc === 'Perlu Rujukan'
-                )) {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
-
-                if (!empty($item->status_puma) && (
-                    $item->status_puma === 'Rujuk ke Puskesmas' ||
-                    $item->status_puma === 'Perlu Rujukan'
-                )) {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
-
-                if (!empty($item->kesimpulan_td) && $item->kesimpulan_td === 'Hipertensi') {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
-
-                if (!empty($item->kesimpulan_gula_darah) && $item->kesimpulan_gula_darah === 'Diabetes') {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
-
-                return [
-                    'id' => $item->id,
-                    'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
-                    'nik' => $item->nik,
-                    'bb' => $item->bb,
-                    'tb' => $item->tb,
-                    'sistole' => $item->sistole ?? null,
-                    'diastole' => $item->diastole ?? null,
-                    'gula_darah' => $item->gula_darah ?? null,
-                    'imt' => $item->imt ?? null,
-                    'umur' => $umur,
-                    'rujuk_puskesmas' => $rujukanStatus,
-                    // 'pemeriksa' => $item->created_by ?? 'N/A',
-                    'pemeriksa' => $item->pemeriksa,
-                    'user' => $item->user,
-                    'jenis_pemeriksaan' => 'dewasa',
-                    'model_type' => 'dewasa'
-                ];
-            });
-            $allData = $allData->merge($dewasaData);
-        }
-
-        // ✅ TAMBAH LANSIA DATA (YANG HILANG!)
-        if (empty($role) || $role === 'lansia') {
-            $lansiaQuery = PemeriksaanLansia::with(['user' => function ($q) {
-                $q->select('id', 'nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
-            }]);
-            $this->applyFilters($lansiaQuery, $request);
-            $lansiaData = $lansiaQuery->get()->map(function ($item) {
-                $rujukanStatus = 'Normal';
-
-                if (!empty($item->status_tbc) && (
-                    $item->status_tbc === 'Rujuk ke Puskesmas' ||
-                    $item->status_tbc === 'Perlu Rujukan'
-                )) {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
-
-                if (!empty($item->status_puma) && (
-                    $item->status_puma === 'Rujuk ke Puskesmas' ||
-                    $item->status_puma === 'Perlu Rujukan'
-                )) {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
-
-                if (!is_null($item->skor_puma) && is_numeric($item->skor_puma) && $item->skor_puma > 6) {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
-
-                if (!empty($item->kesimpulan_td) && $item->kesimpulan_td === 'Hipertensi') {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
-
-                if (!empty($item->kesimpulan_gula_darah) && $item->kesimpulan_gula_darah === 'Diabetes') {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
-
-                $umur = $item->user ? Carbon::parse($item->user->tanggal_lahir)->age : 0;
-
-                return [
-                    'id' => $item->id,
-                    'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
-                    'nik' => $item->nik,
-                    'bb' => $item->bb,
-                    'tb' => $item->tb,
-                    'imt' => $item->imt ?? null,
-                    'sistole' => $item->sistole ?? null,
-                    'diastole' => $item->diastole ?? null,
-                    'gula_darah' => $item->gula_darah ?? null,
-                    'umur' => $umur,
-                    'rujuk_puskesmas' => $rujukanStatus,
-                    // 'pemeriksa' => $item->created_by ?? 'N/A',
-                    'pemeriksa' => $item->pemeriksa,
-                    'user' => $item->user,
-                    'jenis_pemeriksaan' => 'lansia',
-                    'model_type' => 'lansia'
-                ];
-            });
-            $allData = $allData->merge($lansiaData);
-        }
-
-        // ✅ FILTER RUJUKAN SETELAH MERGE
-        if ($request->filled('rujukan')) {
-            $allData = $allData->filter(function ($item) use ($request) {
-                return $item['rujuk_puskesmas'] === $request->rujukan;
-            })->values();
         }
 
         return $allData->sortByDesc('tanggal_pemeriksaan')->values()->toArray();

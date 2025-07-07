@@ -289,18 +289,6 @@
                 <div class="form-text">Apakah ibu mengikuti kelas ibu hamil di Posyandu/Puskesmas?</div>
             </div>
         </div>
-        {{-- <div class="col-md-6">
-            <div class="mb-3">
-                <label for="frekuensi_kelas_ibu" class="form-label">Frekuensi Kehadiran</label>
-                <select class="form-select bg-light" id="frekuensi_kelas_ibu" name="frekuensi_kelas_ibu" disabled>
-                    <option value="">-- Pilih Frekuensi --</option>
-                    <option value="Rutin setiap pertemuan">Rutin setiap pertemuan</option>
-                    <option value="Kadang-kadang">Kadang-kadang</option>
-                    <option value="Jarang">Jarang</option>
-                </select>
-                <div class="form-text text-muted">Aktif jika mengikuti kelas ibu</div>
-            </div>
-        </div> --}}
     </div>
 
 </div>

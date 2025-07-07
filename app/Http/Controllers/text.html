@@ -20,467 +20,137 @@ class DataPemeriksaanController extends Controller
         try {
             // ✅ PAKAI MODEL DENGAN RELATIONSHIP + FIELD PROGRAM
             $query = PemeriksaanBalita::with(['user:nik,nama,rw,level,alamat,tanggal_lahir,jenis_kelamin'])
-                ->select([
-                    'id',
-                    'tanggal_pemeriksaan',
-                    'nik',
-                    'bb',
-                    'tb',
-                    'lingkar_kepala',
-                    'lila',
-                    'umur',
-                    'kesimpulan_bbu',
-                    'kesimpulan_tbuu',
-                    'kesimpulan_bbtb',
-                    'kesimpulan_lingkar_kepala',
-                    'kesimpulan_lila',
-                    'status_perubahan_bb',
-                    'jumlah_gejala_tbc',
-                    'rujuk_puskesmas',
-                    'pemeriksa',
-                    'asi_eksklusif',
-                    'mp_asi',
-                    'imunisasi',
-                    'vitamin_a',
-                    'obat_cacing',
-                    'mt_pangan_lokal',
-                    'batuk_terus_menerus',
-                    'demam_2_minggu',
-                    'bb_tidak_naik',
-                    'kontak_tbc'
-                ]);
+                ->
+select([ 'id', 'tanggal_pemeriksaan', 'nik', 'bb', 'tb', 'lingkar_kepala', 'lila', 'umur',
+'kesimpulan_bbu', 'kesimpulan_tbuu', 'kesimpulan_bbtb', 'kesimpulan_lingkar_kepala',
+'kesimpulan_lila', 'status_perubahan_bb', 'jumlah_gejala_tbc', 'rujuk_puskesmas', 'pemeriksa',
+'asi_eksklusif', 'mp_asi', 'imunisasi', 'vitamin_a', 'obat_cacing', 'mt_pangan_lokal',
+'batuk_terus_menerus', 'demam_2_minggu', 'bb_tidak_naik', 'kontak_tbc' ]); // ✅ APPLY FILTERS
+(EXISTING CODE) if ($request->filled('bulan')) { $query->whereMonth('tanggal_pemeriksaan',
+$request->bulan); } if ($request->filled('tahun')) { $query->whereYear('tanggal_pemeriksaan',
+$request->tahun); } if ($request->filled('role')) { $query->whereHas('user', function ($q) use
+($request) { $q->where('level', $request->role); }); } if ($request->filled('rw')) {
+$query->whereHas('user', function ($q) use ($request) { $q->where('rw', $request->rw); }); } if
+($request->filled('rujukan')) { if ($request->rujukan === 'Tidak Perlu Rujukan') {
+$query->where(function ($q) { $q->where('rujuk_puskesmas', '!=', 'Perlu Rujukan')
+->orWhereNull('rujuk_puskesmas') ->orWhere('rujuk_puskesmas', 'Tidak Perlu Rujukan'); }); } else {
+$query->where('rujuk_puskesmas', $request->rujukan); } } if ($request->filled('search')) { $search =
+$request->search; $query->where(function ($q) use ($search) { $q->where('nik', 'LIKE',
+"%{$search}%") ->orWhereHas('user', function ($subQ) use ($search) { $subQ->where('nama', 'LIKE',
+"%{$search}%"); }); }); } $query->orderBy('tanggal_pemeriksaan', 'desc'); $data =
+$query->paginate(10); $items = $data->items(); // ✅ TRANSFORM DATA DENGAN HEALTH STATUS
+$transformedItems = array_map(function ($item) { $healthStatus =
+$this->calculateHealthStatus($item); // ✅ PANGGIL METHOD INI return [ 'id' => $item->id,
+'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan, 'nik' => $item->nik, 'bb' => $item->bb, 'tb' =>
+$item->tb, 'lingkar_kepala' => $item->lingkar_kepala, 'lila' => $item->lila ?? null, 'umur' =>
+$item->umur, 'kesimpulan_bbu' => $item->kesimpulan_bbu, 'kesimpulan_tbuu' => $item->kesimpulan_tbuu,
+'kesimpulan_bbtb' => $item->kesimpulan_bbtb, 'kesimpulan_lingkar_kepala' =>
+$item->kesimpulan_lingkar_kepala, 'kesimpulan_lila' => $item->kesimpulan_lila ?? null,
+'status_perubahan_bb' => $item->status_perubahan_bb, 'jumlah_gejala_tbc' =>
+$item->jumlah_gejala_tbc, 'rujuk_puskesmas' => $item->rujuk_puskesmas, 'pemeriksa' =>
+$item->pemeriksa, 'asi_eksklusif' => $item->asi_eksklusif, 'mp_asi' => $item->mp_asi, 'imunisasi' =>
+$item->imunisasi, 'vitamin_a' => $item->vitamin_a, 'obat_cacing' => $item->obat_cacing,
+'mt_pangan_lokal' => $item->mt_pangan_lokal, 'user' => $item->user, 'health_status' => $healthStatus
+// ✅ TAMBAH INI ]; }, $items); return response()->json([ 'success' => true, 'data' =>
+$transformedItems, 'pagination' => [ 'current_page' => $data->currentPage(), 'last_page' =>
+$data->lastPage(), 'per_page' => $data->perPage(), 'total' => $data->total(), 'from' =>
+$data->firstItem(), 'to' => $data->lastItem() ], 'stats' => $this->calculateSmartStats($request) //
+✅ GANTI INI ]); } catch (\Exception $e) { return response()->json([ 'success' => false, 'message'
+=> 'Error: ' . $e->getMessage() ], 500); } } // ✅ TAMBAH METHOD CALCULATE HEALTH STATUS private
+function calculateHealthStatus($pemeriksaan, $user = null) { if (!$pemeriksaan) { return [ 'status'
+=> 'Belum Ada Data', 'category' => 'info', 'score' => 0, 'badge' => 'bg-secondary', 'icon' =>
+'question-circle', 'description' => 'Belum ada pemeriksaan' ]; } $user = $user ?:
+$pemeriksaan->user; $level = $user->level ?? 'umum'; $umurBulan = $pemeriksaan->umur ?? 12; // Base
+score $score = 80; $criticalIssues = []; $warningIssues = []; // 1. RUJUKAN MEDIS (HIGHEST PRIORITY)
+if ($pemeriksaan->rujuk_puskesmas === 'Perlu Rujukan') { $score -= 50; $criticalIssues[] = 'Perlu
+rujukan ke puskesmas'; } // 2. TBC SCREENING $gejalaTBC = $pemeriksaan->jumlah_gejala_tbc ?? 0; if
+($gejalaTBC >= 2) { $score -= 30; $criticalIssues[] = 'Risiko TBC tinggi'; } elseif ($gejalaTBC >=
+1) { $score -= 15; $warningIssues[] = 'Perlu pantau gejala TBC'; } // 3. ROLE-SPECIFIC HEALTH CHECKS
+switch ($level) { case 'balita': $score += $this->checkBalitaHealth($pemeriksaan, $umurBulan,
+$criticalIssues, $warningIssues); break; case 'ibuhamil': $score +=
+$this->checkIbuHamilHealth($pemeriksaan, $umurBulan, $criticalIssues, $warningIssues); break;
+default: $score += $this->checkUmumHealth($pemeriksaan, $umurBulan, $criticalIssues,
+$warningIssues); break; } // 4. DETERMINE FINAL STATUS return $this->determineFinalStatus($score,
+$criticalIssues, $warningIssues); } // ✅ TAMBAH METHOD CHECK BALITA HEALTH (CODE LU) private
+function checkBalitaHealth($pemeriksaan, $umurBulan, &$criticalIssues, &$warningIssues) {
+$adjustment = 0; // 🚨 CRITICAL CHECKS (MERAH) if ($umurBulan >= 2 && !$pemeriksaan->imunisasi) {
+$adjustment -= 25; $criticalIssues[] = 'Imunisasi belum lengkap - URGENT!'; } // ⚠️ WARNING CHECKS
+(KUNING) if ($umurBulan <= 6 && !$pemeriksaan->asi_eksklusif) { $adjustment -= 20; $warningIssues[]
+= 'ASI eksklusif belum diberikan'; } if ($umurBulan >= 6 && !$pemeriksaan->mp_asi) { $adjustment -=
+20; $warningIssues[] = 'MPASI belum diberikan'; } // ✅ VITAMIN A JADI INFO AJA (TIDAK MENGURANGI
+SCORE) // Vitamin A tidak critical, hanya informasi // if ($umurBulan >= 6 &&
+!$pemeriksaan->vitamin_a) { // // Tidak mengurangi score, hanya informasi // } // 💊 OBAT CACING
+JUGA JADI INFO (TIDAK MENGURANGI SCORE) // if ($umurBulan >= 12 && !$pemeriksaan->obat_cacing) { //
+// Tidak mengurangi score, hanya informasi // } // 🩺 LILA CHECK (JIKA ADA) if ($pemeriksaan->lila
+&& $pemeriksaan->lila < 11.5) { $adjustment -= 25; $criticalIssues[] = 'LILA di bawah normal'; }
+return $adjustment; } // ✅ TAMBAH METHOD CHECK IBU HAMIL HEALTH (CODE LU) private function
+checkIbuHamilHealth($pemeriksaan, $umurBulan, &$criticalIssues, &$warningIssues) { $adjustment = 0;
+// 🚨 LILA CHECK (CRITICAL FOR IBU HAMIL) if ($pemeriksaan->lila) { $lilaValue =
+floatval($pemeriksaan->lila); if ($lilaValue < 23.5) { $adjustment -= 30; $criticalIssues[] = 'KEK
+(Kurang Energi Kronis)'; } } else { $adjustment -= 15; $warningIssues[] = 'LILA belum diukur'; } //
+⚠️ PROGRAM CHECKS // ✅ VITAMIN A JADI WARNING SAJA UNTUK IBU HAMIL if (!$pemeriksaan->vitamin_a) {
+$adjustment -= 10; // Lebih ringan $warningIssues[] = 'Vitamin A perlu diberikan'; } if
+(!$pemeriksaan->imunisasi) { $adjustment -= 20; $warningIssues[] = 'Imunisasi belum lengkap'; }
+return $adjustment; } // ✅ TAMBAH METHOD CHECK UMUM HEALTH (CODE LU) private function
+checkUmumHealth($pemeriksaan, $umurBulan, &$criticalIssues, &$warningIssues) { $adjustment = 5; //
+Bonus for general health // ✅ VITAMIN A & OBAT CACING TIDAK MENGURANGI SCORE // Hanya informasi
+saja return $adjustment; } // ✅ TAMBAH METHOD DETERMINE FINAL STATUS private function
+determineFinalStatus($score, $criticalIssues, $warningIssues) { if (count($criticalIssues) >= 2 ||
+$score <= 30) { return [ 'status' => 'Perlu Perhatian Khusus', 'category' => 'urgent', 'score' =>
+$score, 'badge' => 'bg-danger', 'icon' => 'exclamation-triangle-fill', 'description' => 'Memerlukan
+penanganan segera', 'issues' => $criticalIssues ]; } elseif (count($criticalIssues) >= 1 ||
+count($warningIssues) >= 2 || $score <= 60) { return [ 'status' => 'Perlu Pantau', 'category' =>
+'warning', 'score' => $score, 'badge' => 'bg-warning', 'icon' => 'exclamation-triangle',
+'description' => 'Perlu pemantauan lebih ketat', 'issues' => array_merge($criticalIssues,
+$warningIssues) ]; } else { return [ 'status' => 'Kondisi Baik', 'category' => 'good', 'score' =>
+$score, 'badge' => 'bg-success', 'icon' => 'check-circle-fill', 'description' => 'Kondisi kesehatan
+baik', 'issues' => [] ]; } } // ✅ UPDATE METHOD calculateSmartStats() - SESUAIKAN DENGAN BLADE
+private function calculateSmartStats($request) { $baseQuery = PemeriksaanBalita::with('user'); //
+Apply same filters... if ($request->filled('bulan')) { $baseQuery->whereMonth('tanggal_pemeriksaan',
+$request->bulan); } if ($request->filled('tahun')) { $baseQuery->whereYear('tanggal_pemeriksaan',
+$request->tahun); } if ($request->filled('role')) { $baseQuery->whereHas('user', function ($q) use
+($request) { $q->where('level', $request->role); }); } if ($request->filled('rw')) {
+$baseQuery->whereHas('user', function ($q) use ($request) { $q->where('rw', $request->rw); }); } if
+($request->filled('rujukan')) { if ($request->rujukan === 'Tidak Perlu Rujukan') {
+$baseQuery->where(function ($q) { $q->where('rujuk_puskesmas', '!=', 'Perlu Rujukan')
+->orWhereNull('rujuk_puskesmas') ->orWhere('rujuk_puskesmas', 'Tidak Perlu Rujukan'); }); } else {
+$baseQuery->where('rujuk_puskesmas', $request->rujukan); } } if ($request->filled('search')) {
+$search = $request->search; $baseQuery->where(function ($q) use ($search) { $q->where('nik', 'LIKE',
+"%{$search}%") ->orWhereHas('user', function ($subQ) use ($search) { $subQ->where('nama', 'LIKE',
+"%{$search}%"); }); }); } $allData = $baseQuery->get(); // ✅ HITUNG STATS SESUAI BLADE $nonWarga =
+0; $bulanIni = 0; $perluRujukan = 0; foreach ($allData as $item) { // ✅ NON WARGA (ASUMSI FIELD
+'type' ATAU 'status_warga') if ( $item->user && (isset($item->user->type) && $item->user->type ===
+'bukan warga' || isset($item->user->status_warga) && $item->user->status_warga === 'bukan warga') )
+{ $nonWarga++; } // ✅ BULAN INI if ( Carbon::parse($item->tanggal_pemeriksaan)->month ===
+now()->month && Carbon::parse($item->tanggal_pemeriksaan)->year === now()->year ) { $bulanIni++; }
+// ✅ PERLU RUJUKAN (DARI FIELD rujuk_puskesmas) if ($item->rujuk_puskesmas === 'Perlu Rujukan') {
+$perluRujukan++; } } return [ 'non_warga' => $nonWarga, // ✅ SESUAI BLADE 'bulan_ini' => $bulanIni,
+// ✅ SESUAI BLADE 'perlu_rujukan' => $perluRujukan, // ✅ SESUAI BLADE 'total_pemeriksaan' =>
+$allData->count() ]; } // ✅ EXISTING METHODS (NO CHANGE) public function getFilterOptions() { try {
+$rwList = User::select('rw') ->distinct() ->whereNotNull('rw') ->whereNotIn('level', ['admin',
+'kader']) ->orderBy('rw') ->pluck('rw'); $roleList = User::select('level') ->distinct()
+->whereNotNull('level') ->whereNotIn('level', ['admin', 'kader']) ->orderBy('level')
+->pluck('level'); $yearRange = PemeriksaanBalita::selectRaw('MIN(YEAR(tanggal_pemeriksaan)) as
+min_year, MAX(YEAR(tanggal_pemeriksaan)) as max_year') ->first(); $years = []; if ($yearRange &&
+$yearRange->min_year && $yearRange->max_year) { for ($year = $yearRange->max_year; $year >=
+$yearRange->min_year; $year--) { $years[] = $year; } } return response()->json([ 'success' => true,
+'rw_list' => $rwList, 'role_list' => $roleList, 'years' => $years ]); } catch (\Exception $e) {
+return response()->json([ 'success' => false, 'message' => 'Error: ' . $e->getMessage() ], 500); } }
+public function detail($id) { try { $pemeriksaan =
+PemeriksaanBalita::with(['user:nik,nama,alamat,rw,level,tanggal_lahir,jenis_kelamin'])
+->findOrFail($id); return response()->json([ 'success' => true, 'data' => $pemeriksaan ]); } catch
+(\Exception $e) { return response()->json([ 'success' => false, 'message' => 'Data pemeriksaan tidak
+ditemukan' ], 404); } } public function getLastExamination($nik) { $currentDate =
+request()->get('current_date', date('Y-m-d')); $baselineExam = PemeriksaanBalita::where('nik', $nik)
+->where('tanggal_pemeriksaan', '<', $currentDate) ->orderBy('tanggal_pemeriksaan', 'desc')
+->first(); return response()->json($baselineExam); } }
 
-            // ✅ APPLY FILTERS (EXISTING CODE)
-            if ($request->filled('bulan')) {
-                $query->whereMonth('tanggal_pemeriksaan', $request->bulan);
-            }
-
-            if ($request->filled('tahun')) {
-                $query->whereYear('tanggal_pemeriksaan', $request->tahun);
-            }
-
-            if ($request->filled('role')) {
-                $query->whereHas('user', function ($q) use ($request) {
-                    $q->where('level', $request->role);
-                });
-            }
-
-            if ($request->filled('rw')) {
-                $query->whereHas('user', function ($q) use ($request) {
-                    $q->where('rw', $request->rw);
-                });
-            }
-
-            if ($request->filled('rujukan')) {
-                if ($request->rujukan === 'Tidak Perlu Rujukan') {
-                    $query->where(function ($q) {
-                        $q->where('rujuk_puskesmas', '!=', 'Perlu Rujukan')
-                            ->orWhereNull('rujuk_puskesmas')
-                            ->orWhere('rujuk_puskesmas', 'Tidak Perlu Rujukan');
-                    });
-                } else {
-                    $query->where('rujuk_puskesmas', $request->rujukan);
-                }
-            }
-
-            if ($request->filled('search')) {
-                $search = $request->search;
-                $query->where(function ($q) use ($search) {
-                    $q->where('nik', 'LIKE', "%{$search}%")
-                        ->orWhereHas('user', function ($subQ) use ($search) {
-                            $subQ->where('nama', 'LIKE', "%{$search}%");
-                        });
-                });
-            }
-
-            $query->orderBy('tanggal_pemeriksaan', 'desc');
-            $data = $query->paginate(10);
-            $items = $data->items();
-
-            // ✅ TRANSFORM DATA DENGAN HEALTH STATUS
-            $transformedItems = array_map(function ($item) {
-                $healthStatus = $this->calculateHealthStatus($item); // ✅ PANGGIL METHOD INI
-
-                return [
-                    'id' => $item->id,
-                    'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
-                    'nik' => $item->nik,
-                    'bb' => $item->bb,
-                    'tb' => $item->tb,
-                    'lingkar_kepala' => $item->lingkar_kepala,
-                    'lila' => $item->lila ?? null,
-                    'umur' => $item->umur,
-                    'kesimpulan_bbu' => $item->kesimpulan_bbu,
-                    'kesimpulan_tbuu' => $item->kesimpulan_tbuu,
-                    'kesimpulan_bbtb' => $item->kesimpulan_bbtb,
-                    'kesimpulan_lingkar_kepala' => $item->kesimpulan_lingkar_kepala,
-                    'kesimpulan_lila' => $item->kesimpulan_lila ?? null,
-                    'status_perubahan_bb' => $item->status_perubahan_bb,
-                    'jumlah_gejala_tbc' => $item->jumlah_gejala_tbc,
-                    'rujuk_puskesmas' => $item->rujuk_puskesmas,
-                    'pemeriksa' => $item->pemeriksa,
-                    'asi_eksklusif' => $item->asi_eksklusif,
-                    'mp_asi' => $item->mp_asi,
-                    'imunisasi' => $item->imunisasi,
-                    'vitamin_a' => $item->vitamin_a,
-                    'obat_cacing' => $item->obat_cacing,
-                    'mt_pangan_lokal' => $item->mt_pangan_lokal,
-                    'user' => $item->user,
-                    'health_status' => $healthStatus // ✅ TAMBAH INI
-                ];
-            }, $items);
-
-            return response()->json([
-                'success' => true,
-                'data' => $transformedItems,
-                'pagination' => [
-                    'current_page' => $data->currentPage(),
-                    'last_page' => $data->lastPage(),
-                    'per_page' => $data->perPage(),
-                    'total' => $data->total(),
-                    'from' => $data->firstItem(),
-                    'to' => $data->lastItem()
-                ],
-                'stats' => $this->calculateSmartStats($request) // ✅ GANTI INI
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    // ✅ TAMBAH METHOD CALCULATE HEALTH STATUS
-    private function calculateHealthStatus($pemeriksaan, $user = null)
-    {
-        if (!$pemeriksaan) {
-            return [
-                'status' => 'Belum Ada Data',
-                'category' => 'info',
-                'score' => 0,
-                'badge' => 'bg-secondary',
-                'icon' => 'question-circle',
-                'description' => 'Belum ada pemeriksaan'
-            ];
-        }
-
-        $user = $user ?: $pemeriksaan->user;
-        $level = $user->level ?? 'umum';
-        $umurBulan = $pemeriksaan->umur ?? 12;
-
-        // Base score
-        $score = 80;
-        $criticalIssues = [];
-        $warningIssues = [];
-
-        // 1. RUJUKAN MEDIS (HIGHEST PRIORITY)
-        if ($pemeriksaan->rujuk_puskesmas === 'Perlu Rujukan') {
-            $score -= 50;
-            $criticalIssues[] = 'Perlu rujukan ke puskesmas';
-        }
-
-        // 2. TBC SCREENING
-        $gejalaTBC = $pemeriksaan->jumlah_gejala_tbc ?? 0;
-        if ($gejalaTBC >= 2) {
-            $score -= 30;
-            $criticalIssues[] = 'Risiko TBC tinggi';
-        } elseif ($gejalaTBC >= 1) {
-            $score -= 15;
-            $warningIssues[] = 'Perlu pantau gejala TBC';
-        }
-
-        // 3. ROLE-SPECIFIC HEALTH CHECKS
-        switch ($level) {
-            case 'balita':
-                $score += $this->checkBalitaHealth($pemeriksaan, $umurBulan, $criticalIssues, $warningIssues);
-                break;
-
-            case 'ibuhamil':
-                $score += $this->checkIbuHamilHealth($pemeriksaan, $umurBulan, $criticalIssues, $warningIssues);
-                break;
-
-            default:
-                $score += $this->checkUmumHealth($pemeriksaan, $umurBulan, $criticalIssues, $warningIssues);
-                break;
-        }
-
-        // 4. DETERMINE FINAL STATUS
-        return $this->determineFinalStatus($score, $criticalIssues, $warningIssues);
-    }
-
-    // ✅ TAMBAH METHOD CHECK BALITA HEALTH (CODE LU)
-    private function checkBalitaHealth($pemeriksaan, $umurBulan, &$criticalIssues, &$warningIssues)
-    {
-        $adjustment = 0;
-
-        // 🚨 CRITICAL CHECKS (MERAH)
-        if ($umurBulan >= 2 && !$pemeriksaan->imunisasi) {
-            $adjustment -= 25;
-            $criticalIssues[] = 'Imunisasi belum lengkap - URGENT!';
-        }
-
-        // ⚠️ WARNING CHECKS (KUNING)
-        if ($umurBulan <= 6 && !$pemeriksaan->asi_eksklusif) {
-            $adjustment -= 20;
-            $warningIssues[] = 'ASI eksklusif belum diberikan';
-        }
-
-        if ($umurBulan >= 6 && !$pemeriksaan->mp_asi) {
-            $adjustment -= 20;
-            $warningIssues[] = 'MPASI belum diberikan';
-        }
-
-        // ✅ VITAMIN A JADI INFO AJA (TIDAK MENGURANGI SCORE)
-        // Vitamin A tidak critical, hanya informasi
-        // if ($umurBulan >= 6 && !$pemeriksaan->vitamin_a) {
-        //     // Tidak mengurangi score, hanya informasi
-        // }
-
-        // 💊 OBAT CACING JUGA JADI INFO (TIDAK MENGURANGI SCORE)
-        // if ($umurBulan >= 12 && !$pemeriksaan->obat_cacing) {
-        //     // Tidak mengurangi score, hanya informasi
-        // }
-
-        // 🩺 LILA CHECK (JIKA ADA)
-        if ($pemeriksaan->lila && $pemeriksaan->lila < 11.5) {
-            $adjustment -= 25;
-            $criticalIssues[] = 'LILA di bawah normal';
-        }
-
-        return $adjustment;
-    }
-
-    // ✅ TAMBAH METHOD CHECK IBU HAMIL HEALTH (CODE LU)
-    private function checkIbuHamilHealth($pemeriksaan, $umurBulan, &$criticalIssues, &$warningIssues)
-    {
-        $adjustment = 0;
-
-        // 🚨 LILA CHECK (CRITICAL FOR IBU HAMIL)
-        if ($pemeriksaan->lila) {
-            $lilaValue = floatval($pemeriksaan->lila);
-            if ($lilaValue < 23.5) {
-                $adjustment -= 30;
-                $criticalIssues[] = 'KEK (Kurang Energi Kronis)';
-            }
-        } else {
-            $adjustment -= 15;
-            $warningIssues[] = 'LILA belum diukur';
-        }
-
-        // ⚠️ PROGRAM CHECKS
-        // ✅ VITAMIN A JADI WARNING SAJA UNTUK IBU HAMIL
-        if (!$pemeriksaan->vitamin_a) {
-            $adjustment -= 10; // Lebih ringan
-            $warningIssues[] = 'Vitamin A perlu diberikan';
-        }
-
-        if (!$pemeriksaan->imunisasi) {
-            $adjustment -= 20;
-            $warningIssues[] = 'Imunisasi belum lengkap';
-        }
-
-        return $adjustment;
-    }
-
-    // ✅ TAMBAH METHOD CHECK UMUM HEALTH (CODE LU)
-    private function checkUmumHealth($pemeriksaan, $umurBulan, &$criticalIssues, &$warningIssues)
-    {
-        $adjustment = 5; // Bonus for general health
-
-        // ✅ VITAMIN A & OBAT CACING TIDAK MENGURANGI SCORE
-        // Hanya informasi saja
-
-        return $adjustment;
-    }
-
-    // ✅ TAMBAH METHOD DETERMINE FINAL STATUS
-    private function determineFinalStatus($score, $criticalIssues, $warningIssues)
-    {
-        if (count($criticalIssues) >= 2 || $score <= 30) {
-            return [
-                'status' => 'Perlu Perhatian Khusus',
-                'category' => 'urgent',
-                'score' => $score,
-                'badge' => 'bg-danger',
-                'icon' => 'exclamation-triangle-fill',
-                'description' => 'Memerlukan penanganan segera',
-                'issues' => $criticalIssues
-            ];
-        } elseif (count($criticalIssues) >= 1 || count($warningIssues) >= 2 || $score <= 60) {
-            return [
-                'status' => 'Perlu Pantau',
-                'category' => 'warning',
-                'score' => $score,
-                'badge' => 'bg-warning',
-                'icon' => 'exclamation-triangle',
-                'description' => 'Perlu pemantauan lebih ketat',
-                'issues' => array_merge($criticalIssues, $warningIssues)
-            ];
-        } else {
-            return [
-                'status' => 'Kondisi Baik',
-                'category' => 'good',
-                'score' => $score,
-                'badge' => 'bg-success',
-                'icon' => 'check-circle-fill',
-                'description' => 'Kondisi kesehatan baik',
-                'issues' => []
-            ];
-        }
-    }
-
-    // ✅ UPDATE METHOD calculateSmartStats() - SESUAIKAN DENGAN BLADE
-    private function calculateSmartStats($request)
-    {
-        $baseQuery = PemeriksaanBalita::with('user');
-
-        // Apply same filters...
-        if ($request->filled('bulan')) {
-            $baseQuery->whereMonth('tanggal_pemeriksaan', $request->bulan);
-        }
-        if ($request->filled('tahun')) {
-            $baseQuery->whereYear('tanggal_pemeriksaan', $request->tahun);
-        }
-        if ($request->filled('role')) {
-            $baseQuery->whereHas('user', function ($q) use ($request) {
-                $q->where('level', $request->role);
-            });
-        }
-        if ($request->filled('rw')) {
-            $baseQuery->whereHas('user', function ($q) use ($request) {
-                $q->where('rw', $request->rw);
-            });
-        }
-        if ($request->filled('rujukan')) {
-            if ($request->rujukan === 'Tidak Perlu Rujukan') {
-                $baseQuery->where(function ($q) {
-                    $q->where('rujuk_puskesmas', '!=', 'Perlu Rujukan')
-                        ->orWhereNull('rujuk_puskesmas')
-                        ->orWhere('rujuk_puskesmas', 'Tidak Perlu Rujukan');
-                });
-            } else {
-                $baseQuery->where('rujuk_puskesmas', $request->rujukan);
-            }
-        }
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $baseQuery->where(function ($q) use ($search) {
-                $q->where('nik', 'LIKE', "%{$search}%")
-                    ->orWhereHas('user', function ($subQ) use ($search) {
-                        $subQ->where('nama', 'LIKE', "%{$search}%");
-                    });
-            });
-        }
-
-        $allData = $baseQuery->get();
-
-        // ✅ HITUNG STATS SESUAI BLADE
-        $nonWarga = 0;
-        $bulanIni = 0;
-        $perluRujukan = 0;
-
-        foreach ($allData as $item) {
-            // ✅ NON WARGA (ASUMSI FIELD 'type' ATAU 'status_warga')
-            if (
-                $item->user &&
-                (isset($item->user->type) && $item->user->type === 'bukan warga' ||
-                    isset($item->user->status_warga) && $item->user->status_warga === 'bukan warga')
-            ) {
-                $nonWarga++;
-            }
-
-            // ✅ BULAN INI
-            if (
-                Carbon::parse($item->tanggal_pemeriksaan)->month === now()->month &&
-                Carbon::parse($item->tanggal_pemeriksaan)->year === now()->year
-            ) {
-                $bulanIni++;
-            }
-
-            // ✅ PERLU RUJUKAN (DARI FIELD rujuk_puskesmas)
-            if ($item->rujuk_puskesmas === 'Perlu Rujukan') {
-                $perluRujukan++;
-            }
-        }
-
-        return [
-            'non_warga' => $nonWarga,        // ✅ SESUAI BLADE
-            'bulan_ini' => $bulanIni,        // ✅ SESUAI BLADE  
-            'perlu_rujukan' => $perluRujukan, // ✅ SESUAI BLADE
-            'total_pemeriksaan' => $allData->count()
-        ];
-    }
-
-    // ✅ EXISTING METHODS (NO CHANGE)
-    public function getFilterOptions()
-    {
-        try {
-            $rwList = User::select('rw')
-                ->distinct()
-                ->whereNotNull('rw')
-                ->whereNotIn('level', ['admin', 'kader'])
-                ->orderBy('rw')
-                ->pluck('rw');
-
-            $roleList = User::select('level')
-                ->distinct()
-                ->whereNotNull('level')
-                ->whereNotIn('level', ['admin', 'kader'])
-                ->orderBy('level')
-                ->pluck('level');
-
-            $yearRange = PemeriksaanBalita::selectRaw('MIN(YEAR(tanggal_pemeriksaan)) as min_year, MAX(YEAR(tanggal_pemeriksaan)) as max_year')
-                ->first();
-
-            $years = [];
-            if ($yearRange && $yearRange->min_year && $yearRange->max_year) {
-                for ($year = $yearRange->max_year; $year >= $yearRange->min_year; $year--) {
-                    $years[] = $year;
-                }
-            }
-
-            return response()->json([
-                'success' => true,
-                'rw_list' => $rwList,
-                'role_list' => $roleList,
-                'years' => $years
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    public function detail($id)
-    {
-        try {
-            $pemeriksaan = PemeriksaanBalita::with(['user:nik,nama,alamat,rw,level,tanggal_lahir,jenis_kelamin'])
-                ->findOrFail($id);
-
-            return response()->json([
-                'success' => true,
-                'data' => $pemeriksaan
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data pemeriksaan tidak ditemukan'
-            ], 404);
-        }
-    }
-
-    public function getLastExamination($nik)
-    {
-        $currentDate = request()->get('current_date', date('Y-m-d'));
-
-        $baselineExam = PemeriksaanBalita::where('nik', $nik)
-            ->where('tanggal_pemeriksaan', '<', $currentDate)
-            ->orderBy('tanggal_pemeriksaan', 'desc')
-            ->first();
-
-        return response()->json($baselineExam);
-    }
-}
+<td>
+  <button
+    class="btn btn-sm btn-primary"
+    onclick="showDetail(${item.id}, '${item.model_type}')"
+    title="Detail"
+  >
+    <i data-feather="eye"></i>
+  </button>
+</td>

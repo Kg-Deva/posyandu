@@ -72,24 +72,24 @@ class PemeriksaanIbuHamilController extends Controller
             }
 
             // ✅ HITUNG STATUS BERDASARKAN INPUT FORM
-            
+
             // STATUS LILA
             $statusLILA = $request->lila >= 23.5 ? 'Normal' : 'KEK';
-            
+
             // STATUS TEKANAN DARAH
             $kategoriTekananDarah = $this->getKategoriTekananDarah($request->sistole, $request->diastole);
-            
+
             // KESIMPULAN SISTOLE & DIASTOLE
             $kesimpulanSistole = $this->getKesimpulanSistole($request->sistole);
             $kesimpulanDiastole = $this->getKesimpulanDiastole($request->diastole);
-            
+
             // STATUS TD SESUAI KIA
             $statusTdKIA = $this->getStatusTdKIA($request->sistole, $request->diastole);
 
             // ✅ HITUNG GEJALA TBC
             $gejalaTBC = 0;
             $gejalaList = [];
-            
+
             if ($request->boolean('batuk_terus_menerus')) {
                 $gejalaTBC++;
                 $gejalaList[] = 'Batuk terus menerus';
@@ -107,7 +107,8 @@ class PemeriksaanIbuHamilController extends Controller
                 $gejalaList[] = 'Kontak erat TBC';
             }
 
-            $rujukPuskesmasTBC = $gejalaTBC >= 1 ? 'Ya' : 'Tidak';
+            // ✅ FIX: HANYA ≥2 GEJALA YANG RUJUK
+            $rujukPuskesmasTBC = $gejalaTBC >= 2 ? 'Ya' : 'Tidak';
 
             // ✅ HITUNG STATUS RUJUKAN UTAMA
             $perluRujukan = false;
@@ -131,8 +132,8 @@ class PemeriksaanIbuHamilController extends Controller
                 $alasanRujukan[] = 'Hipotensi';
             }
 
-            // Cek TBC
-            if ($gejalaTBC >= 1) {
+            // ✅ FIX: CEK TBC - HANYA ≥2 GEJALA YANG RUJUK
+            if ($gejalaTBC >= 2) {
                 $perluRujukan = true;
                 $alasanRujukan[] = "Gejala TBC ({$gejalaTBC} gejala)";
             }
@@ -196,7 +197,6 @@ class PemeriksaanIbuHamilController extends Controller
             PemeriksaanIbuHamil::create($data);
 
             return redirect()->back()->with('success', 'Data pemeriksaan ibu hamil berhasil disimpan!');
-
         } catch (\Exception $e) {
             Log::error('Error saving ibu hamil examination: ' . $e->getMessage());
             return redirect()->back()

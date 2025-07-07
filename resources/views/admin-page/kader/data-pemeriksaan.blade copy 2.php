@@ -299,7 +299,6 @@
         let isLoading = false;
         let isSearchMode = false;
         let searchTimeout = null;
-         let resetTimeout = null; // ✅ TAMBAH TIMEOUT UNTUK RESET
         
         // ELEMENTS
         // UPDATE ELEMENTS - GANTI totalPemeriksaan JADI nonWarga
@@ -367,120 +366,48 @@
                 });
         }
         
-        // ✅ TOAST NOTIFICATION FUNCTION
-    function showToast(message, type = 'success') {
-        // ✅ CREATE TOAST ELEMENT
-        const toastId = 'toast-' + Date.now();
-        const toastHtml = `
-            <div class="toast align-items-center text-bg-${type === 'success' ? 'success' : 'danger'} border-0" 
-                 role="alert" aria-live="assertive" aria-atomic="true" id="${toastId}">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
-                        ${message}
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" 
-                            data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-            </div>
-        `;
-        
-        // ✅ ADD TO TOAST CONTAINER
-        let toastContainer = document.getElementById('toast-container');
-        if (!toastContainer) {
-            toastContainer = document.createElement('div');
-            toastContainer.id = 'toast-container';
-            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
-            toastContainer.style.zIndex = '9999';
-            document.body.appendChild(toastContainer);
-        }
-        
-        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
-        
-        // ✅ SHOW TOAST
-        const toastElement = document.getElementById(toastId);
-        const toast = new bootstrap.Toast(toastElement, {
-            autohide: true,
-            delay: 3000
-        });
-        toast.show();
-        
-        // ✅ REMOVE TOAST AFTER HIDE
-        toastElement.addEventListener('hidden.bs.toast', function() {
-            this.remove();
-        });
-    }
-    
-    // ✅ ALTERNATIVE RESET DENGAN ANIMATION YANG LEBIH HALUS
-    function resetWithAnimation() {
-        return new Promise((resolve) => {
-            // ✅ FADE OUT ANIMATION
-            elements.dataContainer.style.transition = 'opacity 0.3s ease';
-            elements.dataContainer.style.opacity = '0.3';
+        // LOAD DATA
+        function loadData(page = 1) {
+            if (isLoading) return;
             
-            // ✅ RESET VALUES
-            elements.search.value = '';
-            elements.filterBulan.value = '';
-            elements.filterTahun.value = '';
-            elements.filterRole.value = '';
-            elements.filterRw.value = '';
-            elements.filterRujukan.value = '';
+            isLoading = true;
+            currentPage = page;
             
-            // ✅ DELAY UNTUK ANIMATION
-            setTimeout(() => {
-                elements.dataContainer.style.opacity = '1';
-                resolve();
-            }, 300);
-        });
-    }
-    
-    // ✅ ENHANCED LOAD DATA FUNCTION
-    function loadData(page = 1, showLoading = true) {
-        if (isLoading) return;
-        
-        isLoading = true;
-        currentPage = page;
-        
-        if (showLoading) {
+            // SHOW LOADING
             elements.loading.style.display = 'block';
             elements.dataContainer.style.display = 'none';
             elements.noData.style.display = 'none';
-        }
-        
-        // BUILD PARAMS
-        const params = new URLSearchParams({
-            page: page,
-            search: elements.search.value,
-            bulan: elements.filterBulan.value,
-            tahun: elements.filterTahun.value,
-            role: elements.filterRole.value,
-            rw: elements.filterRw.value,
-            rujukan: elements.filterRujukan.value,
-            _t: Date.now() // ✅ CACHE BUSTER
-        });
-        
-        fetch(`/data-pemeriksaan/get-data?${params}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    renderData(data.data, data.pagination);
-                    updateStats(data.stats || {});
-                } else {
-                    throw new Error(data.message || 'Error loading data');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                elements.noData.style.display = 'block';
-                elements.dataContainer.style.display = 'none';
-            })
-            .finally(() => {
-                isLoading = false;
-                if (showLoading) {
-                    elements.loading.style.display = 'none';
-                }
+            
+            // BUILD PARAMS - TAMBAH RUJUKAN
+            const params = new URLSearchParams({
+                page: page,
+                search: elements.search.value,
+                bulan: elements.filterBulan.value,
+                tahun: elements.filterTahun.value,
+                role: elements.filterRole.value,
+                rw: elements.filterRw.value,
+                rujukan: elements.filterRujukan.value // ✅ TAMBAH INI
             });
-    }
+            
+            fetch(`/data-pemeriksaan/get-data?${params}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        renderData(data.data, data.pagination);
+                        updateStats(data.stats || {});
+                    } else {
+                        throw new Error(data.message || 'Error loading data');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    elements.noData.style.display = 'block';
+                })
+                .finally(() => {
+                    isLoading = false;
+                    elements.loading.style.display = 'none';
+                });
+        }
         
         // RENDER DATA - FIX INI BRO!
         // ✅ UPDATE RENDER DATA - SUPPORT SEMUA JENIS
@@ -746,66 +673,14 @@
         
         // RESET FILTER
         elements.btnReset.addEventListener('click', function() {
-            this.blur(); // ✅ TAMBAH BARIS INI - HILANGKAN FOCUS
-            
-            console.log('Reset button clicked');
-            
-            // ✅ FORCE RESET DENGAN JQUERY (KALAU ADA)
-            if (typeof $ !== 'undefined') {
-                $('#search').val('');
-                $('#filter-bulan').val('');
-                $('#filter-tahun').val('');
-                $('#filter-role').val('');
-                $('#filter-rw').val('');
-                $('#filter-rujukan').val('');
-            } else {
-                // ✅ NATIVE JS RESET
-                elements.search.value = '';
-                elements.filterBulan.value = '';
-                elements.filterTahun.value = '';
-                elements.filterRole.value = '';
-                elements.filterRw.value = '';
-                elements.filterRujukan.value = '';
-            }
-            
-            // ✅ CLEAR ALL TIMEOUTS
-            if (searchTimeout) {
-                clearTimeout(searchTimeout);
-                searchTimeout = null;
-            }
-            
-            // ✅ RESET STATES
-            currentPage = 1;
-            isSearchMode = false;
-            isLoading = false;
-            
-            // ✅ HIDE EXPORT REKAP
-            if (elements.btnExportRekap) {
-                elements.btnExportRekap.classList.add('d-none');
-            }
-            
-            // ✅ FORCE RELOAD WITH FRESH REQUEST
-            setTimeout(() => {
-                // ✅ DIRECT FETCH TANPA PARAMETER
-                fetch('/data-pemeriksaan/get-data?page=1')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            renderData(data.data, data.pagination);
-                            updateStats(data.stats || {});
-                        } else {
-                            console.error('Error:', data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    })
-                    .finally(() => {
-                        isLoading = false;
-                    });
-            }, 200);
-            
-            console.log('Reset completed');
+            elements.search.value = '';
+            elements.filterBulan.value = '';
+            elements.filterTahun.value = '';
+            elements.filterRole.value = '';
+            elements.filterRw.value = '';
+            elements.filterRujukan.value = '';
+            elements.btnExportRekap.classList.add('d-none'); // <-- Tambahkan ini
+            loadData(1);
         });
         
         // ✅ TAMBAH EXPORT FUNCTION

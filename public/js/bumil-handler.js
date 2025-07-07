@@ -616,6 +616,10 @@ class IbuHamilHandler {
       if (jumlahGejala === 0) {
         jumlahGejalaField.value = '';
         jumlahGejalaField.className = 'form-control';
+      } else if (jumlahGejala === 1) {
+        // ✅ 1 GEJALA = HIJAU (AMAN)
+        jumlahGejalaField.value = `${jumlahGejala} gejala: ${gejalaList.join(', ')}`;
+        jumlahGejalaField.className = 'form-control status-hijau';
       } else {
         jumlahGejalaField.value = `${jumlahGejala} gejala: ${gejalaList.join(', ')}`;
         jumlahGejalaField.className = 'form-control status-merah';
@@ -633,7 +637,7 @@ class IbuHamilHandler {
         rujukField.className = 'form-control status-merah';
       } else {
         rujukField.value = 'TIDAK RUJUK - Gejala TBC tidak mencukupi';
-        rujukField.className = 'form-control status-merah';
+        rujukField.className = 'form-control status-hijau';
       }
     }
 
