@@ -46,26 +46,37 @@ class DataPemeriksaanController extends Controller
                 $this->applyFilters($balitaQuery, $request);
 
                 $balitaData = $balitaQuery->get()->map(function ($item) {
+                    // ✅ INISIALISASI RUJUKAN STATUS = NORMAL
                     $rujukanStatus = 'Normal';
 
-                    if (
-                        isset($item->rujuk_puskesmas) &&
-                        (strpos($item->rujuk_puskesmas, 'RUJUK') !== false || $item->rujuk_puskesmas === 'Perlu Rujukan')
-                    ) {
-                        $rujukanStatus = 'Perlu Rujukan';
-                    }
-
+                    // ✅ 1. CEK TBC DULU - HANYA ≥ 2 GEJALA
                     $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
                     if (is_string($jumlahGejala) && preg_match('/(\d+)/', $jumlahGejala, $matches)) {
                         $jumlahGejala = (int)$matches[1];
                     }
-                    if ($jumlahGejala >= 2) {
+
+                    if ($jumlahGejala >= 2) { // ✅ HANYA ≥ 2, BUKAN ≥ 1
                         $rujukanStatus = 'Perlu Rujukan';
                     }
 
+                    // ✅ 2. CEK LILA
                     $umur = $item->umur ?? 0;
                     if ($umur >= 6 && $item->lila && floatval($item->lila) < 11.5) {
                         $rujukanStatus = 'Perlu Rujukan';
+                    }
+
+                    // ✅ 3. CEK FIELD rujuk_puskesmas DENGAN VALIDASI
+                    if (
+                        isset($item->rujuk_puskesmas) &&
+                        (strpos($item->rujuk_puskesmas, 'RUJUK') !== false || $item->rujuk_puskesmas === 'Perlu Rujukan')
+                    ) {
+                        // ✅ VALIDASI ULANG
+                        if ($jumlahGejala >= 2 || ($umur >= 6 && $item->lila && floatval($item->lila) < 11.5)) {
+                            $rujukanStatus = 'Perlu Rujukan';
+                        } else {
+                            // ✅ PAKSA NORMAL JIKA TIDAK ADA INDIKASI MEDIS
+                            $rujukanStatus = 'Normal';
+                        }
                     }
 
                     return [
