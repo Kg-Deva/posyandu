@@ -428,28 +428,28 @@ class IbuHamilHandler {
         // Trimester 1 (1-12 minggu): kenaikan minimal
         if (bb >= 45 && bb <= 90) {
           status = 'Ya - BB sesuai kurva KIA (Trimester 1)';
-          cssClass = 'status-hijau';
+          // cssClass = 'status-hijau';
         } else {
           status = 'Tidak - BB tidak sesuai kurva KIA (Trimester 1)';
-          cssClass = 'status-merah';
+          // cssClass = 'status-merah';
         }
       } else if (usia <= 28) {
         // Trimester 2 (13-28 minggu): kenaikan progresif
         if (bb >= 50 && bb <= 95) {
           status = 'Ya - BB sesuai kurva KIA (Trimester 2)';
-          cssClass = 'status-hijau';
+          // cssClass = 'status-hijau';
         } else {
           status = 'Tidak - BB tidak sesuai kurva KIA (Trimester 2)';
-          cssClass = 'status-merah';
+          // cssClass = 'status-merah';
         }
       } else {
         // Trimester 3 (29-42 minggu): kenaikan maksimal
         if (bb >= 55 && bb <= 100) {
           status = 'Ya - BB sesuai kurva KIA (Trimester 3)';
-          cssClass = 'status-hijau';
+          // cssClass = 'status-hijau';
         } else {
           status = 'Tidak - BB tidak sesuai kurva KIA (Trimester 3)';
-          cssClass = 'status-merah';
+          // cssClass = 'status-merah';
         }
       }
 
@@ -482,10 +482,10 @@ class IbuHamilHandler {
 
       if (lila >= 23.5) {
         status = 'Ya - LILA Normal (≥ 23.5 cm)';
-        cssClass = 'status-hijau';
+        // cssClass = 'status-hijau';
       } else {
         status = 'Tidak - LILA Kurang Gizi (< 23.5 cm)';
-        cssClass = 'status-merah';
+        // cssClass = 'status-merah';
       }
 
       statusOutput.value = status;
@@ -521,26 +521,26 @@ class IbuHamilHandler {
       let sistoleStatus, sistoleCss;
       if (sistole < 90) {
         sistoleStatus = 'Rendah';
-        sistoleCss = 'status-merah';
+        // sistoleCss = 'status-merah';
       } else if (sistole >= 90 && sistole < 140) {
         sistoleStatus = 'Normal';
-        sistoleCss = 'status-hijau';
+        // sistoleCss = 'status-hijau';
       } else {
         sistoleStatus = 'Tinggi';
-        sistoleCss = 'status-merah';
+        // sistoleCss = 'status-merah';
       }
 
       // ✅ EVALUASI DIASTOLE - 3 Kategori dengan istilah medis
       let diastoleStatus, diastoleCss;
       if (diastole < 60) {
         diastoleStatus = 'Rendah';
-        diastoleCss = 'status-merah';
+        // diastoleCss = 'status-merah';
       } else if (diastole >= 60 && diastole < 90) {
         diastoleStatus = 'Normal';
-        diastoleCss = 'status-hijau';
+        // diastoleCss = 'status-hijau';
       } else {
         diastoleStatus = 'Tinggi';
-        diastoleCss = 'status-merah';
+        // diastoleCss = 'status-merah';
       }
 
       // ✅ STATUS KESELURUHAN - Spesifik dengan kondisi yang jelas
@@ -549,19 +549,19 @@ class IbuHamilHandler {
       if (sistoleStatus === 'Normal' && diastoleStatus === 'Normal') {
         // Kedua normal
         overallStatus = 'Ya - Tekanan darah normal sesuai KIA';
-        overallCss = 'status-hijau';
+        // overallCss = 'status-hijau';
       } else if (sistoleStatus === 'Tinggi' || diastoleStatus === 'Tinggi') {
         // Salah satu atau kedua Tinggi - prioritas tinggi
         overallStatus = 'Tidak - Hipertensi (perlu rujukan segera)';
-        overallCss = 'status-merah';
+        // overallCss = 'status-merah';
       } else if (sistoleStatus === 'Rendah' || diastoleStatus === 'Rendah') {
         // Salah satu atau kedua hipotensi
         overallStatus = 'Tidak - Hipotensi (perlu rujukan)';
-        overallCss = 'status-merah';
+        // overallCss = 'status-merah';
       } else {
         // Mix status yang tidak umum (fallback, seharusnya tidak terjadi)
         overallStatus = 'Tidak - Tekanan darah tidak normal (perlu rujukan)';
-        overallCss = 'status-merah';
+        // overallCss = 'status-merah';
       }
 
       // ✅ UPDATE OUTPUT FIELDS

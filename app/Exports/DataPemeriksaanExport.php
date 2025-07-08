@@ -22,14 +22,14 @@ class DataPemeriksaanExport implements FromArray, WithHeadings, WithColumnFormat
     {
         $result = [];
         $counter = 1;
-        
+
         foreach ($this->data as $row) {
             $userData = $row['user'] ?? [];
-            
+
             $result[] = [
                 $counter++,
                 \Carbon\Carbon::parse($row['tanggal_pemeriksaan'])->format('d/m/Y'),
-                $row['nik'] ?? '-', // ✅ HILANGKAN PREFIX PETIK
+                $row['nik'] ?? '-',
                 $userData['nama'] ?? '-',
                 $userData['rw'] ?? '-',
                 $userData['level'] ?? '-',
@@ -41,7 +41,7 @@ class DataPemeriksaanExport implements FromArray, WithHeadings, WithColumnFormat
                 $row['pemeriksa'] ?? '-'
             ];
         }
-        
+
         return $result;
     }
 
@@ -63,38 +63,64 @@ class DataPemeriksaanExport implements FromArray, WithHeadings, WithColumnFormat
         ];
     }
 
-    // ✅ TAMBAH METHOD INI UNTUK FORMAT KOLOM
     public function columnFormats(): array
     {
         return [
-            'C' => NumberFormat::FORMAT_TEXT, // ✅ KOLOM NIK JADI TEXT
+            'C' => NumberFormat::FORMAT_TEXT,
         ];
     }
-    
+
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function(AfterSheet $event) {
+            AfterSheet::class => function (AfterSheet $event) {
                 $highestRow = $event->sheet->getHighestRow();
-                
+                $highestColumn = $event->sheet->getHighestColumn();
+
+                // ✅ STYLING UNTUK HEADER ROW (BARIS 1)
+                $event->sheet->getDelegate()->getStyle('A1:' . $highestColumn . '1')->applyFromArray([
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'E6E6FA'], // ✅ WARNA LAVENDER
+                    ],
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['rgb' => '000000'], // ✅ TEXT HITAM
+                    ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                        'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['rgb' => '000000'],
+                        ],
+                    ],
+                ]);
+
                 // ✅ SET SETIAP CELL NIK SEBAGAI TEXT EXPLICITLY
                 for ($row = 2; $row <= $highestRow; $row++) {
                     $cellValue = $event->sheet->getCell('C' . $row)->getValue();
-                    
-                    // Force sebagai string tanpa scientific notation
+
                     if (!empty($cellValue) && $cellValue !== '-') {
                         $event->sheet->setCellValueExplicit(
-                            'C' . $row, 
-                            (string)$cellValue, 
+                            'C' . $row,
+                            (string)$cellValue,
                             \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
                         );
                     }
                 }
-                
+
                 // ✅ SET FORMAT KOLOM NIK
                 $event->sheet->getDelegate()->getStyle('C:C')
                     ->getNumberFormat()
-                    ->setFormatCode('@'); // @ = TEXT FORMAT
+                    ->setFormatCode('@');
+
+                // ✅ AUTO WIDTH UNTUK SEMUA KOLOM
+                foreach (range('A', $highestColumn) as $column) {
+                    $event->sheet->getDelegate()->getColumnDimension($column)->setAutoSize(true);
+                }
             }
         ];
     }

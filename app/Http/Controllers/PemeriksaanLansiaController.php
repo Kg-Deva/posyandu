@@ -84,6 +84,7 @@ class PemeriksaanLansiaController extends Controller
 
         // Pemeriksaan terakhir
         $pemeriksaanTerakhir = $dataPemeriksaan->first();
+        $pemeriksaanSebelumnya = $dataPemeriksaan->skip(1)->first(); // ✅ TAMBAH
 
         // Total pemeriksaan
         $totalPemeriksaan = $dataPemeriksaan->count();
@@ -98,13 +99,28 @@ class PemeriksaanLansiaController extends Controller
             $progressBB = $pemeriksaanTerakhir->bb - $pemeriksaanSebelumnya->bb;
         }
 
+        // ✅ TAMBAH PROGRESS LAINNYA - TIDAK MENGGANGGU
+        $progressSistole = 0;
+        $progressDiastole = 0;
+        $progressGula = 0;
+
+        if ($pemeriksaanTerakhir && $pemeriksaanSebelumnya) {
+            $progressSistole = $pemeriksaanTerakhir->sistole - $pemeriksaanSebelumnya->sistole;
+            $progressDiastole = $pemeriksaanTerakhir->diastole - $pemeriksaanSebelumnya->diastole;
+            $progressGula = $pemeriksaanTerakhir->gula_darah - $pemeriksaanSebelumnya->gula_darah;
+        }
+
         return view('admin-page.lansia.lansia-home', compact(
             'user',
             'dataPemeriksaan',
             'pemeriksaanTerakhir',
+            'pemeriksaanSebelumnya',    // ✅ TAMBAH
             'totalPemeriksaan',
             'statusKesehatan',
-            'progressBB'
+            'progressBB',
+            'progressSistole',          // ✅ TAMBAH
+            'progressDiastole',         // ✅ TAMBAH
+            'progressGula'              // ✅ TAMBAH
         ));
     }
 
@@ -251,5 +267,25 @@ class PemeriksaanLansiaController extends Controller
             'icon' => 'shield-check',
             'description' => 'Kondisi kesehatan baik untuk usia lanjut, pertahankan pola hidup sehat'
         ];
+    }
+
+    // ✅ METHOD BARU - TIDAK MENGGANGGU YANG LAMA
+    public function show($id)
+    {
+        $user = User::findOrFail($id);
+
+        $dataPemeriksaan = PemeriksaanLansia::where('nik', $user->nik)
+            ->orderBy('tanggal_pemeriksaan', 'desc')
+            ->get();
+
+        $pemeriksaanTerakhir = $dataPemeriksaan->first();
+        $pemeriksaanSebelumnya = $dataPemeriksaan->skip(1)->first();
+
+        return view('admin-page.lansia.detail-pemeriksaan', compact(
+            'user',
+            'dataPemeriksaan',
+            'pemeriksaanTerakhir',
+            'pemeriksaanSebelumnya'
+        ));
     }
 }

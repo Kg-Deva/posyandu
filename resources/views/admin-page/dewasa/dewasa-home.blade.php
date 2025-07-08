@@ -315,6 +315,111 @@
                             </div>
                         </div>
                     </div>
+                    <!-- ✅ GANTI CARDS STATIC JADI PROGRESS CARDS KAYAK REMAJA -->
+                    {{-- <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="bg-primary bg-opacity-10 rounded p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="fw-bold text-primary mb-1">{{ $pemeriksaanTerakhir->bb }} kg</h6>
+                                        <small class="text-muted">Berat Badan Saat Ini</small>
+                                    </div>
+                                    <div class="text-end">
+                                        @if($progressBB > 0)
+                                            <div class="badge bg-success px-3 py-2">
+                                                <i class="bi bi-arrow-up me-1"></i>+{{ $progressBB }} kg
+                                            </div>
+                                            <div><small class="text-success">Naik dari pemeriksaan lalu</small></div>
+                                        @elseif($progressBB < 0)
+                                            <div class="badge bg-warning px-3 py-2">
+                                                <i class="bi bi-arrow-down me-1"></i>{{ $progressBB }} kg
+                                            </div>
+                                            <div><small class="text-warning">Turun dari pemeriksaan lalu</small></div>
+                                        @else
+                                            <div class="badge bg-info px-3 py-2">
+                                                <i class="bi bi-dash me-1"></i>Stabil
+                                            </div>
+                                            <div><small class="text-info">Sama seperti pemeriksaan lalu</small></div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="bg-danger bg-opacity-10 rounded p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="fw-bold text-danger mb-1">{{ $pemeriksaanTerakhir->sistole }}/{{ $pemeriksaanTerakhir->diastole }}</h6>
+                                        <small class="text-muted">Tekanan Darah Saat Ini</small>
+                                    </div>
+                                    <div class="text-end">
+                                        @php
+                                            $sistoleBefore = $pemeriksaanSebelumnya->sistole ?? $pemeriksaanTerakhir->sistole;
+                                            $diastoleBefore = $pemeriksaanSebelumnya->diastole ?? $pemeriksaanTerakhir->diastole;
+                                            $progressSistole = $pemeriksaanTerakhir->sistole - $sistoleBefore;
+                                            $progressDiastole = $pemeriksaanTerakhir->diastole - $diastoleBefore;
+                                        @endphp
+                                        
+                                        @if($progressSistole > 0 || $progressDiastole > 0)
+                                            <div class="badge bg-warning px-3 py-2">
+                                                <i class="bi bi-arrow-up me-1"></i>
+                                                @if($progressSistole > 0) S+{{ $progressSistole }} @endif
+                                                @if($progressDiastole > 0) D+{{ $progressDiastole }} @endif
+                                            </div>
+                                            <div><small class="text-warning">Naik dari pemeriksaan lalu</small></div>
+                                        @elseif($progressSistole < 0 || $progressDiastole < 0)
+                                            <div class="badge bg-success px-3 py-2">
+                                                <i class="bi bi-arrow-down me-1"></i>
+                                                @if($progressSistole < 0) S{{ $progressSistole }} @endif
+                                                @if($progressDiastole < 0) D{{ $progressDiastole }} @endif
+                                            </div>
+                                            <div><small class="text-success">Turun dari pemeriksaan lalu</small></div>
+                                        @else
+                                            <div class="badge bg-info px-3 py-2">
+                                                <i class="bi bi-dash me-1"></i>Stabil
+                                            </div>
+                                            <div><small class="text-info">Sama seperti pemeriksaan lalu</small></div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="bg-warning bg-opacity-10 rounded p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="fw-bold text-warning mb-1">{{ $pemeriksaanTerakhir->gula_darah }} mg/dL</h6>
+                                        <small class="text-muted">Gula Darah Saat Ini</small>
+                                    </div>
+                                    <div class="text-end">
+                                        @php
+                                            $gulaBefore = $pemeriksaanSebelumnya->gula_darah ?? $pemeriksaanTerakhir->gula_darah;
+                                            $progressGula = $pemeriksaanTerakhir->gula_darah - $gulaBefore;
+                                        @endphp
+                                        
+                                        @if($progressGula > 0)
+                                            <div class="badge bg-danger px-3 py-2">
+                                                <i class="bi bi-arrow-up me-1"></i>+{{ $progressGula }} mg/dL
+                                            </div>
+                                            <div><small class="text-danger">Naik dari pemeriksaan lalu</small></div>
+                                        @elseif($progressGula < 0)
+                                            <div class="badge bg-success px-3 py-2">
+                                                <i class="bi bi-arrow-down me-1"></i>{{ $progressGula }} mg/dL
+                                            </div>
+                                            <div><small class="text-success">Turun dari pemeriksaan lalu</small></div>
+                                        @else
+                                            <div class="badge bg-info px-3 py-2">
+                                                <i class="bi bi-dash me-1"></i>Stabil
+                                            </div>
+                                            <div><small class="text-info">Sama seperti pemeriksaan lalu</small></div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> --}}
                     @endif
                     
                     <div class="chart-container position-relative bg-white rounded-3 p-3" style="height: 400px;">

@@ -222,9 +222,9 @@
                                 <strong>Grafik ini menunjukkan:</strong> Perkembangan berat badan dan tekanan darah dari setiap pemeriksaan. 
                                 Hover di titik grafik untuk melihat perubahan dari pemeriksaan sebelumnya!
                                 <div class="mt-2">
-                                    <small class="text-muted">
+                                    {{-- <small class="text-muted">
                                         💡 <strong>Tips:</strong> Kenaikan BB ideal 0.3-0.5 kg per minggu di trimester 2-3, TD normal <140/90 mmHg
-                                    </small>
+                                    </small> --}}
                                 </div>
                             </div>
                         </div>
@@ -261,6 +261,77 @@
                             </div>
                         </div>
                     </div>
+                    <!-- ✅ GANTI CARDS STATIC JADI PROGRESS CARDS KAYAK YANG LAIN -->
+                    {{-- <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="bg-primary bg-opacity-10 rounded p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="fw-bold text-primary mb-1">{{ $pemeriksaanTerbaru->bb }} kg</h6>
+                                        <small class="text-muted">Berat Badan Saat Ini</small>
+                                    </div>
+                                    <div class="text-end">
+                                        @if($progressBB > 0)
+                                            <div class="badge bg-success px-3 py-2">
+                                                <i class="bi bi-arrow-up me-1"></i>+{{ $progressBB }} kg
+                                            </div>
+                                            <div><small class="text-success">Naik dari pemeriksaan lalu</small></div>
+                                        @elseif($progressBB < 0)
+                                            <div class="badge bg-danger px-3 py-2">
+                                                <i class="bi bi-arrow-down me-1"></i>{{ $progressBB }} kg
+                                            </div>
+                                            <div><small class="text-danger">Turun dari pemeriksaan lalu</small></div>
+                                        @else
+                                            <div class="badge bg-info px-3 py-2">
+                                                <i class="bi bi-dash me-1"></i>Stabil
+                                            </div>
+                                            <div><small class="text-info">Sama seperti pemeriksaan lalu</small></div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="bg-danger bg-opacity-10 rounded p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="fw-bold text-danger mb-1">{{ $pemeriksaanTerbaru->sistole }}/{{ $pemeriksaanTerbaru->diastole }}</h6>
+                                        <small class="text-muted">Tekanan Darah Saat Ini</small>
+                                    </div>
+                                    <div class="text-end">
+                                        @php
+                                            $sistoleBefore = $pemeriksaanSebelumnya->sistole ?? $pemeriksaanTerbaru->sistole;
+                                            $diastoleBefore = $pemeriksaanSebelumnya->diastole ?? $pemeriksaanTerbaru->diastole;
+                                            $progressSistole = $pemeriksaanTerbaru->sistole - $sistoleBefore;
+                                            $progressDiastole = $pemeriksaanTerbaru->diastole - $diastoleBefore;
+                                        @endphp
+                                        
+                                        @if($progressSistole > 0 || $progressDiastole > 0)
+                                            <div class="badge bg-warning px-3 py-2">
+                                                <i class="bi bi-arrow-up me-1"></i>
+                                                @if($progressSistole > 0) S+{{ $progressSistole }} @endif
+                                                @if($progressDiastole > 0) D+{{ $progressDiastole }} @endif
+                                            </div>
+                                            <div><small class="text-warning">Naik dari pemeriksaan lalu</small></div>
+                                        @elseif($progressSistole < 0 || $progressDiastole < 0)
+                                            <div class="badge bg-success px-3 py-2">
+                                                <i class="bi bi-arrow-down me-1"></i>
+                                                @if($progressSistole < 0) S{{ $progressSistole }} @endif
+                                                @if($progressDiastole < 0) D{{ $progressDiastole }} @endif
+                                            </div>
+                                            <div><small class="text-success">Turun dari pemeriksaan lalu</small></div>
+                                        @else
+                                            <div class="badge bg-info px-3 py-2">
+                                                <i class="bi bi-dash me-1"></i>Stabil
+                                            </div>
+                                            <div><small class="text-info">Sama seperti pemeriksaan lalu</small></div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> --}}
                     @endif
                     
                     <div class="chart-container position-relative bg-white rounded-3 p-3" style="height: 400px;">
@@ -519,7 +590,7 @@
 
     <!-- TREND ANALYSIS YANG LEBIH DETAIL -->
     @if($dataPemeriksaan->count() >= 2)
-    <div class="row g-2 mt-4">
+    {{-- <div class="row g-2 mt-4">
         <div class="col-12">
             <div class="bg-light rounded p-4">
                 <h6 class="fw-semibold mb-3">
@@ -588,7 +659,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
     @endif
 </div>
 

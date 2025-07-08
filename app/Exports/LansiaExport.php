@@ -37,9 +37,17 @@ class LansiaExport implements FromCollection, WithHeadings, WithMapping, WithEve
         if (!empty($this->filters['bulan'])) {
             $query->whereMonth('tanggal_pemeriksaan', $this->filters['bulan']);
         }
+        // ✅ FIX RW FILTER - SUPPORT NORMALIZATION
         if (!empty($this->filters['rw'])) {
-            $query->whereHas('user', function ($q) {
-                $q->where('rw', $this->filters['rw']);
+            $rwFilter = $this->filters['rw'];
+            $query->whereHas('user', function ($q) use ($rwFilter) {
+                $q->where(function ($subQ) use ($rwFilter) {
+                    $subQ->where('rw', $rwFilter)
+                        ->orWhere('rw', sprintf('%02d', intval($rwFilter)))
+                        ->orWhere('rw', sprintf('%03d', intval($rwFilter)))
+                        ->orWhere('rw', sprintf('%04d', intval($rwFilter)))
+                        ->orWhere('rw', strval(intval($rwFilter)));
+                });
             });
         }
         if (!empty($this->filters['search'])) {
@@ -52,7 +60,42 @@ class LansiaExport implements FromCollection, WithHeadings, WithMapping, WithEve
             });
         }
 
-        return $query->orderBy('tanggal_pemeriksaan', 'desc')->get();
+        // ✅ FILTER RUJUKAN SETELAH QUERY
+        $result = $query->orderBy('tanggal_pemeriksaan', 'desc')->get();
+
+        // ✅ FILTER RUJUKAN MANUAL JIKA ADA
+        if (!empty($this->filters['rujukan'])) {
+            $result = $result->filter(function ($pemeriksaan) {
+                // ✅ HITUNG RUJUKAN STATUS
+                $rujukanStatus = 'Normal';
+
+                if (!empty($pemeriksaan->status_tbc) && (
+                    $pemeriksaan->status_tbc === 'Rujuk ke Puskesmas' ||
+                    $pemeriksaan->status_tbc === 'Perlu Rujukan'
+                )) {
+                    $rujukanStatus = 'Perlu Rujukan';
+                }
+
+                if (!empty($pemeriksaan->status_puma) && (
+                    $pemeriksaan->status_puma === 'Rujuk ke Puskesmas' ||
+                    $pemeriksaan->status_puma === 'Perlu Rujukan'
+                )) {
+                    $rujukanStatus = 'Perlu Rujukan';
+                }
+
+                if (!empty($pemeriksaan->kesimpulan_td) && $pemeriksaan->kesimpulan_td === 'Hipertensi') {
+                    $rujukanStatus = 'Perlu Rujukan';
+                }
+
+                if (!empty($pemeriksaan->kesimpulan_gula_darah) && $pemeriksaan->kesimpulan_gula_darah === 'Diabetes') {
+                    $rujukanStatus = 'Perlu Rujukan';
+                }
+
+                return $rujukanStatus === $this->filters['rujukan'];
+            });
+        }
+
+        return $result;
     }
 
     public function headings(): array
@@ -322,10 +365,57 @@ class LansiaExport implements FromCollection, WithHeadings, WithMapping, WithEve
 
         // ✅ RUJUK (DEFAULT TIDAK - KARENA GA ADA FIELD RUJUK DI DATABASE)
         $rujuk = 'TIDAK';
-        // ✅ KALAU ADA FIELD RUJUK DI DATABASE NANTI TINGGAL UNCOMMENT:
-        // if (!empty($pemeriksaan->rujuk) && trim($pemeriksaan->rujuk) !== '') {
-        //     $rujuk = 'YA';
-        // }
+
+        // ✅ CARI TAHU APAKAH PERLU RUJUK
+        $needRujuk = false;
+
+        // ✅ 1. RUJUK BERDASARKAN PUMA
+        // Jika status_puma mengandung "rujuk" atau "puskesmas"
+        if (
+            !empty($pemeriksaan->status_puma) &&
+            (stripos($pemeriksaan->status_puma, 'rujuk') !== false ||
+                stripos($pemeriksaan->status_puma, 'puskesmas') !== false)
+        ) {
+            $needRujuk = true;
+        }
+
+        // Jika skor_puma > 6
+        if (
+            !empty($pemeriksaan->skor_puma) &&
+            is_numeric($pemeriksaan->skor_puma) &&
+            $pemeriksaan->skor_puma > 6
+        ) {
+            $needRujuk = true;
+        }
+
+        // ✅ 2. RUJUK BERDASARKAN TBC
+        // Jika status_tbc mengandung "rujuk" atau "puskesmas"
+        if (
+            !empty($pemeriksaan->status_tbc) &&
+            (stripos($pemeriksaan->status_tbc, 'rujuk') !== false ||
+                stripos($pemeriksaan->status_tbc, 'puskesmas') !== false)
+        ) {
+            $needRujuk = true;
+        }
+
+        // Jika tidak ada status_tbc, hitung berdasarkan gejala TB
+        if (empty($pemeriksaan->status_tbc)) {
+            $gejalaTbCount = 0;
+            if (!empty($pemeriksaan->tbc_batuk)) $gejalaTbCount++;
+            if (!empty($pemeriksaan->tbc_demam)) $gejalaTbCount++;
+            if (!empty($pemeriksaan->tbc_bb_turun)) $gejalaTbCount++;
+            if (!empty($pemeriksaan->tbc_kontak)) $gejalaTbCount++;
+
+            // Jika gejala >= 2, perlu rujuk
+            if ($gejalaTbCount >= 2) {
+                $needRujuk = true;
+            }
+        }
+
+        // ✅ SET FINAL RUJUK VALUE
+        if ($needRujuk) {
+            $rujuk = 'YA';
+        }
 
         return [
             $nama,                  // NAMA

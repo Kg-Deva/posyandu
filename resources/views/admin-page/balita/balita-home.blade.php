@@ -888,7 +888,7 @@
                                     <div class="text-center">
                                         <i class="bi bi-telephone text-{{ $correctClass }} fs-4 mb-2"></i>
                                         <div class="text-muted">Butuh Bantuan?</div>
-                                        <small class="text-muted">Hubungi Kader Posyandu</small>
+                                        <small class="text-muted">Hubungi Puskesmas</small>
                                         <div class="fw-bold text-{{ $correctClass }} mt-2">
                                             📞 024 8445809
                                         </div>

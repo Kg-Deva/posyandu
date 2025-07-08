@@ -14,6 +14,28 @@
     font-weight: 600;
     margin-bottom: 16px;
 }
+
+/* ✅ STYLING WARNA UNTUK TBC SCREENING DEWASA */
+.status-hijau {
+    background-color: #d4edda !important;
+    border-color: #c3e6cb !important;
+    color: #155724 !important;
+    /* font-weight: bold; */
+}
+
+.status-merah {
+    background-color: #f8d7da !important;
+    border-color: #f5c6cb !important;
+    color: #721c24 !important;
+    /* font-weight: bold; */
+}
+
+.status-kuning {
+    background-color: #fff3cd !important;
+    border-color: #ffeaa7 !important;
+    color: #856404 !important;
+    /* font-weight: bold; */
+}
 </style>
 
 <form id="form-dewasa" action="/simpan-pemeriksaan-dewasa" method="POST">
@@ -201,7 +223,7 @@
                         <option value="">-- Pilih --</option>
                         <option value="0">40-49 tahun</option>
                         <option value="1">50-59 tahun</option>
-                        <option value="2">≥ 60 tahun</option>
+                        <option value="2">60 tahun</option>
                     </select>
                 </div>
                 <!-- Merokok -->

@@ -216,30 +216,54 @@ class PemeriksaanIbuHamilController extends Controller
             return redirect('/')->with('error', 'Akses ditolak');
         }
 
+        // Ambil data pemeriksaan ibu hamil untuk user ini
         $dataPemeriksaan = PemeriksaanIbuHamil::where('nik', $user->nik)
             ->orderBy('tanggal_pemeriksaan', 'desc')
             ->get();
 
+        // Pemeriksaan terbaru & sebelumnya
         $pemeriksaanTerbaru = $dataPemeriksaan->first();
+        $pemeriksaanSebelumnya = $dataPemeriksaan->skip(1)->first();
         $totalPemeriksaan = $dataPemeriksaan->count();
 
-        // Progress BB
+        // ✅ PROGRESS DATA LENGKAP - SESUAI PROGRESS CARDS
         $progressBB = 0;
-        if ($dataPemeriksaan->count() >= 2) {
-            $terbaru = $dataPemeriksaan->first();
-            $sebelumnya = $dataPemeriksaan->skip(1)->first();
-            $progressBB = round($terbaru->bb - $sebelumnya->bb, 1);
+        $progressSistole = 0;
+        $progressDiastole = 0;
+        $progressLILA = 0;
+        $progressUsiaKehamilan = 0;
+
+        if ($pemeriksaanTerbaru && $pemeriksaanSebelumnya) {
+            $progressBB = round($pemeriksaanTerbaru->bb - $pemeriksaanSebelumnya->bb, 1);
+            $progressSistole = $pemeriksaanTerbaru->sistole - $pemeriksaanSebelumnya->sistole;
+            $progressDiastole = $pemeriksaanTerbaru->diastole - $pemeriksaanSebelumnya->diastole;
+            $progressLILA = round($pemeriksaanTerbaru->lila - $pemeriksaanSebelumnya->lila, 1);
+            $progressUsiaKehamilan = $pemeriksaanTerbaru->usia_kehamilan - $pemeriksaanSebelumnya->usia_kehamilan;
         }
 
+        // ✅ HITUNG STATUS KESEHATAN LENGKAP
         $statusKesehatan = $this->calculateStatusKesehatanIbuHamil($pemeriksaanTerbaru);
+
+        // ✅ HITUNG KONTROL BERIKUTNYA - KHUSUS IBU HAMIL
+        $kontrolBerikutnya = $this->calculateNextControlIbuHamil($pemeriksaanTerbaru, $statusKesehatan);
+
+        // ✅ STATISTIK KEHAMILAN
+        $statistikKehamilan = $this->generateStatistikKehamilan($dataPemeriksaan, $pemeriksaanTerbaru);
 
         return view('admin-page.ibu-hamil.ibu-hamil-home', compact(
             'user',
             'dataPemeriksaan',
             'pemeriksaanTerbaru',
+            'pemeriksaanSebelumnya',
             'totalPemeriksaan',
             'progressBB',
-            'statusKesehatan'
+            'progressSistole',
+            'progressDiastole',
+            'progressLILA',
+            'progressUsiaKehamilan',
+            'statusKesehatan',
+            'kontrolBerikutnya',
+            'statistikKehamilan'
         ));
     }
 
@@ -251,23 +275,129 @@ class PemeriksaanIbuHamilController extends Controller
         if (!$pemeriksaan) {
             return [
                 'status' => 'Belum Ada Data',
+                'category' => 'secondary',
+                'score' => 0,
+                'badge' => 'bg-secondary',
+                'icon' => 'question-circle',
                 'keterangan' => 'Belum ada pemeriksaan yang dilakukan',
-                'perlu_rujukan' => false
+                'perlu_rujukan' => false,
+                'description' => 'Segera lakukan pemeriksaan ANC pertama'
             ];
         }
 
-        if ($pemeriksaan->perlu_rujukan) {
+        $riskFactors = 0;
+        $criticalConditions = 0;
+        $riskList = [];
+
+        // ✅ EVALUASI KONDISI KRITIS
+        if ($pemeriksaan->lila < 23.5) {
+            $criticalConditions++;
+            $riskList[] = 'KEK (LILA < 23.5 cm)';
+        }
+
+        if ($pemeriksaan->sistole >= 140 || $pemeriksaan->diastole >= 90) {
+            $criticalConditions++;
+            $riskList[] = 'Hipertensi';
+        }
+
+        if ($pemeriksaan->sistole < 90 || $pemeriksaan->diastole < 60) {
+            $criticalConditions++;
+            $riskList[] = 'Hipotensi';
+        }
+
+        if ($pemeriksaan->jumlah_gejala_tbc >= 2) {
+            $criticalConditions++;
+            $riskList[] = 'Suspek TBC';
+        }
+
+        // ✅ EVALUASI FAKTOR RISIKO
+        if ($pemeriksaan->lila >= 23.5 && $pemeriksaan->lila < 25) {
+            $riskFactors++;
+            $riskList[] = 'LILA borderline';
+        }
+
+        if ($pemeriksaan->sistole >= 130 && $pemeriksaan->sistole < 140) {
+            $riskFactors++;
+            $riskList[] = 'Pre-hipertensi';
+        }
+
+        if ($pemeriksaan->jumlah_gejala_tbc == 1) {
+            $riskFactors++;
+            $riskList[] = '1 gejala TBC';
+        }
+
+        if ($pemeriksaan->konsumsi_tablet_fe == 'Tidak setiap hari') {
+            $riskFactors++;
+            $riskList[] = 'Konsumsi Fe tidak teratur';
+        }
+
+        if ($pemeriksaan->mengikuti_kelas_ibu == 'Tidak') {
+            $riskFactors++;
+            $riskList[] = 'Tidak mengikuti kelas ibu';
+        }
+
+        // ✅ TENTUKAN STATUS BERDASARKAN KONDISI
+        if ($criticalConditions >= 2) {
+            return [
+                'status' => 'Perlu Rujukan Segera',
+                'category' => 'danger',
+                'score' => 90 + ($criticalConditions * 5),
+                'badge' => 'bg-danger',
+                'icon' => 'exclamation-triangle-fill',
+                'keterangan' => implode(', ', $riskList),
+                'perlu_rujukan' => true,
+                'description' => 'Ada beberapa kondisi serius yang memerlukan penanganan medis segera'
+            ];
+        }
+
+        if ($criticalConditions >= 1) {
             return [
                 'status' => 'Perlu Rujukan',
-                'keterangan' => $pemeriksaan->alasan_rujukan ?? 'Perlu rujukan ke Puskesmas',
-                'perlu_rujukan' => true
+                'category' => 'warning',
+                'score' => 70 + ($criticalConditions * 10),
+                'badge' => 'bg-warning',
+                'icon' => 'exclamation-triangle',
+                'keterangan' => implode(', ', $riskList),
+                'perlu_rujukan' => true,
+                'description' => 'Ada kondisi yang memerlukan perhatian medis'
+            ];
+        }
+
+        if ($riskFactors >= 2) {
+            return [
+                'status' => 'Perlu Perhatian',
+                'category' => 'info',
+                'score' => 50 + ($riskFactors * 5),
+                'badge' => 'bg-info',
+                'icon' => 'exclamation-circle',
+                'keterangan' => implode(', ', $riskList),
+                'perlu_rujukan' => false,
+                'description' => 'Beberapa faktor risiko perlu dipantau'
+            ];
+        }
+
+        if ($riskFactors >= 1) {
+            return [
+                'status' => 'Perlu Perhatian',
+                'category' => 'info',
+                'score' => 30 + ($riskFactors * 8),
+                'badge' => 'bg-info',
+                'icon' => 'info-circle',
+                'keterangan' => implode(', ', $riskList),
+                'perlu_rujukan' => false,
+                'description' => 'Ada faktor risiko yang perlu dipantau'
             ];
         }
 
         return [
             'status' => 'Sehat',
+            'category' => 'success',
+            'score' => 95,
+            'badge' => 'bg-success',
+            'icon' => 'shield-check',
             'keterangan' => 'Semua parameter dalam batas normal',
-            'perlu_rujukan' => false
+            'perlu_rujukan' => false,
+            'description' => 'Kondisi kehamilan sehat, lanjutkan ANC rutin'
         ];
     }
 
@@ -415,5 +545,239 @@ class PemeriksaanIbuHamilController extends Controller
                 'message' => 'Data tidak ditemukan'
             ], 404);
         }
+    }
+
+    /**
+     * ✅ METHOD BARU: HITUNG KONTROL BERIKUTNYA KHUSUS IBU HAMIL
+     */
+    private function calculateNextControlIbuHamil($pemeriksaan, $statusKesehatan)
+    {
+        if (!$pemeriksaan) {
+            return [
+                'interval' => 0,
+                'label' => 'Segera ANC',
+                'date' => null,
+                'days' => 0,
+                'color' => 'danger'
+            ];
+        }
+
+        // ✅ INTERVAL KONTROL BERDASARKAN USIA KEHAMILAN
+        $usiaKehamilan = $pemeriksaan->usia_kehamilan ?? 0;
+        $interval = 4; // Default 4 minggu
+
+        if ($usiaKehamilan < 28) {
+            // Trimester 1-2: 4 minggu
+            $interval = 4;
+        } elseif ($usiaKehamilan < 36) {
+            // Trimester 3 awal: 2 minggu
+            $interval = 2;
+        } else {
+            // Trimester 3 akhir: 1 minggu
+            $interval = 1;
+        }
+
+        // ✅ SESUAIKAN BERDASARKAN STATUS KESEHATAN
+        if ($statusKesehatan['perlu_rujukan']) {
+            $interval = 1; // 1 minggu untuk kondisi perlu rujukan
+        }
+
+        // ✅ SESUAIKAN BERDASARKAN KONDISI KHUSUS
+        if ($pemeriksaan->lila < 23.5) {
+            $interval = min($interval, 2); // Maksimal 2 minggu untuk KEK
+        }
+
+        if ($pemeriksaan->sistole >= 140 || $pemeriksaan->diastole >= 90) {
+            $interval = 1; // 1 minggu untuk hipertensi
+        }
+
+        $nextDate = Carbon::parse($pemeriksaan->tanggal_pemeriksaan)->addWeeks($interval);
+        $now = Carbon::now();
+
+        // ✅ HITUNG SELISIH HARI
+        $daysLeft = $nextDate->diffInDays($now);
+
+        // ✅ CEK APAKAH SUDAH LEWAT ATAU BELUM
+        if ($nextDate->isPast()) {
+            $daysLeft = -$daysLeft; // Negatif kalau sudah lewat
+        }
+
+        // Tentukan warna badge
+        $color = 'success';
+        if ($daysLeft <= 0) {
+            $color = 'danger';
+        } elseif ($daysLeft <= 3) {
+            $color = 'warning';
+        } elseif ($daysLeft <= 7) {
+            $color = 'info';
+        }
+
+        return [
+            'interval' => $interval,
+            'label' => $this->getIntervalLabelIbuHamil($interval, $usiaKehamilan),
+            'date' => $nextDate,
+            'days' => $daysLeft,
+            'color' => $color
+        ];
+    }
+
+    /**
+     * ✅ METHOD BARU: LABEL INTERVAL KHUSUS IBU HAMIL
+     */
+    private function getIntervalLabelIbuHamil($interval, $usiaKehamilan)
+    {
+        $trimester = $usiaKehamilan < 14 ? 'Trimester 1' : ($usiaKehamilan < 28 ? 'Trimester 2' : 'Trimester 3');
+
+        switch ($interval) {
+            case 1:
+                return "ANC Mingguan ($trimester)";
+            case 2:
+                return "ANC 2 Minggu ($trimester)";
+            case 4:
+                return "ANC Bulanan ($trimester)";
+            default:
+                return "ANC Rutin ($trimester)";
+        }
+    }
+
+    /**
+     * ✅ METHOD BARU: STATISTIK KEHAMILAN
+     */
+    private function generateStatistikKehamilan($dataPemeriksaan, $pemeriksaanTerbaru)
+    {
+        if ($dataPemeriksaan->isEmpty()) {
+            return [
+                'trimester' => 'Belum ditentukan',
+                'riwayat_kek' => 0,
+                'riwayat_hipertensi' => 0,
+                'riwayat_tbc' => 0,
+                'trend_bb' => 'stabil',
+                'trend_lila' => 'stabil',
+                'total_tablet_fe' => 0,
+                'total_porsi_mt' => 0,
+                'mengikuti_kelas_ibu' => 'Belum diketahui'
+            ];
+        }
+
+        // ✅ TENTUKAN TRIMESTER
+        $usiaKehamilan = $pemeriksaanTerbaru->usia_kehamilan ?? 0;
+        $trimester = 'Trimester 1';
+        if ($usiaKehamilan >= 28) {
+            $trimester = 'Trimester 3';
+        } elseif ($usiaKehamilan >= 14) {
+            $trimester = 'Trimester 2';
+        }
+
+        // ✅ HITUNG RIWAYAT MASALAH
+        $riwayatKEK = $dataPemeriksaan->where('lila', '<', 23.5)->count();
+        $riwayatHipertensi = $dataPemeriksaan->where('sistole', '>=', 140)->count();
+        $riwayatTBC = $dataPemeriksaan->where('jumlah_gejala_tbc', '>=', 2)->count();
+
+        // ✅ HITUNG TREND
+        $trendBB = $this->calculateTrend($dataPemeriksaan->take(3)->pluck('bb'));
+        $trendLILA = $this->calculateTrend($dataPemeriksaan->take(3)->pluck('lila'));
+
+        // ✅ TOTAL SUPLEMENTASI
+        $totalTabletFe = $dataPemeriksaan->sum('jumlah_tablet_fe');
+        $totalPorsiMT = $dataPemeriksaan->sum('jumlah_porsi_mt');
+
+        // ✅ STATUS KELAS IBU TERBARU
+        $mengikutiKelasIbu = $pemeriksaanTerbaru->mengikuti_kelas_ibu ?? 'Belum diketahui';
+
+        return [
+            'trimester' => $trimester,
+            'usia_kehamilan' => $usiaKehamilan,
+            'riwayat_kek' => $riwayatKEK,
+            'riwayat_hipertensi' => $riwayatHipertensi,
+            'riwayat_tbc' => $riwayatTBC,
+            'trend_bb' => $trendBB,
+            'trend_lila' => $trendLILA,
+            'total_tablet_fe' => $totalTabletFe,
+            'total_porsi_mt' => $totalPorsiMT,
+            'mengikuti_kelas_ibu' => $mengikutiKelasIbu,
+            'total_pemeriksaan' => $dataPemeriksaan->count(),
+            'pemeriksaan_terakhir' => $pemeriksaanTerbaru->tanggal_pemeriksaan ?? null
+        ];
+    }
+
+    /**
+     * ✅ METHOD BARU: HITUNG TREND
+     */
+    private function calculateTrend($data)
+    {
+        $values = $data->filter()->values();
+
+        if ($values->count() < 2) {
+            return 'stabil';
+        }
+
+        $first = $values->first();
+        $last = $values->last();
+        $diff = $last - $first;
+
+        if ($diff > 0) {
+            return 'naik';
+        } elseif ($diff < 0) {
+            return 'turun';
+        } else {
+            return 'stabil';
+        }
+    }
+
+    /**
+     * ✅ METHOD BARU: SKRINING TAHUNAN
+     */
+    public function skriningTahunan($userId)
+    {
+        $user = User::findOrFail($userId);
+        return view('admin-page.pemeriksaan-form.skrining-tahunan-ibu-hamil', compact('user'));
+    }
+
+    /**
+     * ✅ SHOW DETAIL UNTUK ADMIN
+     */
+    public function show($id)
+    {
+        $user = User::findOrFail($id);
+
+        $dataPemeriksaan = PemeriksaanIbuHamil::where('nik', $user->nik)
+            ->orderBy('tanggal_pemeriksaan', 'desc')
+            ->get();
+
+        $pemeriksaanTerbaru = $dataPemeriksaan->first();
+        $pemeriksaanSebelumnya = $dataPemeriksaan->skip(1)->first();
+        $totalPemeriksaan = $dataPemeriksaan->count();
+
+        // Hitung progress
+        $progressBB = 0;
+        $progressSistole = 0;
+        $progressDiastole = 0;
+        $progressLILA = 0;
+
+        if ($pemeriksaanTerbaru && $pemeriksaanSebelumnya) {
+            $progressBB = round($pemeriksaanTerbaru->bb - $pemeriksaanSebelumnya->bb, 1);
+            $progressSistole = $pemeriksaanTerbaru->sistole - $pemeriksaanSebelumnya->sistole;
+            $progressDiastole = $pemeriksaanTerbaru->diastole - $pemeriksaanSebelumnya->diastole;
+            $progressLILA = round($pemeriksaanTerbaru->lila - $pemeriksaanSebelumnya->lila, 1);
+        }
+
+        $statusKesehatan = $this->calculateStatusKesehatanIbuHamil($pemeriksaanTerbaru);
+        $kontrolBerikutnya = $this->calculateNextControlIbuHamil($pemeriksaanTerbaru, $statusKesehatan);
+        $statistikKehamilan = $this->generateStatistikKehamilan($dataPemeriksaan, $pemeriksaanTerbaru);
+
+        return view('admin-page.ibu-hamil.ibu-hamil-home', compact(
+            'user',
+            'dataPemeriksaan',
+            'pemeriksaanTerbaru',
+            'pemeriksaanSebelumnya',
+            'totalPemeriksaan',
+            'progressBB',
+            'progressSistole',
+            'progressDiastole',
+            'progressLILA',
+            'statusKesehatan',
+            'kontrolBerikutnya',
+            'statistikKehamilan'
+        ));
     }
 }

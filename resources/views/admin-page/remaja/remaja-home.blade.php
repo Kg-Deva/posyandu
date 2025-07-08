@@ -20,7 +20,13 @@
                                         <div class="d-flex flex-column flex-md-row gap-2 gap-md-4">
                                             <div class="d-flex align-items-center">
                                                 <span class="text-white-50 me-2 fw-normal">🧑‍🎓 Umur:</span>
-                                                <span class="fw-semibold">{{ $pemeriksaanTerakhir ? $pemeriksaanTerakhir->umur . ' tahun' : $user->umur }}</span>
+                                                <span class="fw-semibold">
+                                                    @if($user->tanggal_lahir)
+                                                        {{ \Carbon\Carbon::parse($user->tanggal_lahir)->age }} tahun
+                                                    @else
+                                                        Belum diisi
+                                                    @endif
+                                                </span>
                                             </div>
                                             <div class="d-flex align-items-center">
                                                 <span class="text-white-50 me-2 fw-normal">📅 Periksa Terakhir:</span>

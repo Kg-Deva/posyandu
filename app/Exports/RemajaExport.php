@@ -27,24 +27,28 @@ class RemajaExport implements FromCollection, WithHeadings, WithMapping, WithEve
     {
         $query = PemeriksaanRemaja::with('user');
 
+        // ✅ FILTER BERDASARKAN PARAMETER
         if (!empty($this->filters['tahun'])) {
             $query->whereYear('tanggal_pemeriksaan', $this->filters['tahun']);
         }
         if (!empty($this->filters['bulan'])) {
             $query->whereMonth('tanggal_pemeriksaan', $this->filters['bulan']);
         }
+
+        // ✅ FIX RW FILTER - SUPPORT NORMALIZATION
         if (!empty($this->filters['rw'])) {
-            $query->whereHas('user', function ($q) {
-                $q->where('rw', $this->filters['rw']);
+            $rwFilter = $this->filters['rw'];
+            $query->whereHas('user', function ($q) use ($rwFilter) {
+                $q->where(function ($subQ) use ($rwFilter) {
+                    $subQ->where('rw', $rwFilter)
+                        ->orWhere('rw', sprintf('%02d', intval($rwFilter)))
+                        ->orWhere('rw', sprintf('%03d', intval($rwFilter)))
+                        ->orWhere('rw', sprintf('%04d', intval($rwFilter)))
+                        ->orWhere('rw', strval(intval($rwFilter)));
+                });
             });
         }
-        if (!empty($this->filters['rujukan'])) {
-            if ($this->filters['rujukan'] === 'Perlu Rujukan') {
-                $query->where('rujuk_puskesmas', 'Perlu Rujukan');
-            } else if ($this->filters['rujukan'] === 'Tidak Perlu Rujukan' || $this->filters['rujukan'] === 'Normal') {
-                $query->where('rujuk_puskesmas', '!=', 'Perlu Rujukan');
-            }
-        }
+
         if (!empty($this->filters['search'])) {
             $search = $this->filters['search'];
             $query->where(function ($q) use ($search) {
@@ -55,7 +59,27 @@ class RemajaExport implements FromCollection, WithHeadings, WithMapping, WithEve
             });
         }
 
-        return $query->get();
+        // ✅ GET DATA DULU, BARU FILTER RUJUKAN MANUAL
+        $result = $query->orderBy('tanggal_pemeriksaan', 'desc')->get();
+
+        // ✅ FILTER RUJUKAN MANUAL - CUMA TBC ≥ 2
+        if (!empty($this->filters['rujukan'])) {
+            $result = $result->filter(function ($pemeriksaan) {
+                // ✅ LOGIC RUJUKAN REMAJA - CUMA TBC ≥ 2
+                $rujukanStatus = 'Normal';
+
+                // ✅ CEK GEJALA TBC >= 2
+                $jumlahGejala = $pemeriksaan->jumlah_gejala_tbc ?? 0;
+                if ($jumlahGejala >= 2) {
+                    $rujukanStatus = 'Perlu Rujukan';
+                }
+
+                // ✅ STRICT FILTER MATCHING
+                return $this->filters['rujukan'] === $rujukanStatus;
+            });
+        }
+
+        return $result;
     }
 
     public function headings(): array
@@ -124,16 +148,11 @@ class RemajaExport implements FromCollection, WithHeadings, WithMapping, WithEve
 
         // ✅ FORMAT RUJUKAN - FIX LOGIKA!
         $rujukan = 'TIDAK';
-        if (!empty($pemeriksaan->rujuk_puskesmas)) {
-            $rujukValue = strtolower($pemeriksaan->rujuk_puskesmas);
-            if (
-                in_array($rujukValue, ['perlu rujukan', 'ya', 'rujuk', 'perlu', 'butuh rujukan']) ||
-                strpos($rujukValue, 'perlu') !== false
-            ) {
-                $rujukan = 'YA';
-            } else {
-                $rujukan = 'TIDAK';
-            }
+
+        // ✅ CEK GEJALA TBC >= 2
+        $jumlahGejala = $pemeriksaan->jumlah_gejala_tbc ?? 0;
+        if ($jumlahGejala >= 2) {
+            $rujukan = 'YA';
         } else {
             $rujukan = 'TIDAK';
         }
@@ -163,13 +182,56 @@ class RemajaExport implements FromCollection, WithHeadings, WithMapping, WithEve
         // ✅ FORMAT SKRINING MASALAH KESEHATAN - FIX LOGIKA!
         $skriningMasalah = 'TIDAK';
         $masalahList = [];
-        if (!empty($pemeriksaan->masalah_pendidikan)) $masalahList[] = 'Pendidikan';
-        if (!empty($pemeriksaan->masalah_pola_makan)) $masalahList[] = 'Pola Makan';
-        if (!empty($pemeriksaan->masalah_aktivitas)) $masalahList[] = 'Aktivitas';
-        if (!empty($pemeriksaan->masalah_obat)) $masalahList[] = 'Obat';
-        if (!empty($pemeriksaan->masalah_kesehatan_seksual)) $masalahList[] = 'Kesehatan Seksual';
-        if (!empty($pemeriksaan->masalah_keamanan)) $masalahList[] = 'Keamanan';
-        if (!empty($pemeriksaan->masalah_kesehatan_mental)) $masalahList[] = 'Kesehatan Mental';
+
+        // ✅ CEK MASING-MASING FIELD DENGAN LOGIC YANG BENAR
+        if (!empty($pemeriksaan->masalah_pendidikan)) {
+            $nilai = strtolower(trim($pemeriksaan->masalah_pendidikan));
+            if (!in_array($nilai, ['tidak ada', 'tidak ada masalah', 'normal', 'tidak', 'kosong', '-'])) {
+                $masalahList[] = 'Pendidikan';
+            }
+        }
+
+        if (!empty($pemeriksaan->masalah_pola_makan)) {
+            $nilai = strtolower(trim($pemeriksaan->masalah_pola_makan));
+            if (!in_array($nilai, ['tidak ada', 'tidak ada masalah', 'normal', 'tidak', 'kosong', '-'])) {
+                $masalahList[] = 'Pola Makan';
+            }
+        }
+
+        if (!empty($pemeriksaan->masalah_aktivitas)) {
+            $nilai = strtolower(trim($pemeriksaan->masalah_aktivitas));
+            if (!in_array($nilai, ['tidak ada', 'tidak ada masalah', 'normal', 'tidak', 'kosong', '-'])) {
+                $masalahList[] = 'Aktivitas';
+            }
+        }
+
+        if (!empty($pemeriksaan->masalah_obat)) {
+            $nilai = strtolower(trim($pemeriksaan->masalah_obat));
+            if (!in_array($nilai, ['tidak ada', 'tidak ada masalah', 'normal', 'tidak', 'kosong', '-'])) {
+                $masalahList[] = 'Obat';
+            }
+        }
+
+        if (!empty($pemeriksaan->masalah_kesehatan_seksual)) {
+            $nilai = strtolower(trim($pemeriksaan->masalah_kesehatan_seksual));
+            if (!in_array($nilai, ['tidak ada', 'tidak ada masalah', 'normal', 'tidak', 'kosong', '-'])) {
+                $masalahList[] = 'Kesehatan Seksual';
+            }
+        }
+
+        if (!empty($pemeriksaan->masalah_keamanan)) {
+            $nilai = strtolower(trim($pemeriksaan->masalah_keamanan));
+            if (!in_array($nilai, ['tidak ada', 'tidak ada masalah', 'normal', 'tidak', 'kosong', '-'])) {
+                $masalahList[] = 'Keamanan';
+            }
+        }
+
+        if (!empty($pemeriksaan->masalah_kesehatan_mental)) {
+            $nilai = strtolower(trim($pemeriksaan->masalah_kesehatan_mental));
+            if (!in_array($nilai, ['tidak ada', 'tidak ada masalah', 'normal', 'tidak', 'kosong', '-'])) {
+                $masalahList[] = 'Kesehatan Mental';
+            }
+        }
 
         if (!empty($masalahList)) {
             $skriningMasalah = 'YA';    // ✅ Ada masalah = YA

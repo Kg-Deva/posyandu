@@ -53,9 +53,9 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-body">
-                                <div class="row">
+                               <div class="row">
                                     {{-- SEARCH --}}
-                                    <div class="col-lg-2 col-md-4 mb-3">
+                                    <div class="col-lg-3 col-md-4 mb-3">
                                         <label class="form-label">Pencarian</label>
                                         <input type="text" id="search" class="form-control" placeholder="NIK atau Nama...">
                                     </div>
@@ -97,15 +97,14 @@
                                     </div>
                                     
                                     {{-- FILTER RW --}}
-                                    <div class="col-lg-1 col-md-3 mb-3">
+                                    <div class="col-lg-2 col-md-3 mb-3">
                                         <label class="form-label">RW</label>
                                         <select id="filter-rw" class="form-select">
                                             <option value="">Semua</option>
                                         </select>
                                     </div>
-                                    
-                                    {{-- ✅ FILTER RUJUKAN BARU --}}
-                                    <div class="col-lg-2 col-md-4 mb-3">
+                                    {{-- ✅ COMMENT FILTER RUJUKAN - DISABLED SEMENTARA --}}
+                                    <div class="col-lg-2 col-md-4 mb-3 d-none">
                                         <label class="form-label">Rujukan</label>
                                         <select id="filter-rujukan" class="form-select">
                                             <option value="">Semua</option>
@@ -113,7 +112,6 @@
                                             <option value="Normal">Normal</option>
                                         </select>
                                     </div>
-                                    
                                     {{-- RESET BUTTON --}}
                                     <div class="col-lg-1 col-md-2 mb-3 d-flex align-items-end">
                                         <button id="btn-reset" class="btn btn-outline-secondary w-100" title="Reset">
@@ -128,8 +126,8 @@
 
                 {{-- STATISTICS CARDS --}}
                 {{-- GANTI CARD TOTAL PEMERIKSAAN JADI NON WARGA --}}
-                <section class="row mb-4">
-                    <div class="col-lg-4 col-md-6">
+                <section class="row mb-1">
+                    <div class="col-lg-4 col-md-6 d-none">
                         <div class="card">
                             <div class="card-body px-4 py-4-5">
                                 <div class="row">
@@ -147,7 +145,7 @@
                         </div>
                     </div>
                     
-                    <div class="col-lg-4 col-md-6">
+                    <div class="col-lg-4 col-md-6 d-none">
                         <div class="card">
                             <div class="card-body px-4 py-4-5">
                                 <div class="row">
@@ -165,7 +163,7 @@
                         </div>
                     </div>
                     
-                    <div class="col-lg-4 col-md-6">
+                    <div class="col-lg-4 col-md-6 d-none">
                         <div class="card">
                             <div class="card-body px-4 py-4-5">
                                 <div class="row">
@@ -485,54 +483,54 @@
         // RENDER DATA - FIX INI BRO!
         // ✅ UPDATE RENDER DATA - SUPPORT SEMUA JENIS
         function renderData(data, pagination) {
-            if (!data || data.length === 0) {
-                elements.noData.style.display = 'block';
-                elements.dataContainer.style.display = 'none';
-                return;
-            }
-            
-            let html = '';
-            data.forEach((item, index) => {
-                const no = ((pagination.current_page - 1) * pagination.per_page) + index + 1;
-                const tanggal = new Date(item.tanggal_pemeriksaan).toLocaleDateString('id-ID');
-                
-                const userData = item.user || {};
-                const nama = userData.nama || '-';
-                const rw = userData.rw || '-';
-                
-                // ✅ USE jenis_pemeriksaan FOR BADGE
-                const roleBadge = getBadgeClass(item.jenis_pemeriksaan);
-                
-                // ✅ RUJUKAN BADGE UNIVERSAL
-                const rujukanBadge = item.rujuk_puskesmas === 'Perlu Rujukan' ? 
-                    '<span class="badge bg-danger">Perlu Rujukan</span>' : 
-                    '<span class="badge bg-success">Normal</span>';
-                
-                html += `
-                    <tr>
-                        <td>${no}</td>
-                        <td>${tanggal}</td>
-                        <td class="text-bold-500">${item.nik || '-'}</td>
-                        <td class="text-bold-500">${nama}</td>
-                        <td class="text-center"><span class="badge bg-secondary">RW ${rw}</span></td>
-                        <td class="text-center">${roleBadge}</td>
-                        <td class="text-center"><strong>${item.bb || '-'}</strong></td>
-                        <td class="text-center"><strong>${item.tb || '-'}</strong></td>
-                        <td class="text-center">${rujukanBadge}</td>
-                        
-                    </tr>
-                `;
-            });
-            
-            elements.dataTbody.innerHTML = html;
-            renderPagination(pagination);
-            elements.dataContainer.style.display = 'block';
-            elements.noData.style.display = 'none';
-            
-            if (typeof feather !== 'undefined') {
-                feather.replace();
-            }
-        }
+             if (!data || data.length === 0) {
+        elements.noData.style.display = 'block';
+        elements.dataContainer.style.display = 'none';
+        return;
+    }
+    
+    let html = '';
+    data.forEach((item, index) => {
+        const no = ((pagination.current_page - 1) * pagination.per_page) + index + 1;
+        const tanggal = new Date(item.tanggal_pemeriksaan).toLocaleDateString('id-ID');
+        
+        const userData = item.user || {};
+        const nama = userData.nama || '-';
+        const rw = userData.rw || '-';
+        
+        // ✅ NORMALIZE RW DISPLAY - HILANGKAN LEADING ZERO
+        const normalizedRw = rw === '-' ? '-' : parseInt(rw).toString();
+        
+        const roleBadge = getBadgeClass(item.jenis_pemeriksaan);
+        
+        const rujukanBadge = item.rujuk_puskesmas === 'Perlu Rujukan' ? 
+            '<span class="badge bg-danger">Perlu Rujukan</span>' : 
+            '<span class="badge bg-success">Normal</span>';
+        
+        html += `
+            <tr>
+                <td>${no}</td>
+                <td>${tanggal}</td>
+                <td class="text-bold-500">${item.nik || '-'}</td>
+                <td class="text-bold-500">${nama}</td>
+                <td class="text-center"><span class="badge bg-secondary">RW ${normalizedRw}</span></td>
+                <td class="text-center">${roleBadge}</td>
+                <td class="text-center"><strong>${item.bb || '-'}</strong></td>
+                <td class="text-center"><strong>${item.tb || '-'}</strong></td>
+                <td class="text-center">${rujukanBadge}</td>
+            </tr>
+        `;
+    });
+    
+    elements.dataTbody.innerHTML = html;
+    renderPagination(pagination);
+    elements.dataContainer.style.display = 'block';
+    elements.noData.style.display = 'none';
+    
+    if (typeof feather !== 'undefined') {
+        feather.replace();
+    }
+}
         
         // GET BADGE CLASS
         function getBadgeClass(role) {

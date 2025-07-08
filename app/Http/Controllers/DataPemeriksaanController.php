@@ -19,6 +19,7 @@ use App\Exports\RemajaExport;
 use App\Exports\IbuHamilExport;
 use App\Exports\DewasaExport;
 use App\Exports\LansiaExport;
+use App\Exports\RekapIbuHamilExport;
 use App\Exports\RekapDewasaExport;
 use App\Exports\RekapBalitaExport;
 use App\Exports\RekapRemajaExport;
@@ -96,7 +97,14 @@ class DataPemeriksaanController extends Controller
                 $this->applyFilters($remajaQuery, $request);
 
                 $remajaData = $remajaQuery->get()->map(function ($item) {
-                    $healthStatus = $this->calculateHealthStatus($item, $item->user);
+                    // ✅ LOGIC RUJUKAN REMAJA - CUMA TBC ≥ 2
+                    $rujukanStatus = 'Normal';
+
+                    // ✅ CEK GEJALA TBC >= 2
+                    $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
+                    if ($jumlahGejala >= 2) {
+                        $rujukanStatus = 'Perlu Rujukan';
+                    }
 
                     return [
                         'id' => $item->id,
@@ -107,9 +115,7 @@ class DataPemeriksaanController extends Controller
                         'imt' => $item->imt,
                         'lila' => $item->lila,
                         'umur' => $item->umur,
-                        'rujuk_puskesmas' => ($healthStatus['category'] === 'urgent' ||
-                            $item->rujuk_puskesmas === 'Perlu Rujukan') ? 'Perlu Rujukan' : 'Normal',
-                        'health_status' => $healthStatus,
+                        'rujuk_puskesmas' => $rujukanStatus, // ✅ CUMA BERDASARKAN TBC
                         'pemeriksa' => $item->pemeriksa,
                         'user' => $item->user,
                         'jenis_pemeriksaan' => 'remaja',
@@ -757,14 +763,20 @@ class DataPemeriksaanController extends Controller
             $this->applyFilters($remajaQuery, $request);
 
             $remajaData = $remajaQuery->get()->map(function ($item) {
-                $healthStatus = $this->calculateHealthStatus($item, $item->user);
+                // ✅ LOGIC RUJUKAN REMAJA - CUMA TBC ≥ 2
+                $rujukanStatus = 'Normal';
+
+                // ✅ CEK GEJALA TBC >= 2
+                $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
+                if ($jumlahGejala >= 2) {
+                    $rujukanStatus = 'Perlu Rujukan';
+                }
 
                 return [
                     'id' => $item->id,
                     'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
                     'nik' => $item->nik,
-                    'rujuk_puskesmas' => ($healthStatus['category'] === 'urgent' ||
-                        $item->rujuk_puskesmas === 'Perlu Rujukan') ? 'Perlu Rujukan' : 'Normal',
+                    'rujuk_puskesmas' => $rujukanStatus, // ✅ CUMA BERDASARKAN TBC
                     'user' => $item->user,
                     'jenis_pemeriksaan' => 'remaja'
                 ];
@@ -1283,7 +1295,14 @@ class DataPemeriksaanController extends Controller
             }]);
             $this->applyFilters($remajaQuery, $request);
             $remajaData = $remajaQuery->get()->map(function ($item) {
-                $healthStatus = $this->calculateHealthStatus($item, $item->user);
+                // ✅ LOGIC RUJUKAN REMAJA - CUMA TBC ≥ 2
+                $rujukanStatus = 'Normal';
+
+                // ✅ CEK GEJALA TBC >= 2
+                $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
+                if ($jumlahGejala >= 2) {
+                    $rujukanStatus = 'Perlu Rujukan';
+                }
 
                 return [
                     'id' => $item->id,
@@ -1294,9 +1313,7 @@ class DataPemeriksaanController extends Controller
                     'imt' => $item->imt,
                     'lila' => $item->lila,
                     'umur' => $item->umur,
-                    'rujuk_puskesmas' => ($healthStatus['category'] === 'urgent' ||
-                        $item->rujuk_puskesmas === 'Perlu Rujukan') ? 'Perlu Rujukan' : 'Normal',
-                    'health_status' => $healthStatus,
+                    'rujuk_puskesmas' => $rujukanStatus, // ✅ CUMA BERDASARKAN TBC
                     'pemeriksa' => $item->pemeriksa,
                     'user' => $item->user,
                     'jenis_pemeriksaan' => 'remaja',

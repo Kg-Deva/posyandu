@@ -33,7 +33,7 @@ class DewasaHandler {
       gulaInput.addEventListener('input', () => this.kesimpulanGula());
     }
 
-    // PUMA
+    // PUMA - ✅ UPDATE DENGAN VALIDASI WAJIB
     [
       'puma_jk',
       'puma_usia',
@@ -45,7 +45,11 @@ class DewasaHandler {
     ].forEach((id) => {
       const input = document.getElementById(id);
       if (input) {
-        input.addEventListener('change', () => this.hitungPUMA());
+        input.addEventListener('change', () => {
+          this.hitungPUMA();
+          // ✅ CEK APAKAH FIELD PUMA WAJIB DIISI
+          this.togglePUMARequired();
+        });
       }
     });
 
@@ -66,6 +70,66 @@ class DewasaHandler {
     }
 
     return true;
+  }
+
+  // ✅ FUNCTION BARU - TOGGLE REQUIRED FIELD PUMA
+  togglePUMARequired() {
+    const usiaField = document.getElementById('puma_usia');
+    const isUsiaSelected = usiaField && usiaField.value !== '';
+
+    // ✅ DAFTAR FIELD PUMA YANG WAJIB DIISI JIKA SUDAH PILIH USIA
+    const pumaFields = ['puma_rokok', 'puma_napas', 'puma_dahak', 'puma_batuk', 'puma_spirometri'];
+
+    pumaFields.forEach((fieldId) => {
+      const field = document.getElementById(fieldId);
+      if (field) {
+        // ✅ JIKA SUDAH PILIH USIA, FIELD LAIN JADI WAJIB
+        field.required = isUsiaSelected;
+
+        // ✅ VISUAL FEEDBACK - TAMBAH TANDA * MERAH
+        const label = field.closest('.mb-3')?.querySelector('label');
+        if (label) {
+          // Hapus tanda * lama
+          label.innerHTML = label.innerHTML.replace(' <span class="text-danger">*</span>', '');
+
+          // Tambah tanda * jika wajib
+          if (isUsiaSelected) {
+            label.innerHTML += ' <span class="text-danger">*</span>';
+          }
+        }
+      }
+    });
+
+    // ✅ TAMPILKAN PESAN JIKA SUDAH PILIH USIA
+    this.showPUMAWarning(isUsiaSelected);
+  }
+
+  // ✅ FUNCTION BARU - TAMPILKAN WARNING PUMA
+  showPUMAWarning(isUsiaSelected) {
+    let warningDiv = document.getElementById('puma-warning');
+
+    if (isUsiaSelected) {
+      // ✅ BUAT WARNING JIKA BELUM ADA
+      if (!warningDiv) {
+        warningDiv = document.createElement('div');
+        warningDiv.id = 'puma-warning';
+        warningDiv.className = 'alert alert-warning py-2 px-3 mb-3';
+        warningDiv.style.fontSize = '0.9em';
+        warningDiv.innerHTML =
+          '<i class="bi bi-exclamation-triangle"></i> <strong>Wajib diisi semua!</strong> Karena Anda sudah memilih rentang usia.';
+
+        // ✅ MASUKKAN SETELAH ALERT INFO
+        const infoAlert = document.querySelector('.alert-info');
+        if (infoAlert) {
+          infoAlert.parentNode.insertBefore(warningDiv, infoAlert.nextSibling);
+        }
+      }
+    } else {
+      // ✅ HAPUS WARNING JIKA ADA
+      if (warningDiv) {
+        warningDiv.remove();
+      }
+    }
   }
 
   calculateIMT() {
@@ -146,20 +210,109 @@ class DewasaHandler {
     document.getElementById('status_puma').value = status;
   }
 
+  // cekTBC() {
+  //   const gejala = [
+  //     document.getElementById('tbc_batuk')?.checked,
+  //     document.getElementById('tbc_demam')?.checked,
+  //     document.getElementById('tbc_bb_turun')?.checked,
+  //     document.getElementById('tbc_kontak')?.checked,
+  //   ].filter(Boolean).length;
+  //   const status = gejala >= 2 ? 'Rujuk ke Puskesmas' : 'Tidak Perlu Rujuk';
+  //   const statusField = document.getElementById('status_tbc');
+  //   if (statusField) statusField.value = status;
+
+  //   // Edukasi wajib jika rujuk
+  //   const edukasi = document.getElementById('edukasi');
+  //   if (edukasi) edukasi.required = status === 'Rujuk ke Puskesmas';
+  // }
+
   cekTBC() {
+    // ✅ HITUNG GEJALA TBC YANG DI-CHECK
     const gejala = [
       document.getElementById('tbc_batuk')?.checked,
       document.getElementById('tbc_demam')?.checked,
       document.getElementById('tbc_bb_turun')?.checked,
       document.getElementById('tbc_kontak')?.checked,
     ].filter(Boolean).length;
-    const status = gejala >= 2 ? 'Rujuk ke Puskesmas' : 'Tidak Perlu Rujuk';
-    const statusField = document.getElementById('status_tbc');
-    if (statusField) statusField.value = status;
 
-    // Edukasi wajib jika rujuk
+    // ✅ COLLECT GEJALA YANG DIPILIH
+    const gejalaList = [];
+    if (document.getElementById('tbc_batuk')?.checked) {
+      gejalaList.push('Batuk terus menerus');
+    }
+    if (document.getElementById('tbc_demam')?.checked) {
+      gejalaList.push('Demam >2 minggu');
+    }
+    if (document.getElementById('tbc_bb_turun')?.checked) {
+      gejalaList.push('BB tidak naik/turun');
+    }
+    if (document.getElementById('tbc_kontak')?.checked) {
+      gejalaList.push('Kontak erat TBC');
+    }
+
+    console.log('DEWASA: TBC screening - checked:', gejala);
+
+    // ✅ UPDATE FIELD JUMLAH GEJALA DENGAN WARNA
+    const jumlahGejalaField = document.getElementById('jumlah_gejala_tbc');
+    if (jumlahGejalaField) {
+      if (gejala === 0) {
+        jumlahGejalaField.value = '';
+        jumlahGejalaField.className = 'form-control';
+      } else if (gejala === 1) {
+        // ✅ 1 GEJALA = HIJAU (AMAN)
+        jumlahGejalaField.value = `${gejala} gejala: ${gejalaList.join(', ')}`;
+        jumlahGejalaField.className = 'form-control status-hijau';
+      } else {
+        // ✅ 2+ GEJALA = MERAH (RUJUK)
+        jumlahGejalaField.value = `${gejala} gejala: ${gejalaList.join(', ')}`;
+        jumlahGejalaField.className = 'form-control status-merah';
+      }
+    }
+
+    // ✅ UPDATE FIELD STATUS TBC DENGAN WARNA
+    const status =
+      gejala >= 2
+        ? 'RUJUK - Perlu pemeriksaan lebih lanjut di Puskesmas'
+        : 'TIDAK RUJUK - Gejala TBC tidak mencukupi';
+    const statusField = document.getElementById('status_tbc');
+
+    if (statusField) {
+      if (gejala === 0) {
+        // ✅ KOSONG KALAU BELUM PILIH GEJALA
+        statusField.value = '';
+        statusField.className = 'form-control';
+      } else if (gejala >= 2) {
+        // ✅ RUJUK = MERAH
+        statusField.value = status;
+        statusField.className = 'form-control status-merah';
+      } else {
+        // ✅ TIDAK RUJUK = HIJAU
+        statusField.value = status;
+        statusField.className = 'form-control status-hijau';
+      }
+    }
+
+    // ✅ EDUKASI WAJIB JIKA RUJUK
     const edukasi = document.getElementById('edukasi');
-    if (edukasi) edukasi.required = status === 'Rujuk ke Puskesmas';
+    if (edukasi) {
+      edukasi.required = gejala >= 2;
+
+      // ✅ UPDATE LABEL EDUKASI
+      const edukasiLabel = document.querySelector('label[for="edukasi"]');
+      if (edukasiLabel) {
+        // Hapus tanda * lama
+        edukasiLabel.innerHTML = edukasiLabel.innerHTML.replace(
+          ' <span class="text-danger">*</span>',
+          ''
+        );
+
+        if (gejala >= 2) {
+          edukasiLabel.innerHTML += ' <span class="text-danger">*</span>';
+        }
+      }
+    }
+
+    console.log(`✅ DEWASA: TBC screening - ${gejala} gejala`);
   }
 }
 
@@ -168,6 +321,7 @@ function initializeDewasaHandler() {
   return dewasaHandler.initialize();
 }
 window.initializeDewasaHandler = initializeDewasaHandler;
+
 // Handler untuk Skrining Tahunan Dewasa
 document.addEventListener('DOMContentLoaded', function () {
   const container = document.getElementById('form-pemeriksaan');

@@ -146,20 +146,109 @@ class LansiaHandler {
     document.getElementById('status_puma').value = status;
   }
 
+  // cekTBC() {
+  //   const gejala = [
+  //     document.getElementById('tbc_batuk')?.checked,
+  //     document.getElementById('tbc_demam')?.checked,
+  //     document.getElementById('tbc_bb_turun')?.checked,
+  //     document.getElementById('tbc_kontak')?.checked,
+  //   ].filter(Boolean).length;
+  //   const status = gejala >= 2 ? 'Rujuk ke Puskesmas' : 'Tidak Perlu Rujuk';
+  //   const statusField = document.getElementById('status_tbc');
+  //   if (statusField) statusField.value = status;
+
+  //   // Edukasi wajib jika rujuk
+  //   const edukasi = document.getElementById('edukasi');
+  //   if (edukasi) edukasi.required = status === 'Rujuk ke Puskesmas';
+  // }
+
   cekTBC() {
+    // ✅ HITUNG GEJALA TBC YANG DI-CHECK
     const gejala = [
       document.getElementById('tbc_batuk')?.checked,
       document.getElementById('tbc_demam')?.checked,
       document.getElementById('tbc_bb_turun')?.checked,
       document.getElementById('tbc_kontak')?.checked,
     ].filter(Boolean).length;
-    const status = gejala >= 2 ? 'Rujuk ke Puskesmas' : 'Tidak Perlu Rujuk';
-    const statusField = document.getElementById('status_tbc');
-    if (statusField) statusField.value = status;
 
-    // Edukasi wajib jika rujuk
+    // ✅ COLLECT GEJALA YANG DIPILIH
+    const gejalaList = [];
+    if (document.getElementById('tbc_batuk')?.checked) {
+      gejalaList.push('Batuk terus menerus');
+    }
+    if (document.getElementById('tbc_demam')?.checked) {
+      gejalaList.push('Demam >2 minggu');
+    }
+    if (document.getElementById('tbc_bb_turun')?.checked) {
+      gejalaList.push('BB tidak naik/turun');
+    }
+    if (document.getElementById('tbc_kontak')?.checked) {
+      gejalaList.push('Kontak erat TBC');
+    }
+
+    console.log('LANSIA: TBC screening - checked:', gejala);
+
+    // ✅ UPDATE FIELD JUMLAH GEJALA DENGAN WARNA
+    const jumlahGejalaField = document.getElementById('jumlah_gejala_tbc');
+    if (jumlahGejalaField) {
+      if (gejala === 0) {
+        jumlahGejalaField.value = '';
+        jumlahGejalaField.className = 'form-control';
+      } else if (gejala === 1) {
+        // ✅ 1 GEJALA = HIJAU (AMAN)
+        jumlahGejalaField.value = `${gejala} gejala: ${gejalaList.join(', ')}`;
+        jumlahGejalaField.className = 'form-control status-hijau';
+      } else {
+        // ✅ 2+ GEJALA = MERAH (RUJUK)
+        jumlahGejalaField.value = `${gejala} gejala: ${gejalaList.join(', ')}`;
+        jumlahGejalaField.className = 'form-control status-merah';
+      }
+    }
+
+    // ✅ UPDATE FIELD STATUS TBC DENGAN WARNA
+    const status =
+      gejala >= 2
+        ? 'RUJUK - Perlu pemeriksaan lebih lanjut di Puskesmas'
+        : 'TIDAK RUJUK - Gejala TBC tidak mencukupi';
+    const statusField = document.getElementById('status_tbc');
+
+    if (statusField) {
+      if (gejala === 0) {
+        // ✅ KOSONG KALAU BELUM PILIH GEJALA
+        statusField.value = '';
+        statusField.className = 'form-control';
+      } else if (gejala >= 2) {
+        // ✅ RUJUK = MERAH
+        statusField.value = status;
+        statusField.className = 'form-control status-merah';
+      } else {
+        // ✅ TIDAK RUJUK = HIJAU
+        statusField.value = status;
+        statusField.className = 'form-control status-hijau';
+      }
+    }
+
+    // ✅ EDUKASI WAJIB JIKA RUJUK
     const edukasi = document.getElementById('edukasi');
-    if (edukasi) edukasi.required = status === 'Rujuk ke Puskesmas';
+    if (edukasi) {
+      edukasi.required = gejala >= 2;
+
+      // ✅ UPDATE LABEL EDUKASI
+      const edukasiLabel = document.querySelector('label[for="edukasi"]');
+      if (edukasiLabel) {
+        // Hapus tanda * lama
+        edukasiLabel.innerHTML = edukasiLabel.innerHTML.replace(
+          ' <span class="text-danger">*</span>',
+          ''
+        );
+
+        if (gejala >= 2) {
+          edukasiLabel.innerHTML += ' <span class="text-danger">*</span>';
+        }
+      }
+    }
+
+    console.log(`✅ LANSIA: TBC screening - ${gejala} gejala`);
   }
 }
 

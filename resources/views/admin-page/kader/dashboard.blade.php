@@ -485,11 +485,29 @@ document.getElementById('search-anggota').addEventListener('keyup', function() {
         }
 
         // Lebih efektif: trigger saat modal Bootstrap benar-benar tampil
-        document.addEventListener('shown.bs.modal', function(e) {
-            if (e.target.id === 'lengkapiDataModal') { // pastikan id modal benar
-                updateUmurField();
+       document.addEventListener('shown.bs.modal', function(e) {
+    if (e.target.id === 'lengkapiDataModal') {
+        updateUmurField();
+        
+        // ✅ TAMBAH RW NORMALIZATION
+        setTimeout(function() {
+            const rwInput = document.querySelector('input[name="rw"]');
+            if (rwInput) {
+                console.log('✅ RW Input found, setting up normalization...');
+                rwInput.addEventListener('blur', function() {
+                    const originalValue = this.value;
+                    const value = this.value.replace(/[^0-9]/g, '');
+                    if (value) {
+                        this.value = parseInt(value, 10).toString();
+                        console.log('✅ RW normalized:', originalValue, '→', this.value);
+                    }
+                });
+            } else {
+                console.log('❌ RW Input not found');
             }
-        });
+        }, 200);
+    }
+});
 
         // Fallback jika modal bukan Bootstrap atau script termuat langsung
         setTimeout(updateUmurField, 300);
@@ -555,11 +573,11 @@ document.getElementById('search-anggota').addEventListener('keyup', function() {
             }
         }
 
-        document.addEventListener('shown.bs.modal', function(e) {
-            if (e.target.id === 'lengkapiDataModal') {
-                updateUmurField();
-            }
-        });
+        // document.addEventListener('shown.bs.modal', function(e) {
+        //     if (e.target.id === 'lengkapiDataModal') {
+        //         updateUmurField();
+        //     }
+        // });
     </script>
 
 {{-- //// notifikasi untuk nik --}}

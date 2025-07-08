@@ -134,9 +134,12 @@ class BalitaExport implements FromCollection, WithHeadings, WithMapping, WithEve
             // ✅ KOLOM GRUP TAMBAHAN (AP-AU = 6 kolom)
             $pemeriksaan->vitamin_a ? 'YA' : 'TIDAK',        // AP - VIT A
             $pemeriksaan->obat_cacing ? 'YA' : 'TIDAK',      // AQ - OBAT CACING
-            $pemeriksaan->pmt ? 'YA' : 'TIDAK',              // AR - PMT
-            $pemeriksaan->edukasi ? 'YA' : 'TIDAK',          // AS - EDUKASI
-            $pemeriksaan->sedang_sakit ? 'YA' : 'TIDAK',     // AT - SEDANG SAKIT
+            // $pemeriksaan->pmt ? 'YA' : 'TIDAK',              // AR - PMT
+            // $pemeriksaan->edukasi ? 'YA' : 'TIDAK',          // AS - EDUKASI
+            // $pemeriksaan->sedang_sakit ? 'YA' : 'TIDAK',     // AT - SEDANG SAKIT
+            $this->formatPMT($pemeriksaan),                              // AR - PMT ✅ FIX
+            $this->formatEdukasi($pemeriksaan),                          // AS - EDUKASI ✅ FIX
+            $this->formatSedangSakit($pemeriksaan),
             $this->formatRujukanTBC($pemeriksaan),           // AU - RUJUK ✅ (BERDASARKAN GEJALA TBC)
         ];
     }
@@ -187,7 +190,23 @@ class BalitaExport implements FromCollection, WithHeadings, WithMapping, WithEve
             return 'TIDAK';
         }
     }
+    private function formatPMT($pemeriksaan)
+    {
+        // ✅ SUPER SIMPLE: LANGSUNG BOOLEAN CHECK
+        return $pemeriksaan->mt_pangan_lokal ? 'YA' : 'TIDAK';
+    }
 
+    private function formatEdukasi($pemeriksaan)
+    {
+        // ✅ SUPER SIMPLE: LANGSUNG BOOLEAN CHECK
+        return $pemeriksaan->mp_asi_protein_hewani ? 'YA' : 'TIDAK';
+    }
+
+    private function formatSedangSakit($pemeriksaan)
+    {
+        // ✅ SUPER SIMPLE: LANGSUNG BOOLEAN CHECK
+        return $pemeriksaan->ada_gejala_sakit ? 'YA' : 'TIDAK';
+    }
     // ✅ TAMBAH METHOD BARU UNTUK RUJUKAN BERDASARKAN GEJALA TBC
     private function formatRujukanTBC($pemeriksaan)
     {
