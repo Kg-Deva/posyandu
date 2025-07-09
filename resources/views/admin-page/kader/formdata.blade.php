@@ -9,7 +9,7 @@
         <div class="row mb-3">
             <div class="col">
                 <label>Nama Lengkap</label>
-                <input type="text" name="nama" class="form-control" value="{{ $user->nama ?? '' }}" required>
+                <input type="text" name="nama" class="form-control" value="{{ $user->name ?? '' }}" required>
             </div>
             <div class="col">
                 <label>Jenis Kelamin</label><br>

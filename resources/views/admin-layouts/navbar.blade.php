@@ -5,7 +5,7 @@
 
         {{-- Menu khusus admin --}}
         @if(auth()->check() && auth()->user()->level == 'admin')
-            <li class="sidebar-item {{ Request::is('dashboard') ? 'active' : '' }}">
+            <li class="sidebar-item {{ Request::is('dashboard')  || Request::is('tambah-anggota') || Request::is('edit-anggota/*') ? 'active' : '' }}">
                 <a href="/dashboard" class='sidebar-link'>
                     <i class="bi bi-grid-fill"></i>
                     <span>Dashboard</span>
@@ -16,7 +16,7 @@
 
         {{-- Menu khusus kader --}}
         @if(auth()->check() && auth()->user()->level == 'kader')
-            <li class="sidebar-item {{ Request::is('kader-home') ? 'active' : '' }}">
+             <li class="sidebar-item {{ Request::is('kader-home') || Request::is('tambah-pasien') || Request::is('edit-pasien/*') ? 'active' : '' }}">
                 <a href="/kader-home" class='sidebar-link'>
                     <i class="bi bi-grid-fill"></i>
                     <span>Dashboard</span>
