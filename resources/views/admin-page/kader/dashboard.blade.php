@@ -206,13 +206,13 @@
                                                             <th>Level</th>
                                                             <th>Status</th>
                                                             <th>Aksi</th>
+                                                            <th>Data</th>
                                                         </tr>
                                                     </thead>
-                                                    <tbody id="anggota-table-body">
+                                                    {{-- <tbody id="anggota-table-body">
                                                         @foreach ($data as $item)
                                                             @if ($item->id != auth()->user()->id)
                                                                 <tr>
-                                                                    {{-- <tr class="{{ $item->type == 'bukan warga' ? 'bg-warning' : '' }}"> --}}
                                                                     <td>{{ ($data->currentPage() - 1) * $data->perPage() + $loop->iteration }}
                                                                     </td>
 
@@ -264,7 +264,51 @@
                                                             </tr>
                                                         @endif
                                                         @endforeach
-                                                    </tbody>
+                                                    </tbody> --}}
+                                                    <tbody id="anggota-table-body">
+                                                    @foreach ($data as $item)
+                                                        @if ($item->id != auth()->user()->id)
+                                                            <tr>
+                                                                <td>{{ ($data->currentPage() - 1) * $data->perPage() + $loop->iteration }}</td>
+                                                                <td class="text-bold-500">
+                                                                    {{ $item->name }}
+                                                                    @if ($item->type == 'bukan warga')
+                                                                        <span class="badge bg-secondary ms-1" title="Bukan warga">NW</span>
+                                                                    @endif
+                                                                </td>
+                                                                <td>{{ $item->email }}</td>
+                                                                <td class="text-bold-500">{{ $item->level }}</td>
+                                                                <td>
+                                                                    @if ($item->status)
+                                                                        <span class="badge bg-success">Aktif</span>
+                                                                    @else
+                                                                        <span class="badge bg-danger">Tidak Aktif</span>
+                                                                    @endif
+                                                                </td>
+                                                                <td>
+                                                                    @if ($item->level != 'admin' && $item->level != 'kader')
+                                                                        <div class="d-flex gap-2">
+                                                                            <a class="btn btn-sm btn-primary" href="{{ url('edit-pasien', $item->id) }}">
+                                                                                <i data-feather="edit"></i> Edit
+                                                                            </a>
+                                                                            <a class="btn btn-sm btn-danger" href="{{ url('delete-pasien', $item->id) }}" onclick="confirmation(event)">
+                                                                                <i data-feather="trash"></i> Delete
+                                                                            </a>
+                                                                        </div>
+                                                                    @endif
+                                                                </td>
+                                                                <td>
+                                                                    @if ($item->status)
+                                                                        <button class="btn btn-sm {{ $item->data_lengkap ? 'btn-info' : 'btn-warning' }} lengkapi-data-btn" data-id="{{ $item->id }}">
+                                                                            <i data-feather="{{ $item->data_lengkap ? 'edit' : 'user-check' }}"></i>
+                                                                            {{ $item->data_lengkap ? 'Edit Data' : 'Lengkapi Data' }}
+                                                                        </button>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                        @endif
+                                                    @endforeach
+                                                </tbody>
                                                 </table>
                                                 <div class="mt-3">
                                                     {{ $data->links('pagination::bootstrap-4') }}
@@ -319,7 +363,7 @@
     let searchTimeout = null;
 </script>
 
-<script>
+{{-- <script>
 document.getElementById('search-anggota').addEventListener('keyup', function() {
     let q = this.value.trim();
     let tbody = document.getElementById('anggota-table-body');
@@ -423,9 +467,116 @@ document.getElementById('search-anggota').addEventListener('keyup', function() {
             });
     }, 300);
 });
+</script> --}}
+
+<script>
+document.getElementById('search-anggota').addEventListener('keyup', function() {
+    let q = this.value.trim();
+    let tbody = document.getElementById('anggota-table-body');
+    
+    clearTimeout(searchTimeout);
+    
+    if (q === '') {
+        if (isSearchMode) {
+            window.location.reload();
+        }
+        return;
+    }
+    
+    isSearchMode = true;
+    
+    searchTimeout = setTimeout(() => {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-3">🔍 Mencari...</td></tr>';
+
+        fetch('/search-pasien?q=' + encodeURIComponent(q))
+            .then(res => res.json())
+            .then(data => {
+                tbody.innerHTML = '';
+                
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">❌ Data tidak ditemukan</td></tr>';
+                    return;
+                }
+                
+                let html = '';
+                data.forEach(item => {
+                    if(item.id != currentUserId) {
+                        // ✅ FIX: PROPER BOOLEAN CHECK
+                        const isDataLengkap = item.data_lengkap === 1 || 
+                                             item.data_lengkap === true || 
+                                             item.data_lengkap === '1' || 
+                                             item.data_lengkap === 'true';
+                        
+                        html += `
+                            <tr>
+                                <td>${item.row_number}</td>
+                                <td class="text-bold-500">
+                                    ${item.name}
+                                    ${item.type == 'bukan warga' ? '<span class="badge bg-secondary ms-1">NW</span>' : ''}
+                                </td>
+                                <td>${item.email}</td>
+                                <td class="text-bold-500">${item.level}</td>
+                                <td>
+                                    ${item.status ? '<span class="badge bg-success">Aktif</span>' : '<span class="badge bg-danger">Tidak Aktif</span>'}
+                                </td>
+                                <td>
+                                    ${item.level != 'admin' && item.level != 'kader' ? `
+                                        <div class="d-flex gap-2">
+                                            <a class="btn btn-sm btn-primary" href="/edit-pasien/${item.id}">
+                                                <i data-feather="edit"></i> Edit
+                                            </a>
+                                            <a class="btn btn-sm btn-danger" href="/delete-pasien/${item.id}" onclick="return confirm('Yakin hapus?')">
+                                                <i data-feather="trash"></i> Delete
+                                            </a>
+                                        </div>
+                                    ` : ''}
+                                </td>
+                                <td>
+                                    ${item.status ? `
+                                        <button class="btn btn-sm ${isDataLengkap ? 'btn-info' : 'btn-warning'} lengkapi-data-btn" data-id="${item.id}">
+                                            <i data-feather="${isDataLengkap ? 'edit' : 'user-check'}"></i>
+                                            ${isDataLengkap ? 'Edit Data' : 'Lengkapi Data'}
+                                        </button>
+                                    ` : ''}
+                                </td>
+                            </tr>
+                        `;
+                    }
+                });
+                
+                tbody.innerHTML = html;
+                
+                // ✅ HIDE PAGINATION
+                const paginationDiv = document.querySelector('.mt-3');
+                if (paginationDiv) {
+                    paginationDiv.style.display = 'none';
+                }
+                
+                // ✅ RE-INIT LENGKAPI DATA BUTTONS
+                document.querySelectorAll('.lengkapi-data-btn').forEach(btn => {
+                    btn.onclick = function() {
+                        let userId = this.dataset.id;
+                        fetch('/lengkapi-data/' + userId)
+                            .then(res => res.text())
+                            .then(html => {
+                                document.getElementById('modal-lengkapi-data-content').innerHTML = html;
+                                new bootstrap.Modal(document.getElementById('lengkapiDataModal')).show();
+                            });
+                    };
+                });
+                
+                // ✅ RE-INIT FEATHER ICONS
+                if (typeof feather !== 'undefined') {
+                    feather.replace();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-3">❌ Error loading data</td></tr>';
+            });
+    }, 300);
+});
 </script>
-
-
 </script>
 
     <!-- Modal Lengkapi Data -->
