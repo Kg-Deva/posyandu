@@ -482,8 +482,58 @@
         
         // RENDER DATA - FIX INI BRO!
         // ✅ UPDATE RENDER DATA - SUPPORT SEMUA JENIS
-        function renderData(data, pagination) {
-             if (!data || data.length === 0) {
+//         function renderData(data, pagination) {
+//              if (!data || data.length === 0) {
+//         elements.noData.style.display = 'block';
+//         elements.dataContainer.style.display = 'none';
+//         return;
+//     }
+    
+//     let html = '';
+//     data.forEach((item, index) => {
+//         const no = ((pagination.current_page - 1) * pagination.per_page) + index + 1;
+//         const tanggal = new Date(item.tanggal_pemeriksaan).toLocaleDateString('id-ID');
+        
+//         const userData = item.user || {};
+//         const nama = userData.nama || '-';
+//         const rw = userData.rw || '-';
+        
+//         // ✅ NORMALIZE RW DISPLAY - HILANGKAN LEADING ZERO
+//         const normalizedRw = rw === '-' ? '-' : parseInt(rw).toString();
+        
+//         const roleBadge = getBadgeClass(item.jenis_pemeriksaan);
+        
+//         const rujukanBadge = item.rujuk_puskesmas === 'Perlu Rujukan' ? 
+//             '<span class="badge bg-danger">Perlu Rujukan</span>' : 
+//             '<span class="badge bg-success">Normal</span>';
+        
+//         html += `
+//             <tr>
+//                 <td>${no}</td>
+//                 <td>${tanggal}</td>
+//                 <td class="text-bold-500">${item.nik || '-'}</td>
+//                 <td class="text-bold-500">${nama}</td>
+//                 <td class="text-center"><span class="badge bg-secondary">RW ${normalizedRw}</span></td>
+//                 <td class="text-center">${roleBadge}</td>
+//                 <td class="text-center"><strong>${item.bb || '-'}</strong></td>
+//                 <td class="text-center"><strong>${item.tb || '-'}</strong></td>
+//                 <td class="text-center">${rujukanBadge}</td>
+//             </tr>
+//         `;
+//     });
+    
+//     elements.dataTbody.innerHTML = html;
+//     renderPagination(pagination);
+//     elements.dataContainer.style.display = 'block';
+//     elements.noData.style.display = 'none';
+    
+//     if (typeof feather !== 'undefined') {
+//         feather.replace();
+//     }
+// }
+// ✅ FULL UPDATE RENDER DATA FUNCTION
+function renderData(data, pagination) {
+    if (!data || data.length === 0) {
         elements.noData.style.display = 'block';
         elements.dataContainer.style.display = 'none';
         return;
@@ -507,12 +557,19 @@
             '<span class="badge bg-danger">Perlu Rujukan</span>' : 
             '<span class="badge bg-success">Normal</span>';
         
+        // ✅ TAMBAH LOGIC UNTUK LABEL NW - SAMA SEPERTI DASHBOARD
+        const nwLabel = userData.type === 'bukan warga' ? 
+            '<span class="badge bg-secondary ms-1" title="Bukan warga">NW</span>' : '';
+        
         html += `
             <tr>
                 <td>${no}</td>
                 <td>${tanggal}</td>
                 <td class="text-bold-500">${item.nik || '-'}</td>
-                <td class="text-bold-500">${nama}</td>
+                <td class="text-bold-500">
+                    ${nama}
+                    ${nwLabel}
+                </td>
                 <td class="text-center"><span class="badge bg-secondary">RW ${normalizedRw}</span></td>
                 <td class="text-center">${roleBadge}</td>
                 <td class="text-center"><strong>${item.bb || '-'}</strong></td>

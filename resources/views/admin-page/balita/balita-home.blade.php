@@ -10,7 +10,7 @@
             <div class="position-relative overflow-hidden rounded-4 shadow-lg bg-gradient-primary text-white">
                 <div class="p-4 p-md-5">
                     <div class="row align-items-center">
-                        <div class="col-md-8">
+                        {{-- <div class="col-md-8">
                             <div class="d-flex align-items-center mb-3">
                                 <div>
                                     <h1 class="mb-1 fw-bold">Dashboard Kesehatan {{ $user->nama }}</h1>
@@ -20,10 +20,6 @@
                                                 <span class="text-white-50 me-2 fw-normal">👶 Umur:</span>
                                                 <span class="fw-semibold">{{ $pemeriksaanTerakhir ? $pemeriksaanTerakhir->umur  . ' bulan' : $user->umur }}</span>
                                             </div>
-                                            {{-- <div class="d-flex align-items-center">
-                                                <span class="text-white-50 me-2 fw-normal">📋 NIK:</span>
-                                                <span class="fw-semibold">{{ $user->nik }}</span>
-                                            </div> --}}
                                             <div class="d-flex align-items-center">
                                                 <span class="text-white-50 me-2 fw-normal">📅 Periksa Terakhir:</span>
                                                 <span class="fw-semibold">{{ $pemeriksaanTerakhir->tanggal_pemeriksaan->format('d M Y') }}</span>
@@ -37,6 +33,55 @@
                                     <i class="bi bi-info-circle me-2"></i>
                                     <strong>Untuk Orang Tua:</strong> Pantau perkembangan kesehatan dan pertumbuhan si kecil di sini. 
                                     Grafik ini membantu Anda memahami apakah anak berkembang dengan baik.
+                                </p>
+                            </div>
+                        </div> --}}
+                        <!-- ✅ FIX HEADER SECTION -->
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center mb-3">
+                                <div>
+                                    <h1 class="mb-1 fw-bold">Dashboard Kesehatan {{ $user->nama }}</h1>
+                                    <div class="mb-0 opacity-90 fs-5">
+                                        @if($pemeriksaanTerakhir)
+                                            <div class="d-flex flex-column flex-md-row gap-2 gap-md-4">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="text-white-50 me-2 fw-normal">👶 Umur:</span>
+                                                    <span class="fw-semibold">{{ $pemeriksaanTerakhir->umur . ' bulan' }}</span>
+                                                </div>
+                                                
+                                                <div class="d-flex align-items-center">
+                                                    <span class="text-white-50 me-2 fw-normal">📅 Periksa Terakhir:</span>
+                                                    <span class="fw-semibold">{{ \Carbon\Carbon::parse($pemeriksaanTerakhir->tanggal_pemeriksaan)->format('d M Y') }}</span>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <div class="d-flex flex-column flex-md-row gap-2 gap-md-4">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="text-white-50 me-2 fw-normal">👶 Umur:</span>
+                                                    <span class="fw-semibold">{{ $user->umur ?? 'Belum diisi' }}</span>
+                                                </div>
+                                                
+                                                <div class="d-flex align-items-center">
+                                                    <span class="text-white-50 me-2 fw-normal">📅 Status:</span>
+                                                    <span class="fw-semibold text-warning">Belum pernah pemeriksaan</span>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white bg-opacity-10 rounded-3 p-3 mb-3">
+                                <p class="mb-0">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <strong>Untuk Orang Tua:</strong> 
+                                    @if($pemeriksaanTerakhir)
+                                        Pantau perkembangan kesehatan dan pertumbuhan si kecil di sini. 
+                                        Grafik ini membantu Anda memahami apakah anak berkembang dengan baik.
+                                    @else
+                                        Mulai pantau kesehatan si kecil dengan melakukan pemeriksaan pertama.
+                                        Pemeriksaan rutin penting untuk tumbuh kembang optimal.
+                                    @endif
                                 </p>
                             </div>
                         </div>

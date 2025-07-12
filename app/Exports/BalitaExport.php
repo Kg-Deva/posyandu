@@ -452,6 +452,40 @@ class BalitaExport implements FromCollection, WithHeadings, WithMapping, WithEve
                     }
                 }
 
+                // $data = $this->collection();
+                // $highestRow = $sheet->getHighestRow();
+
+                // for ($row = 3; $row <= $highestRow; $row++) {
+                //     // ✅ 1. HANDLE NIK FORMAT (EXISTING CODE)
+                //     $cellValue = $event->sheet->getCell('C' . $row)->getValue();
+
+                //     // Force sebagai string tanpa scientific notation
+                //     if (!empty($cellValue) && $cellValue !== '-') {
+                //         $event->sheet->setCellValueExplicit(
+                //             'C' . $row,
+                //             (string)$cellValue,
+                //             DataType::TYPE_STRING
+                //         );
+                //     }
+
+                //     // ✅ 2. HIGHLIGHT NAMA NON WARGA (NEW CODE)
+                //     $pemeriksaan = $data->skip($row - 3)->first();
+
+                //     if ($pemeriksaan && $pemeriksaan->user && $pemeriksaan->user->type === 'bukan warga') {
+                //         // ✅ HIGHLIGHT NAMA (KOLOM B) DENGAN WARNA MERAH
+                //         $sheet->getStyle('B' . $row)->applyFromArray([
+                //             'font' => [
+                //                 'color' => ['rgb' => 'FF0000'], // Merah
+                //                 'bold' => true
+                //             ],
+                //             'fill' => [
+                //                 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                //                 'color' => ['rgb' => 'FFE6E6'] // Background merah muda
+                //             ]
+                //         ]);
+                //     }
+                // }
+
                 // ✅ SET FORMAT KOLOM NIK
                 $event->sheet->getDelegate()->getStyle('C:C')
                     ->getNumberFormat()

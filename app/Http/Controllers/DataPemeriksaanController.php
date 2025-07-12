@@ -39,9 +39,8 @@ class DataPemeriksaanController extends Controller
 
             // ✅ BALITA DATA
             if (empty($role) || $role === 'balita') {
-                $balitaQuery = PemeriksaanBalita::with(['user' => function ($q) {
-                    $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
-                }]);
+                // ✅ LOAD ALL FIELDS (SIMPLE TAPI LEBIH BERAT)
+                $balitaQuery = PemeriksaanBalita::with(['user']); // Tanpa select()
 
                 $this->applyFilters($balitaQuery, $request);
 
@@ -101,9 +100,8 @@ class DataPemeriksaanController extends Controller
 
             // ✅ REMAJA DATA
             if (empty($role) || $role === 'remaja') {
-                $remajaQuery = PemeriksaanRemaja::with(['user' => function ($q) {
-                    $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
-                }]);
+                // ✅ LOAD ALL FIELDS (SIMPLE TAPI LEBIH BERAT)
+                $remajaQuery = PemeriksaanRemaja::with(['user']); // Tanpa select()
 
                 $this->applyFilters($remajaQuery, $request);
 
@@ -139,9 +137,8 @@ class DataPemeriksaanController extends Controller
 
             // ✅ IBU HAMIL DATA
             if (empty($role) || $role === 'ibu-hamil') {
-                $ibuHamilQuery = PemeriksaanIbuHamil::with(['user' => function ($q) {
-                    $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
-                }]);
+                // ✅ LOAD ALL FIELDS (SIMPLE TAPI LEBIH BERAT)
+                $ibuHamilQuery = PemeriksaanIbuHamil::with(['user']); // Tanpa select()
 
                 $this->applyFilters($ibuHamilQuery, $request);
 
@@ -172,9 +169,8 @@ class DataPemeriksaanController extends Controller
 
             // ✅ DEWASA DATA
             if (empty($role) || $role === 'dewasa') {
-                $dewasaQuery = PemeriksaanDewasa::with(['user' => function ($q) {
-                    $q->select('id', 'nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
-                }]);
+                // ✅ LOAD ALL FIELDS (SIMPLE TAPI LEBIH BERAT)
+                $dewasaQuery = PemeriksaanDewasa::with(['user']); // Tanpa select()
 
                 $this->applyFilters($dewasaQuery, $request);
 
@@ -228,9 +224,8 @@ class DataPemeriksaanController extends Controller
 
             // ✅ LANSIA DATA
             if (empty($role) || $role === 'lansia') {
-                $lansiaQuery = PemeriksaanLansia::with(['user' => function ($q) {
-                    $q->select('id', 'nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
-                }]);
+                // ✅ LOAD ALL FIELDS (SIMPLE TAPI LEBIH BERAT)
+                $lansiaQuery = PemeriksaanLansia::with(['user']); // Tanpa select()
 
                 $this->applyFilters($lansiaQuery, $request);
 
@@ -1250,10 +1245,11 @@ class DataPemeriksaanController extends Controller
 
         // ✅ BALITA DATA
         if (empty($role) || $role === 'balita') {
-            $balitaQuery = PemeriksaanBalita::with(['user' => function ($q) {
-                $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
-            }]);
+            // ✅ LOAD ALL FIELDS (SIMPLE TAPI LEBIH BERAT)
+            $balitaQuery = PemeriksaanBalita::with(['user']); // Tanpa select()
+
             $this->applyFilters($balitaQuery, $request);
+
             $balitaData = $balitaQuery->get()->map(function ($item) {
                 $rujukanStatus = 'Normal';
 
@@ -1301,10 +1297,11 @@ class DataPemeriksaanController extends Controller
 
         // ✅ REMAJA DATA
         if (empty($role) || $role === 'remaja') {
-            $remajaQuery = PemeriksaanRemaja::with(['user' => function ($q) {
-                $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
-            }]);
+            // ✅ LOAD ALL FIELDS (SIMPLE TAPI LEBIH BERAT)
+            $remajaQuery = PemeriksaanRemaja::with(['user']); // Tanpa select()
+
             $this->applyFilters($remajaQuery, $request);
+
             $remajaData = $remajaQuery->get()->map(function ($item) {
                 // ✅ LOGIC RUJUKAN REMAJA - CUMA TBC ≥ 2
                 $rujukanStatus = 'Normal';
@@ -1336,10 +1333,11 @@ class DataPemeriksaanController extends Controller
 
         // ✅ IBU HAMIL DATA
         if (empty($role) || $role === 'ibu-hamil') {
-            $ibuHamilQuery = PemeriksaanIbuHamil::with(['user' => function ($q) {
-                $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
-            }]);
+            // ✅ LOAD ALL FIELDS (SIMPLE TAPI LEBIH BERAT)
+            $ibuHamilQuery = PemeriksaanIbuHamil::with(['user']); // Tanpa select()
+
             $this->applyFilters($ibuHamilQuery, $request);
+
             $ibuHamilData = $ibuHamilQuery->get()->map(function ($item) {
                 $healthStatus = $this->calculateHealthStatus($item, $item->user);
                 return [
@@ -1365,10 +1363,11 @@ class DataPemeriksaanController extends Controller
 
         // ✅ TAMBAH DEWASA DATA (YANG HILANG!)
         if (empty($role) || $role === 'dewasa') {
-            $dewasaQuery = PemeriksaanDewasa::with(['user' => function ($q) {
-                $q->select('id', 'nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
-            }]);
+            // ✅ LOAD ALL FIELDS (SIMPLE TAPI LEBIH BERAT)
+            $dewasaQuery = PemeriksaanDewasa::with(['user']); // Tanpa select()
+
             $this->applyFilters($dewasaQuery, $request);
+
             $dewasaData = $dewasaQuery->get()->map(function ($item) {
                 $rujukanStatus = 'Normal';
                 $umur = $item->user ? Carbon::parse($item->user->tanggal_lahir)->age : 0;
@@ -1419,10 +1418,11 @@ class DataPemeriksaanController extends Controller
 
         // ✅ TAMBAH LANSIA DATA (YANG HILANG!)
         if (empty($role) || $role === 'lansia') {
-            $lansiaQuery = PemeriksaanLansia::with(['user' => function ($q) {
-                $q->select('id', 'nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
-            }]);
+            // ✅ LOAD ALL FIELDS (SIMPLE TAPI LEBIH BERAT)
+            $lansiaQuery = PemeriksaanLansia::with(['user']); // Tanpa select()
+
             $this->applyFilters($lansiaQuery, $request);
+
             $lansiaData = $lansiaQuery->get()->map(function ($item) {
                 $rujukanStatus = 'Normal';
 
