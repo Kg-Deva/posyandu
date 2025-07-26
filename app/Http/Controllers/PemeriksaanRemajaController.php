@@ -175,6 +175,7 @@ class PemeriksaanRemajaController extends Controller
         // ✅ AMBIL DATA PEMERIKSAAN REMAJA
         $dataPemeriksaan = PemeriksaanRemaja::where('nik', $user->nik)
             ->orderBy('tanggal_pemeriksaan', 'desc')
+            ->limit(12)
             ->get();
 
         $pemeriksaanTerakhir = $dataPemeriksaan->first();

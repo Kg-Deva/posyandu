@@ -1328,6 +1328,7 @@ class MenuController extends Controller
         $q = $request->q;
         $data = User::where('name', 'like', "%$q%")
             ->orWhere('email', 'like', "%$q%")
+            ->limit(20)
             ->get();
         return response()->json($data);
     }
@@ -1355,6 +1356,7 @@ class MenuController extends Controller
                     ->orWhere('email', 'like', "%$q%");
             })
             ->orderBy('id')
+            ->limit(10)
             ->get()
             ->map(function ($item, $index) {
                 $item->row_number = $index + 1;
@@ -1740,7 +1742,9 @@ class MenuController extends Controller
         // ✅ AMBIL DATA PEMERIKSAAN BALITA
         $dataPemeriksaan = PemeriksaanBalita::where('nik', $user->nik)
             ->orderBy('tanggal_pemeriksaan', 'asc')
-            ->get();
+            ->limit(12)
+            ->get()
+            ->reverse();
 
         // ✅ SIAPKAN DATA UNTUK CHART
         $chartData = [

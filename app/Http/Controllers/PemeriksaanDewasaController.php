@@ -76,6 +76,7 @@ class PemeriksaanDewasaController extends Controller
         // Ambil data pemeriksaan dewasa untuk user ini
         $dataPemeriksaan = PemeriksaanDewasa::where('nik', $user->nik)
             ->orderBy('tanggal_pemeriksaan', 'desc')
+            ->limit(12)
             ->get();
 
         // Pemeriksaan terakhir

@@ -80,6 +80,7 @@ class PemeriksaanLansiaController extends Controller
         // Ambil data pemeriksaan lansia untuk user ini
         $dataPemeriksaan = PemeriksaanLansia::where('nik', $user->nik)
             ->orderBy('tanggal_pemeriksaan', 'desc')
+            ->limit(12)
             ->get();
 
         // Pemeriksaan terakhir

@@ -219,6 +219,7 @@ class PemeriksaanIbuHamilController extends Controller
         // Ambil data pemeriksaan ibu hamil untuk user ini
         $dataPemeriksaan = PemeriksaanIbuHamil::where('nik', $user->nik)
             ->orderBy('tanggal_pemeriksaan', 'desc')
+            ->limit(12)
             ->get();
 
         // Pemeriksaan terbaru & sebelumnya
