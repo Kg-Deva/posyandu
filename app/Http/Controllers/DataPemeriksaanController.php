@@ -59,24 +59,24 @@ class DataPemeriksaanController extends Controller
                     }
 
                     // ✅ 2. CEK LILA
-                    $umur = $item->umur ?? 0;
-                    if ($umur >= 6 && $item->lila && floatval($item->lila) < 11.5) {
-                        $rujukanStatus = 'Perlu Rujukan';
-                    }
+                    // $umur = $item->umur ?? 0;
+                    // if ($umur >= 6 && $item->lila && floatval($item->lila) < 11.5) {
+                    //     $rujukanStatus = 'Perlu Rujukan';
+                    // }
 
-                    // ✅ 3. CEK FIELD rujuk_puskesmas DENGAN VALIDASI
-                    if (
-                        isset($item->rujuk_puskesmas) &&
-                        (strpos($item->rujuk_puskesmas, 'RUJUK') !== false || $item->rujuk_puskesmas === 'Perlu Rujukan')
-                    ) {
-                        // ✅ VALIDASI ULANG
-                        if ($jumlahGejala >= 2 || ($umur >= 6 && $item->lila && floatval($item->lila) < 11.5)) {
-                            $rujukanStatus = 'Perlu Rujukan';
-                        } else {
-                            // ✅ PAKSA NORMAL JIKA TIDAK ADA INDIKASI MEDIS
-                            $rujukanStatus = 'Normal';
-                        }
-                    }
+                    // // ✅ 3. CEK FIELD rujuk_puskesmas DENGAN VALIDASI
+                    // if (
+                    //     isset($item->rujuk_puskesmas) &&
+                    //     (strpos($item->rujuk_puskesmas, 'RUJUK') !== false || $item->rujuk_puskesmas === 'Perlu Rujukan')
+                    // ) {
+                    //     // ✅ VALIDASI ULANG
+                    //     if ($jumlahGejala >= 2 || ($umur >= 6 && $item->lila && floatval($item->lila) < 11.5)) {
+                    //         $rujukanStatus = 'Perlu Rujukan';
+                    //     } else {
+                    //         // ✅ PAKSA NORMAL JIKA TIDAK ADA INDIKASI MEDIS
+                    //         $rujukanStatus = 'Normal';
+                    //     }
+                    // }
 
                     return [
                         'id' => $item->id,
@@ -143,8 +143,19 @@ class DataPemeriksaanController extends Controller
                 $this->applyFilters($ibuHamilQuery, $request);
 
                 $ibuHamilData = $ibuHamilQuery->get()->map(function ($item) {
-                    $healthStatus = $this->calculateHealthStatus($item, $item->user);
+                    // $healthStatus = $this->calculateHealthStatus($item, $item->user);
+                    $rujukanStatus = 'Normal';
 
+                    // ✅ HANYA CEK TBC ≥ 2 GEJALA - IGNORE YANG LAIN
+                    $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
+                    if (is_string($jumlahGejala) && preg_match('/(\d+)/', $jumlahGejala, $matches)) {
+                        $jumlahGejala = (int)$matches[1];
+                    }
+
+                    // ✅ HANYA RUJUK JIKA TBC ≥ 2 GEJALA
+                    if ($jumlahGejala >= 2) {
+                        $rujukanStatus = 'Perlu Rujukan';
+                    }
                     return [
                         'id' => $item->id,
                         'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
@@ -156,7 +167,7 @@ class DataPemeriksaanController extends Controller
                         'umur' => $item->umur,
                         'perlu_rujukan' => $item->perlu_rujukan,
                         'rujuk_puskesmas' => ($item->perlu_rujukan) ? 'Perlu Rujukan' : 'Normal',
-                        'health_status' => $healthStatus,
+                        // 'health_status' => $healthStatus,
                         'pemeriksa' => $item->pemeriksa,
                         'user' => $item->user,
                         'jenis_pemeriksaan' => 'ibu-hamil',
@@ -178,28 +189,37 @@ class DataPemeriksaanController extends Controller
                     $rujukanStatus = 'Normal';
                     $umur = $item->user ? Carbon::parse($item->user->tanggal_lahir)->age : 0;
 
-                    if (!empty($item->status_tbc) && (
-                        $item->status_tbc === 'Rujuk ke Puskesmas' ||
-                        $item->status_tbc === 'Perlu Rujukan'
-                    )) {
-                        $rujukanStatus = 'Perlu Rujukan';
+                    // if (!empty($item->status_tbc) && (
+                    //     $item->status_tbc === 'Rujuk ke Puskesmas' ||
+                    //     $item->status_tbc === 'Perlu Rujukan'
+                    // )) {
+                    //     $rujukanStatus = 'Perlu Rujukan';
+                    // }
+
+                    // if (!empty($item->status_puma) && (
+                    //     $item->status_puma === 'Rujuk ke Puskesmas' ||
+                    //     $item->status_puma === 'Perlu Rujukan'
+                    // )) {
+                    //     $rujukanStatus = 'Perlu Rujukan';
+                    // }
+
+                    // if (!empty($item->kesimpulan_td) && $item->kesimpulan_td === 'Hipertensi') {
+                    //     $rujukanStatus = 'Perlu Rujukan';
+                    // }
+
+                    // if (!empty($item->kesimpulan_gula_darah) && $item->kesimpulan_gula_darah === 'Diabetes') {
+                    //     $rujukanStatus = 'Perlu Rujukan';
+                    // }
+                    // ✅ HANYA CEK TBC ≥ 2 GEJALA - IGNORE YANG LAIN
+                    $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
+                    if (is_string($jumlahGejala) && preg_match('/(\d+)/', $jumlahGejala, $matches)) {
+                        $jumlahGejala = (int)$matches[1];
                     }
 
-                    if (!empty($item->status_puma) && (
-                        $item->status_puma === 'Rujuk ke Puskesmas' ||
-                        $item->status_puma === 'Perlu Rujukan'
-                    )) {
+                    // ✅ HANYA RUJUK JIKA TBC ≥ 2 GEJALA
+                    if ($jumlahGejala >= 2) {
                         $rujukanStatus = 'Perlu Rujukan';
                     }
-
-                    if (!empty($item->kesimpulan_td) && $item->kesimpulan_td === 'Hipertensi') {
-                        $rujukanStatus = 'Perlu Rujukan';
-                    }
-
-                    if (!empty($item->kesimpulan_gula_darah) && $item->kesimpulan_gula_darah === 'Diabetes') {
-                        $rujukanStatus = 'Perlu Rujukan';
-                    }
-
                     return [
                         'id' => $item->id,
                         'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
@@ -232,29 +252,38 @@ class DataPemeriksaanController extends Controller
                 $lansiaData = $lansiaQuery->get()->map(function ($item) {
                     $rujukanStatus = 'Normal';
 
-                    if (!empty($item->status_tbc) && (
-                        $item->status_tbc === 'Rujuk ke Puskesmas' ||
-                        $item->status_tbc === 'Perlu Rujukan'
-                    )) {
-                        $rujukanStatus = 'Perlu Rujukan';
+                    // if (!empty($item->status_tbc) && (
+                    //     $item->status_tbc === 'Rujuk ke Puskesmas' ||
+                    //     $item->status_tbc === 'Perlu Rujukan'
+                    // )) {
+                    //     $rujukanStatus = 'Perlu Rujukan';
+                    // }
+
+                    // if (!empty($item->status_puma) && (
+                    //     $item->status_puma === 'Rujuk ke Puskesmas' ||
+                    //     $item->status_puma === 'Perlu Rujukan'
+                    // )) {
+                    //     $rujukanStatus = 'Perlu Rujukan';
+                    // }
+
+                    // if (!is_null($item->skor_puma) && is_numeric($item->skor_puma) && $item->skor_puma > 6) {
+                    //     $rujukanStatus = 'Perlu Rujukan';
+                    // }
+
+                    // if (!empty($item->kesimpulan_td) && $item->kesimpulan_td === 'Hipertensi') {
+                    //     $rujukanStatus = 'Perlu Rujukan';
+                    // }
+
+                    // if (!empty($item->kesimpulan_gula_darah) && $item->kesimpulan_gula_darah === 'Diabetes') {
+                    //     $rujukanStatus = 'Perlu Rujukan';
+                    // }
+
+                    $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
+                    if (is_string($jumlahGejala) && preg_match('/(\d+)/', $jumlahGejala, $matches)) {
+                        $jumlahGejala = (int)$matches[1];
                     }
 
-                    if (!empty($item->status_puma) && (
-                        $item->status_puma === 'Rujuk ke Puskesmas' ||
-                        $item->status_puma === 'Perlu Rujukan'
-                    )) {
-                        $rujukanStatus = 'Perlu Rujukan';
-                    }
-
-                    if (!is_null($item->skor_puma) && is_numeric($item->skor_puma) && $item->skor_puma > 6) {
-                        $rujukanStatus = 'Perlu Rujukan';
-                    }
-
-                    if (!empty($item->kesimpulan_td) && $item->kesimpulan_td === 'Hipertensi') {
-                        $rujukanStatus = 'Perlu Rujukan';
-                    }
-
-                    if (!empty($item->kesimpulan_gula_darah) && $item->kesimpulan_gula_darah === 'Diabetes') {
+                    if ($jumlahGejala >= 2) {
                         $rujukanStatus = 'Perlu Rujukan';
                     }
 
@@ -729,23 +758,30 @@ class DataPemeriksaanController extends Controller
             $balitaData = $balitaQuery->get()->map(function ($item) {
                 $rujukanStatus = 'Normal';
 
-                if (
-                    isset($item->rujuk_puskesmas) &&
-                    (strpos($item->rujuk_puskesmas, 'RUJUK') !== false || $item->rujuk_puskesmas === 'Perlu Rujukan')
-                ) {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
+                // if (
+                //     isset($item->rujuk_puskesmas) &&
+                //     (strpos($item->rujuk_puskesmas, 'RUJUK') !== false || $item->rujuk_puskesmas === 'Perlu Rujukan')
+                // ) {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
 
+                // $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
+                // if (is_string($jumlahGejala) && preg_match('/(\d+)/', $jumlahGejala, $matches)) {
+                //     $jumlahGejala = (int)$matches[1];
+                // }
+                // if ($jumlahGejala >= 2) {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
+
+                // $umur = $item->umur ?? 0;
+                // if ($umur >= 6 && $item->lila && floatval($item->lila) < 11.5) {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
                 $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
                 if (is_string($jumlahGejala) && preg_match('/(\d+)/', $jumlahGejala, $matches)) {
                     $jumlahGejala = (int)$matches[1];
                 }
                 if ($jumlahGejala >= 2) {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
-
-                $umur = $item->umur ?? 0;
-                if ($umur >= 6 && $item->lila && floatval($item->lila) < 11.5) {
                     $rujukanStatus = 'Perlu Rujukan';
                 }
 
@@ -798,8 +834,14 @@ class DataPemeriksaanController extends Controller
             $this->applyFilters($ibuHamilQuery, $request);
 
             $ibuHamilData = $ibuHamilQuery->get()->map(function ($item) {
-                $healthStatus = $this->calculateHealthStatus($item, $item->user);
-
+                // $healthStatus = $this->calculateHealthStatus($item, $item->user);
+                $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
+                if (is_string($jumlahGejala) && preg_match('/(\d+)/', $jumlahGejala, $matches)) {
+                    $jumlahGejala = (int)$matches[1];
+                }
+                if ($jumlahGejala >= 2) {
+                    $rujukanStatus = 'Perlu Rujukan';
+                }
                 return [
                     'id' => $item->id,
                     'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
@@ -822,25 +864,32 @@ class DataPemeriksaanController extends Controller
             $dewasaData = $dewasaQuery->get()->map(function ($item) {
                 $rujukanStatus = 'Normal';
 
-                if (!empty($item->status_tbc) && (
-                    $item->status_tbc === 'Rujuk ke Puskesmas' ||
-                    $item->status_tbc === 'Perlu Rujukan'
-                )) {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
+                // if (!empty($item->status_tbc) && (
+                //     $item->status_tbc === 'Rujuk ke Puskesmas' ||
+                //     $item->status_tbc === 'Perlu Rujukan'
+                // )) {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
 
-                if (!empty($item->status_puma) && (
-                    $item->status_puma === 'Rujuk ke Puskesmas' ||
-                    $item->status_puma === 'Perlu Rujukan'
-                )) {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
+                // if (!empty($item->status_puma) && (
+                //     $item->status_puma === 'Rujuk ke Puskesmas' ||
+                //     $item->status_puma === 'Perlu Rujukan'
+                // )) {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
 
-                if (!empty($item->kesimpulan_td) && $item->kesimpulan_td === 'Hipertensi') {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
+                // if (!empty($item->kesimpulan_td) && $item->kesimpulan_td === 'Hipertensi') {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
 
-                if (!empty($item->kesimpulan_gula_darah) && $item->kesimpulan_gula_darah === 'Diabetes') {
+                // if (!empty($item->kesimpulan_gula_darah) && $item->kesimpulan_gula_darah === 'Diabetes') {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
+                $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
+                if (is_string($jumlahGejala) && preg_match('/(\d+)/', $jumlahGejala, $matches)) {
+                    $jumlahGejala = (int)$matches[1];
+                }
+                if ($jumlahGejala >= 2) {
                     $rujukanStatus = 'Perlu Rujukan';
                 }
 
@@ -866,29 +915,36 @@ class DataPemeriksaanController extends Controller
             $lansiaData = $lansiaQuery->get()->map(function ($item) {
                 $rujukanStatus = 'Normal';
 
-                if (!empty($item->status_tbc) && (
-                    $item->status_tbc === 'Rujuk ke Puskesmas' ||
-                    $item->status_tbc === 'Perlu Rujukan'
-                )) {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
+                // if (!empty($item->status_tbc) && (
+                //     $item->status_tbc === 'Rujuk ke Puskesmas' ||
+                //     $item->status_tbc === 'Perlu Rujukan'
+                // )) {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
 
-                if (!empty($item->status_puma) && (
-                    $item->status_puma === 'Rujuk ke Puskesmas' ||
-                    $item->status_puma === 'Perlu Rujukan'
-                )) {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
+                // if (!empty($item->status_puma) && (
+                //     $item->status_puma === 'Rujuk ke Puskesmas' ||
+                //     $item->status_puma === 'Perlu Rujukan'
+                // )) {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
 
-                if (!is_null($item->skor_puma) && is_numeric($item->skor_puma) && $item->skor_puma > 6) {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
+                // if (!is_null($item->skor_puma) && is_numeric($item->skor_puma) && $item->skor_puma > 6) {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
 
-                if (!empty($item->kesimpulan_td) && $item->kesimpulan_td === 'Hipertensi') {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
+                // if (!empty($item->kesimpulan_td) && $item->kesimpulan_td === 'Hipertensi') {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
 
-                if (!empty($item->kesimpulan_gula_darah) && $item->kesimpulan_gula_darah === 'Diabetes') {
+                // if (!empty($item->kesimpulan_gula_darah) && $item->kesimpulan_gula_darah === 'Diabetes') {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
+                $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
+                if (is_string($jumlahGejala) && preg_match('/(\d+)/', $jumlahGejala, $matches)) {
+                    $jumlahGejala = (int)$matches[1];
+                }
+                if ($jumlahGejala >= 2) {
                     $rujukanStatus = 'Perlu Rujukan';
                 }
 
@@ -1110,11 +1166,11 @@ class DataPemeriksaanController extends Controller
                     new RekapBalitaExport($request->all()),
                     'rekap-balita.xlsx'
                 );
-            case 'remaja':
-                return Excel::download(
-                    new RekapRemajaExport($request->all()),
-                    'rekap-remaja.xlsx'
-                );
+                // case 'remaja':
+                //     return Excel::download(
+                //         new RekapRemajaExport($request->all()),
+                //         'rekap-remaja.xlsx'
+                //     );
             default:
                 return response()->json([
                     'success' => false,
@@ -1123,120 +1179,6 @@ class DataPemeriksaanController extends Controller
         }
     }
 
-    // private function getExportData(Request $request)
-    // {
-    //     $role = $request->get('role', '');
-    //     $allData = collect();
-
-    //     if (empty($role) || $role === 'balita') {
-    //         $balitaQuery = PemeriksaanBalita::with(['user' => function ($q) {
-    //             $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
-    //         }]);
-    //         $this->applyFilters($balitaQuery, $request);
-    //         $balitaData = $balitaQuery->get()->map(function ($item) {
-    //             $rujukanStatus = 'Normal';
-
-    //             // 1. Cek field rujuk_puskesmas
-    //             if (
-    //                 isset($item->rujuk_puskesmas) &&
-    //                 (str_contains($item->rujuk_puskesmas, 'RUJUK') || $item->rujuk_puskesmas === 'Perlu Rujukan')
-    //             ) {
-    //                 $rujukanStatus = 'Perlu Rujukan';
-    //             }
-
-    //             // 2. Cek TBC ≥ 2 gejala
-    //             $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
-    //             if (is_string($jumlahGejala) && preg_match('/(\d+)/', $jumlahGejala, $matches)) {
-    //                 $jumlahGejala = (int)$matches[1];
-    //             }
-    //             if ($jumlahGejala >= 2) {
-    //                 $rujukanStatus = 'Perlu Rujukan';
-    //             }
-
-    //             // 3. Cek LILA hanya jika umur ≥ 6 bulan DAN < 11.5 cm
-    //             $umur = $item->umur ?? 0;
-    //             if ($umur >= 6 && $item->lila && floatval($item->lila) < 11.5) {
-    //                 $rujukanStatus = 'Perlu Rujukan';
-    //             }
-
-    //             return [
-    //                 'id' => $item->id,
-    //                 'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
-    //                 'nik' => $item->nik,
-    //                 'bb' => $item->bb,
-    //                 'tb' => $item->tb,
-    //                 'lingkar_kepala' => $item->lingkar_kepala,
-    //                 'lila' => $item->lila,
-    //                 'umur' => $item->umur,
-    //                 'rujuk_puskesmas' => $rujukanStatus,
-    //                 'pemeriksa' => $item->pemeriksa,
-    //                 'user' => $item->user,
-    //                 'jenis_pemeriksaan' => 'balita',
-    //                 'model_type' => 'balita'
-    //             ];
-    //         });
-    //         $allData = $allData->merge($balitaData);
-    //     }
-
-    //     if (empty($role) || $role === 'remaja') {
-    //         $remajaQuery = PemeriksaanRemaja::with(['user' => function ($q) {
-    //             $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
-    //         }]);
-    //         $this->applyFilters($remajaQuery, $request);
-    //         $remajaData = $remajaQuery->get()->map(function ($item) {
-    //             $healthStatus = $this->calculateHealthStatus($item, $item->user);
-
-    //             return [
-    //                 'id' => $item->id,
-    //                 'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
-    //                 'nik' => $item->nik,
-    //                 'bb' => $item->bb,
-    //                 'tb' => $item->tb,
-    //                 'imt' => $item->imt,
-    //                 'lila' => $item->lila,
-    //                 'umur' => $item->umur,
-    //                 'rujuk_puskesmas' => ($healthStatus['category'] === 'urgent' ||
-    //                     $item->rujuk_puskesmas === 'Perlu Rujukan') ? 'Perlu Rujukan' : 'Normal',
-    //                 'health_status' => $healthStatus,
-    //                 'pemeriksa' => $item->pemeriksa,
-    //                 'user' => $item->user,
-    //                 'jenis_pemeriksaan' => 'remaja',
-    //                 'model_type' => 'remaja'
-    //             ];
-    //         });
-    //         $allData = $allData->merge($remajaData);
-    //     }
-
-    //     if (empty($role) || $role === 'ibu-hamil') {
-    //         $ibuHamilQuery = PemeriksaanIbuHamil::with(['user' => function ($q) {
-    //             $q->select('nik', 'nama', 'rw', 'level', 'alamat', 'tanggal_lahir', 'jenis_kelamin');
-    //         }]);
-    //         $this->applyFilters($ibuHamilQuery, $request);
-    //         $ibuHamilData = $ibuHamilQuery->get()->map(function ($item) {
-    //             $healthStatus = $this->calculateHealthStatus($item, $item->user);
-    //             return [
-    //                 'id' => $item->id,
-    //                 'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
-    //                 'nik' => $item->nik,
-    //                 'bb' => $item->bb,
-    //                 'tb' => $item->tb,
-    //                 'usia_kehamilan' => $item->usia_kehamilan,
-    //                 'lila' => $item->lila,
-    //                 'umur' => $item->umur,
-    //                 'perlu_rujukan' => $item->perlu_rujukan,
-    //                 'rujuk_puskesmas' => ($healthStatus['category'] === 'urgent' ||
-    //                     $item->perlu_rujukan) ? 'Perlu Rujukan' : 'Normal',
-    //                 'pemeriksa' => $item->pemeriksa,
-    //                 'user' => $item->user,
-    //                 'jenis_pemeriksaan' => 'ibu-hamil',
-    //                 'model_type' => 'ibu-hamil'
-    //             ];
-    //         });
-    //         $allData = $allData->merge($ibuHamilData);
-    //     }
-
-    //     return $allData->sortByDesc('tanggal_pemeriksaan')->values()->toArray();
-    // }
 
     private function getExportData(Request $request)
     {
@@ -1253,26 +1195,34 @@ class DataPemeriksaanController extends Controller
             $balitaData = $balitaQuery->get()->map(function ($item) {
                 $rujukanStatus = 'Normal';
 
-                // 1. Cek field rujuk_puskesmas
-                if (
-                    isset($item->rujuk_puskesmas) &&
-                    (str_contains($item->rujuk_puskesmas, 'RUJUK') || $item->rujuk_puskesmas === 'Perlu Rujukan')
-                ) {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
+                // // 1. Cek field rujuk_puskesmas
+                // if (
+                //     isset($item->rujuk_puskesmas) &&
+                //     (str_contains($item->rujuk_puskesmas, 'RUJUK') || $item->rujuk_puskesmas === 'Perlu Rujukan')
+                // ) {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
 
-                // 2. Cek TBC ≥ 2 gejala
+                // // 2. Cek TBC ≥ 2 gejala
+                // $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
+                // if (is_string($jumlahGejala) && preg_match('/(\d+)/', $jumlahGejala, $matches)) {
+                //     $jumlahGejala = (int)$matches[1];
+                // }
+                // if ($jumlahGejala >= 2) {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
+
+                // // 3. Cek LILA hanya jika umur ≥ 6 bulan DAN < 11.5 cm
+                // $umur = $item->umur ?? 0;
+                // if ($umur >= 6 && $item->lila && floatval($item->lila) < 11.5) {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
+                // ✅ HANYA CEK TBC ≥ 2 GEJALA - IGNORE YANG LAIN
                 $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
                 if (is_string($jumlahGejala) && preg_match('/(\d+)/', $jumlahGejala, $matches)) {
                     $jumlahGejala = (int)$matches[1];
                 }
                 if ($jumlahGejala >= 2) {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
-
-                // 3. Cek LILA hanya jika umur ≥ 6 bulan DAN < 11.5 cm
-                $umur = $item->umur ?? 0;
-                if ($umur >= 6 && $item->lila && floatval($item->lila) < 11.5) {
                     $rujukanStatus = 'Perlu Rujukan';
                 }
 
@@ -1339,7 +1289,15 @@ class DataPemeriksaanController extends Controller
             $this->applyFilters($ibuHamilQuery, $request);
 
             $ibuHamilData = $ibuHamilQuery->get()->map(function ($item) {
-                $healthStatus = $this->calculateHealthStatus($item, $item->user);
+                // $healthStatus = $this->calculateHealthStatus($item, $item->user);
+                // ✅ HANYA CEK TBC ≥ 2 GEJALA - IGNORE YANG LAIN
+                $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
+                if (is_string($jumlahGejala) && preg_match('/(\d+)/', $jumlahGejala, $matches)) {
+                    $jumlahGejala = (int)$matches[1];
+                }
+                if ($jumlahGejala >= 2) {
+                    $rujukanStatus = 'Perlu Rujukan';
+                }
                 return [
                     'id' => $item->id,
                     'tanggal_pemeriksaan' => $item->tanggal_pemeriksaan,
@@ -1350,8 +1308,9 @@ class DataPemeriksaanController extends Controller
                     'lila' => $item->lila,
                     'umur' => $item->umur,
                     'perlu_rujukan' => $item->perlu_rujukan,
-                    'rujuk_puskesmas' => ($healthStatus['category'] === 'urgent' ||
-                        $item->perlu_rujukan) ? 'Perlu Rujukan' : 'Normal',
+                    // 'rujuk_puskesmas' => ($healthStatus['category'] === 'urgent' ||
+                    //     $item->perlu_rujukan) ? 'Perlu Rujukan' : 'Normal',
+                    'rujuk_puskesmas' => $rujukanStatus,
                     'pemeriksa' => $item->pemeriksa,
                     'user' => $item->user,
                     'jenis_pemeriksaan' => 'ibu-hamil',
@@ -1372,25 +1331,33 @@ class DataPemeriksaanController extends Controller
                 $rujukanStatus = 'Normal';
                 $umur = $item->user ? Carbon::parse($item->user->tanggal_lahir)->age : 0;
 
-                if (!empty($item->status_tbc) && (
-                    $item->status_tbc === 'Rujuk ke Puskesmas' ||
-                    $item->status_tbc === 'Perlu Rujukan'
-                )) {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
+                // if (!empty($item->status_tbc) && (
+                //     $item->status_tbc === 'Rujuk ke Puskesmas' ||
+                //     $item->status_tbc === 'Perlu Rujukan'
+                // )) {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
 
-                if (!empty($item->status_puma) && (
-                    $item->status_puma === 'Rujuk ke Puskesmas' ||
-                    $item->status_puma === 'Perlu Rujukan'
-                )) {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
+                // if (!empty($item->status_puma) && (
+                //     $item->status_puma === 'Rujuk ke Puskesmas' ||
+                //     $item->status_puma === 'Perlu Rujukan'
+                // )) {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
 
-                if (!empty($item->kesimpulan_td) && $item->kesimpulan_td === 'Hipertensi') {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
+                // if (!empty($item->kesimpulan_td) && $item->kesimpulan_td === 'Hipertensi') {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
 
-                if (!empty($item->kesimpulan_gula_darah) && $item->kesimpulan_gula_darah === 'Diabetes') {
+                // if (!empty($item->kesimpulan_gula_darah) && $item->kesimpulan_gula_darah === 'Diabetes') {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
+                // ✅ CEK GEJALA TBC >= 2 SAJA
+                $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
+                if (is_string($jumlahGejala) && preg_match('/(\d+)/', $jumlahGejala, $matches)) {
+                    $jumlahGejala = (int)$matches[1];
+                }
+                if ($jumlahGejala >= 2) {
                     $rujukanStatus = 'Perlu Rujukan';
                 }
 
@@ -1426,29 +1393,36 @@ class DataPemeriksaanController extends Controller
             $lansiaData = $lansiaQuery->get()->map(function ($item) {
                 $rujukanStatus = 'Normal';
 
-                if (!empty($item->status_tbc) && (
-                    $item->status_tbc === 'Rujuk ke Puskesmas' ||
-                    $item->status_tbc === 'Perlu Rujukan'
-                )) {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
+                // if (!empty($item->status_tbc) && (
+                //     $item->status_tbc === 'Rujuk ke Puskesmas' ||
+                //     $item->status_tbc === 'Perlu Rujukan'
+                // )) {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
 
-                if (!empty($item->status_puma) && (
-                    $item->status_puma === 'Rujuk ke Puskesmas' ||
-                    $item->status_puma === 'Perlu Rujukan'
-                )) {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
+                // if (!empty($item->status_puma) && (
+                //     $item->status_puma === 'Rujuk ke Puskesmas' ||
+                //     $item->status_puma === 'Perlu Rujukan'
+                // )) {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
 
-                if (!is_null($item->skor_puma) && is_numeric($item->skor_puma) && $item->skor_puma > 6) {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
+                // if (!is_null($item->skor_puma) && is_numeric($item->skor_puma) && $item->skor_puma > 6) {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
 
-                if (!empty($item->kesimpulan_td) && $item->kesimpulan_td === 'Hipertensi') {
-                    $rujukanStatus = 'Perlu Rujukan';
-                }
+                // if (!empty($item->kesimpulan_td) && $item->kesimpulan_td === 'Hipertensi') {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
 
-                if (!empty($item->kesimpulan_gula_darah) && $item->kesimpulan_gula_darah === 'Diabetes') {
+                // if (!empty($item->kesimpulan_gula_darah) && $item->kesimpulan_gula_darah === 'Diabetes') {
+                //     $rujukanStatus = 'Perlu Rujukan';
+                // }
+                $jumlahGejala = $item->jumlah_gejala_tbc ?? 0;
+                if (is_string($jumlahGejala) && preg_match('/(\d+)/', $jumlahGejala, $matches)) {
+                    $jumlahGejala = (int)$matches[1];
+                }
+                if ($jumlahGejala >= 2) {
                     $rujukanStatus = 'Perlu Rujukan';
                 }
 
