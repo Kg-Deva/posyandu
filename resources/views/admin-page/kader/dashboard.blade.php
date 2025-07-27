@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<title>Dashboard</title>
+<title>Dashboard Kader</title>
 @include('admin-layouts.header')
 
 <body>
@@ -201,7 +201,7 @@
                                                     <thead>
                                                         <tr>
                                                             <th>No</th>
-                                                            <th>Nama</th>
+                                                            <th>Nama Lengkap</th>
                                                             <th>Email</th>
                                                             <th>Level</th>
                                                             <th>Status</th>

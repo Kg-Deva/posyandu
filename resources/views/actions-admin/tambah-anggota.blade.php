@@ -59,7 +59,7 @@
 
                                     <div class="mb-3">
                                         <div class="form-group has-icon-left">
-                                            <label for="first-name-vertical">Nama</label>
+                                            <label for="first-name-vertical">Nama Lengkap</label>
                                             <div class="position-relative">
                                                 <input type="text" id="first-name-vertical" class="form-control"
                                                     name="name" placeholder="Masukan Nama">
@@ -67,6 +67,7 @@
                                                     <i class="bi bi-person"></i>
                                                 </div>
                                             </div>
+                                            <small>Masukan nama lengkap</small>
                                         </div>
                                     </div>
                                     <div class="mb-3">

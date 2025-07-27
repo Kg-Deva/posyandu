@@ -186,7 +186,7 @@
                                                     <thead>
                                                         <tr>
                                                             <th>No</th>
-                                                            <th>Nama</th>
+                                                            <th>Nama Lengkap</th>
                                                             <th>Email</th>
                                                             <th>Level</th>
                                                             <th>Status</th>
